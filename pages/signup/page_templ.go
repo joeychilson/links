@@ -11,7 +11,6 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/joeychilson/flixmetrics/components/signup"
 	"github.com/joeychilson/flixmetrics/layouts/app"
 )
 
@@ -34,7 +33,7 @@ func Page() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			templ_7745c5c3_Err = signup.Form().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Form().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

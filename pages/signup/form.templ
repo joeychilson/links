@@ -1,0 +1,84 @@
+package signup 
+
+import "github.com/joeychilson/flixmetrics/components/form"
+
+templ Form() {
+	@form.Component(form.Props{ Title: "Sign Up" }) {
+		<form method="POST" hx-post="/signup">
+			@EmailInput(false, "")
+			@UsernameInput(false, "")
+			<input
+ 				id="password"
+ 				type="password"
+ 				class="w-full p-2 mb-4 rounded border border-neutral-900/50"
+ 				name="password"
+ 				placeholder="Password"
+ 				required
+			/>
+			<input
+ 				id="password-confirm"
+ 				type="password"
+ 				class="w-full p-2 mb-4 rounded border border-neutral-900/50"
+ 				name="password-confirm"
+ 				placeholder="Confirm Password"
+ 				required
+			/>
+			<button
+ 				type="submit"
+ 				class="w-full py-2 rounded border border-transparent text-center text-white bg-neutral-900 hover:text-neutral-900 hover:bg-white hover:border-neutral-900"
+			>
+				Create Account
+			</button>
+		</form>
+		<div class="text-center text-sm text-neutral-900 mt-4">
+			By signing up, you agree to the
+		</div>
+		<div class="text-center text-sm text-neutral-900">
+			<a href="/" class="border-b border-neutral-900 text-neutral-900 hover:text-neutral-900/50">
+				Terms of Service
+			</a>
+			and the
+			<a href="/" class="border-b border-neutral-900 text-neutral-900 hover:text-neutral-900/50">
+				Privacy Policy
+			</a>
+		</div>
+	}
+}
+
+templ EmailInput(taken bool, value string) {
+	<div hx-target="this" hx-swap="outerHTML">
+		if taken {
+			<div class="text-red-600">That email is already taken.</div>
+		}
+		<input
+ 			hx-post="/signup/check-email"
+ 			id="email"
+ 			type="email"
+ 			class="w-full p-2 mt-4 mb-4 rounded border border-neutral-900/50"
+ 			name="email"
+ 			placeholder="Email"
+ 			value={ value }
+ 			aria-invalid="true"
+ 			required
+		/>
+	</div>
+}
+
+templ UsernameInput(taken bool, value string) {
+	<div hx-target="this" hx-swap="outerHTML">
+		if taken {
+			<div class="text-red-600">That username is already taken.</div>
+		}
+		<input
+ 			hx-post="/signup/check-username"
+ 			id="username"
+ 			type="text"
+ 			class="w-full p-2 mb-4 rounded border border-neutral-900/50"
+ 			name="username"
+ 			placeholder="Username"
+ 			value={ value }
+ 			aria-invalid="true"
+ 			required
+		/>
+	</div>
+}
