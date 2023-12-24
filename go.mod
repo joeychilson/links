@@ -1,4 +1,4 @@
-module github.com/joeychilson/flixmetrics
+module github.com/joeychilson/inquire
 
 go 1.21.5
 

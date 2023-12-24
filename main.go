@@ -7,8 +7,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	"github.com/joeychilson/flixmetrics/database"
-	"github.com/joeychilson/flixmetrics/server"
+	"github.com/joeychilson/inquire/database"
+	"github.com/joeychilson/inquire/server"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 	queries := database.New(conn)
 	server := server.New(queries)
 
-	log.Println("Serving application @ http://localhost:8080")
+	log.Println("Serving inquire application @ http://localhost:8080")
 	if err := server.ListenAndServe(":8080"); err != nil {
 		log.Fatal(err)
 	}

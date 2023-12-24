@@ -10,7 +10,7 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/joeychilson/flixmetrics/components/form"
+import "github.com/joeychilson/inquire/components/form"
 
 func Form() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {

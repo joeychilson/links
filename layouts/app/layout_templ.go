@@ -11,8 +11,8 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/joeychilson/flixmetrics/components/header"
-	"github.com/joeychilson/flixmetrics/layouts/base"
+	"github.com/joeychilson/inquire/components/header"
+	"github.com/joeychilson/inquire/layouts/base"
 )
 
 func Layout(title string) templ.Component {

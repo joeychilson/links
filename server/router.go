@@ -7,8 +7,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/joeychilson/flixmetrics/pages/home"
-	"github.com/joeychilson/flixmetrics/pages/signup"
+	"github.com/joeychilson/inquire/pages/home"
+	"github.com/joeychilson/inquire/pages/signup"
+	"github.com/joeychilson/inquire/static"
 )
 
 func (s *Server) Router() http.Handler {
@@ -19,7 +20,7 @@ func (s *Server) Router() http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
 
 	r.Get("/", templ.Handler(home.Page()).ServeHTTP)
 

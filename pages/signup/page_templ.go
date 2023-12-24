@@ -11,7 +11,7 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/joeychilson/flixmetrics/layouts/app"
+	"github.com/joeychilson/inquire/layouts/app"
 )
 
 func Page() templ.Component {
