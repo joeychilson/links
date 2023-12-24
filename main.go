@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/joeychilson/starter-templ/server"
+	"github.com/joeychilson/flixmetrics/server"
 )
 
 func main() {

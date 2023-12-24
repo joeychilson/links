@@ -4,9 +4,12 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
-	"github.com/joeychilson/starter-templ/pages/home"
-	"github.com/joeychilson/starter-templ/pages/login"
-	"github.com/joeychilson/starter-templ/pages/signup"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/joeychilson/flixmetrics/pages/home"
+	"github.com/joeychilson/flixmetrics/pages/login"
+	"github.com/joeychilson/flixmetrics/pages/signup"
 )
 
 type Server struct{}
@@ -16,14 +19,25 @@ func New() *Server {
 }
 
 func (s *Server) Router() http.Handler {
-	mux := http.NewServeMux()
+	r := chi.NewRouter()
 
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
-	mux.HandleFunc("/", templ.Handler(home.Page()).ServeHTTP)
-	mux.HandleFunc("/login", templ.Handler(login.Page()).ServeHTTP)
-	mux.HandleFunc("/signup", templ.Handler(signup.Page()).ServeHTTP)
-	return mux
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+
+	r.Get("/", templ.Handler(home.Page()).ServeHTTP)
+
+	r.Route("/login", func(r chi.Router) {
+		r.Get("/", templ.Handler(login.Page()).ServeHTTP)
+	})
+
+	r.Route("/signup", func(r chi.Router) {
+		r.Get("/", templ.Handler(signup.Page()).ServeHTTP)
+	})
+	return r
 }
 
 func (s *Server) ListenAndServe(addr string) error {

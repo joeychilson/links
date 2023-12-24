@@ -86,7 +86,7 @@ func Form() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <a href=\"/auth/login\" class=\"border-b border-neutral-900 text-neutral-900 hover:text-neutral-900/50\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <a href=\"/login\" class=\"border-b border-neutral-900 text-neutral-900 hover:text-neutral-900/50\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

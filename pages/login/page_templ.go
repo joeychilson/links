@@ -11,8 +11,8 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/joeychilson/starter-templ/components/login"
-	"github.com/joeychilson/starter-templ/layouts/app"
+	"github.com/joeychilson/flixmetrics/components/login"
+	"github.com/joeychilson/flixmetrics/layouts/app"
 )
 
 func Page() templ.Component {
