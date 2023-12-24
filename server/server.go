@@ -3,7 +3,10 @@ package server
 import (
 	"net/http"
 
+	"github.com/a-h/templ"
 	"github.com/joeychilson/starter-templ/pages/home"
+	"github.com/joeychilson/starter-templ/pages/login"
+	"github.com/joeychilson/starter-templ/pages/signup"
 )
 
 type Server struct{}
@@ -17,10 +20,9 @@ func (s *Server) Router() http.Handler {
 
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		home.Page().Render(r.Context(), w)
-	})
-
+	mux.HandleFunc("/", templ.Handler(home.Page()).ServeHTTP)
+	mux.HandleFunc("/login", templ.Handler(login.Page()).ServeHTTP)
+	mux.HandleFunc("/signup", templ.Handler(signup.Page()).ServeHTTP)
 	return mux
 }
 

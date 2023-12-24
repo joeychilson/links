@@ -1,0 +1,12 @@
+package signup
+
+import (
+	"github.com/joeychilson/starter-templ/components/signup"
+	"github.com/joeychilson/starter-templ/layouts/app"
+)
+
+templ Page() {
+	@app.Layout("Sign Up") {
+		@signup.Form()
+	}
+}

@@ -1,0 +1,12 @@
+package login
+
+import (
+	"github.com/joeychilson/starter-templ/components/login"
+	"github.com/joeychilson/starter-templ/layouts/app"
+)
+
+templ Page() {
+	@app.Layout("Login") {
+		@login.Form()
+	}
+}

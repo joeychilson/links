@@ -1,0 +1,56 @@
+package signup
+
+templ Form() {
+	<div class="flex-1 flex flex-col items-center justify-center">
+		<div
+ 			class="max-w-sm px-6 py-8 bg-white rounded shadow-md border border-neutral-900/50 text-neutral-900"
+		>
+			<h1 class="mb-8 text-3xl text-center">Sign Up</h1>
+			<form method="POST" action="/signup">
+				<input
+ 					id="email"
+ 					type="email"
+ 					class="w-full p-2 mb-4 rounded border border-neutral-900/50"
+ 					name="email"
+ 					placeholder="Email"
+ 					required
+				/>
+				<input
+ 					id="password"
+ 					type="password"
+ 					class="w-full p-2 mb-4 rounded border border-neutral-900/50"
+ 					name="password"
+ 					placeholder="Password"
+ 					required
+				/>
+				<button
+ 					type="submit"
+ 					class="w-full py-2 rounded border border-transparent text-center text-white bg-neutral-900 hover:text-neutral-900 hover:bg-white hover:border-neutral-900"
+				>
+					Create Account
+				</button>
+			</form>
+			<div class="text-center text-sm text-neutral-900 mt-4">
+				By signing up, you agree to the
+			</div>
+			<div class="text-center text-sm text-neutral-900">
+				<a href="/" class="border-b border-neutral-900 text-neutral-900 hover:text-neutral-900/50">
+					Terms of Service
+				</a>
+				and the
+				<a href="/" class="border-b border-neutral-900 text-neutral-900 hover:text-neutral-900/50">
+					Privacy Policy
+				</a>
+			</div>
+		</div>
+		<div class="text-neutral-900 mt-4">
+			Already have an account?
+			<a
+ 				href="/auth/login"
+ 				class="border-b border-neutral-900 text-neutral-900 hover:text-neutral-900/50"
+			>
+				Login
+			</a>
+		</div>
+	</div>
+}
