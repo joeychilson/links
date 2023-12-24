@@ -15,6 +15,8 @@ func New() *Server {
 func (s *Server) Router() http.Handler {
 	mux := http.NewServeMux()
 
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		home.Page().Render(r.Context(), w)
 	})

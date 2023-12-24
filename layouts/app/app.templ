@@ -1,0 +1,12 @@
+package app
+
+import (
+	"github.com/joeychilson/starter-templ/components/header"
+	"github.com/joeychilson/starter-templ/layouts/base"
+)
+
+templ Layout(title string) {
+	@base.Layout(title) {
+		@header.Component()
+	}
+}
