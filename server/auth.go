@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/joeychilson/inquire/database"
-	"github.com/joeychilson/inquire/models"
+	"github.com/joeychilson/lixy/database"
+	"github.com/joeychilson/lixy/models"
 )
 
 type contextKey string

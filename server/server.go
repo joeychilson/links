@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/joeychilson/inquire/database"
+	"github.com/joeychilson/lixy/database"
 )
 
 type Server struct {

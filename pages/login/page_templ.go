@@ -11,7 +11,7 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/joeychilson/inquire/layouts/app"
+	"github.com/joeychilson/lixy/layouts/app"
 )
 
 type Props struct {

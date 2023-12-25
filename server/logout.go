@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/joeychilson/inquire/database"
+	"github.com/joeychilson/lixy/database"
 )
 
 func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {

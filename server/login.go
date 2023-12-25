@@ -4,11 +4,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/joeychilson/inquire/database"
-	"github.com/joeychilson/inquire/models"
-	"github.com/joeychilson/inquire/pages/login"
-	"github.com/joeychilson/inquire/pages/signup"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/joeychilson/lixy/database"
+	"github.com/joeychilson/lixy/models"
+	"github.com/joeychilson/lixy/pages/login"
+	"github.com/joeychilson/lixy/pages/signup"
 )
 
 func (s *Server) handleLoginPage(w http.ResponseWriter, r *http.Request) {

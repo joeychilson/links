@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
-	"github.com/joeychilson/inquire/models"
-	"github.com/joeychilson/inquire/pages/account"
+	"github.com/joeychilson/lixy/models"
+	"github.com/joeychilson/lixy/pages/account"
 )
 
 func (s *Server) handleAccountPage(w http.ResponseWriter, r *http.Request) {

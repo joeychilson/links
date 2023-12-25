@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joeychilson/inquire/database"
-	"github.com/joeychilson/inquire/server"
+
+	"github.com/joeychilson/lixy/database"
+	"github.com/joeychilson/lixy/server"
 )
 
 func main() {
@@ -16,15 +16,19 @@ func main() {
 
 	dbpool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
 	defer dbpool.Close()
+
+	err = database.Migrate(os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("Unable to migrate database: %v\n", err)
+	}
 
 	queries := database.New(dbpool)
 	server := server.New(queries)
 
-	log.Println("Serving inquire application @ http://localhost:8080")
+	log.Println("Serving lixy application @ http://localhost:8080")
 	if err := server.ListenAndServe(":8080"); err != nil {
 		log.Fatal(err)
 	}

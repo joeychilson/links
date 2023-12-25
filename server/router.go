@@ -6,9 +6,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/joeychilson/inquire/models"
-	"github.com/joeychilson/inquire/pages/home"
-	"github.com/joeychilson/inquire/static"
+	"github.com/joeychilson/lixy/models"
+	"github.com/joeychilson/lixy/pages/home"
+	"github.com/joeychilson/lixy/static"
 )
 
 func (s *Server) Router() http.Handler {

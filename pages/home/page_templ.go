@@ -10,8 +10,8 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/joeychilson/inquire/layouts/app"
-import "github.com/joeychilson/inquire/models"
+import "github.com/joeychilson/lixy/layouts/app"
+import "github.com/joeychilson/lixy/models"
 
 type Props struct {
 	User models.User
