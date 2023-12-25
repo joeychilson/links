@@ -7,7 +7,7 @@ type FormProps struct {
 }
 
 templ Form(props FormProps) {
-	<form method="POST" action="/signup">
+	<form method="POST" action="/signup" hx-boost="true">
 		<!-- Email Field -->
 		<div class="mb-4">
 			<input
