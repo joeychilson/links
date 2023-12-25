@@ -1,6 +1,6 @@
 var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
 
-// node_modules/htmx.org/dist/htmx.min.js
+// assets/node_modules/htmx.org/dist/htmx.min.js
 var require_htmx_min = __commonJS((exports, module) => {
   (function(e, t) {
     if (typeof define === "function" && define.amd) {
@@ -3050,5 +3050,5 @@ var require_htmx_min = __commonJS((exports, module) => {
   });
 });
 
-// js/app.js
+// assets/js/app.js
 var htmx = require_htmx_min();
