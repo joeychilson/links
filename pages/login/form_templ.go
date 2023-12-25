@@ -23,7 +23,7 @@ func Form() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form id=\"login-form\" hx-post=\"/login\" hx-select=\"#login-form\" hx-swap=\"outerHTML\"><!--")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form method=\"POST\" action=\"/login\"><!--")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -32,7 +32,7 @@ func Form() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"mb-4\"><input hx-post=\"/signup/check-email\" type=\"email\" name=\"email\" id=\"email\" placeholder=\"Email\" class=\"block w-full p-2 mb-1 sm:text-sm border border-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-600\"></div><!--")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"mb-6\"><input type=\"email\" name=\"email\" id=\"email\" placeholder=\"Email\" class=\"block w-full p-2 mb-1 sm:text-sm border border-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-600\"></div><!--")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -41,7 +41,7 @@ func Form() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"mb-4\"><input type=\"password\" name=\"password\" id=\"password\" placeholder=\"Password\" class=\"block w-full p-2 mb-1 sm:text-sm border border-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-600\"></div><!--")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"mb-6\"><input type=\"password\" name=\"password\" id=\"password\" placeholder=\"Password\" class=\"block w-full p-2 mb-1 sm:text-sm border border-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-600\"></div><!--")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

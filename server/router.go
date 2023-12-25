@@ -35,8 +35,6 @@ func (s *Server) Router() http.Handler {
 	r.Route("/signup", func(r chi.Router) {
 		r.Get("/", s.handleSignUpPage)
 		r.Post("/", s.handleSignUp)
-		r.Post("/check-email", s.handleCheckEmail)
-		r.Post("/check-username", s.handleCheckUsername)
 	})
 	return r
 }
