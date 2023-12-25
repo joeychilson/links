@@ -5,23 +5,23 @@ type Props struct {
 }
 
 templ Component(props Props) {
-	<header class="bg-neutral-900 relative w-full mx-auto px-4">
+	<header class="bg-white relative w-full mx-auto px-4">
 		<div class="flex justify-between items-center py-4 md:justify-start md:space-x-10">
 			<div class="md:flex md:items-center md:gap-12">
-				<a href="/" class="text-xl md:text-2xl font-bold text-white hover:underline">Inquire</a>
+				<a href="/" class="text-xl md:text-2xl font-bold text-gray-800 hover:text-blue-600">Inquire</a>
 			</div>
 			<div class="flex items-center justify-end md:flex-1 lg:w-0 gap-4">
 				<div class="sm:gap-4 sm:flex">
 					if props.User != "" {
 						<a
  							href="/account"
- 							class="px-4 py-2 rounded-md border border-white text-sm font-medium text-white bg-neutral-900 hover:text-neutral-900 hover:bg-white"
+ 							class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
 						>
 							Account
 						</a>
 						<form action="/logout" method="post">
 							<button
- 								class="px-4 py-2 rounded-md border border-white text-sm font-medium text-white bg-neutral-900 hover:text-neutral-900 hover:bg-white"
+ 								class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
 							>
 								Logout
 							</button>
@@ -29,18 +29,16 @@ templ Component(props Props) {
 					} else {
 						<a
  							href="/login"
- 							class="px-4 py-2 rounded-md border border-white text-sm font-medium text-white bg-neutral-900 hover:text-neutral-900 hover:bg-white"
+ 							class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
 						>
 							Login
 						</a>
-						<div class="hidden sm:flex">
-							<a
- 								href="/signup"
- 								class="px-4 py-2 rounded-md border border-transparent text-sm font-medium text-neutral-900 bg-white hover:bg-neutral-900 hover:text-white hover:border-white"
-							>
-								Sign Up
-							</a>
-						</div>
+						<a
+ 							href="/signup"
+ 							class="px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+						>
+							Sign Up
+						</a>
 					}
 				</div>
 			</div>

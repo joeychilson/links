@@ -26,6 +26,7 @@ func (s *Server) Router() http.Handler {
 	// Home page
 	r.Get("/", templ.Handler(home.Page()).ServeHTTP)
 
+	// Login page
 	r.Route("/login", func(r chi.Router) {
 		r.Get("/", s.handleLoginPage)
 	})
@@ -34,8 +35,8 @@ func (s *Server) Router() http.Handler {
 	r.Route("/signup", func(r chi.Router) {
 		r.Get("/", s.handleSignUpPage)
 		r.Post("/", s.handleSignUp)
-		r.Post("/check-email", s.handleEmailCheck)
-		r.Post("/check-username", s.handleUsernameCheck)
+		r.Post("/check-email", s.handleCheckEmail)
+		r.Post("/check-username", s.handleCheckUsername)
 	})
 	return r
 }

@@ -1,84 +1,106 @@
-package signup 
-
-import "github.com/joeychilson/inquire/components/form"
+package signup
 
 templ Form() {
-	@form.Component(form.Props{ Title: "Sign Up" }) {
-		<form method="POST" hx-post="/signup">
-			@EmailInput("", "")
-			@UsernameInput("", "")
-			<input
- 				id="password"
- 				type="password"
- 				class="w-full p-2 mb-4 rounded border border-neutral-900/50"
- 				name="password"
- 				placeholder="Password"
- 				required
-			/>
-			<input
- 				id="password-confirm"
- 				type="password"
- 				class="w-full p-2 mb-4 rounded border border-neutral-900/50"
- 				name="password-confirm"
- 				placeholder="Confirm Password"
- 				required
-			/>
-			<button
- 				type="submit"
- 				class="w-full py-2 rounded border border-transparent text-center text-white bg-neutral-900 hover:text-neutral-900 hover:bg-white hover:border-neutral-900"
-			>
-				Create Account
+	<form hx-post="/signup" method="POST">
+		<!-- Email Field -->
+		@EmailField(EmailFieldProps{})
+		<!-- Username Field -->
+		@UsernameField(UsernameFieldProps{})
+		<!-- Password Field -->
+		@PasswordField("")
+		<!-- Confirm Password Field -->
+		@ConfirmPasswordField("")
+		<!-- Submit Button -->
+		<div class="mb-4">
+			<button type="submit" class="w-full bg-blue-600 text-white rounded-md py-2 px-4 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+				Sign up
 			</button>
-		</form>
-		<div class="text-center text-sm text-neutral-900 mt-4">
-			By signing up, you agree to the
 		</div>
-		<div class="text-center text-sm text-neutral-900">
-			<a href="/" class="border-b border-neutral-900 text-neutral-900 hover:text-neutral-900/50">
-				Terms of Service
-			</a>
-			and the
-			<a href="/" class="border-b border-neutral-900 text-neutral-900 hover:text-neutral-900/50">
-				Privacy Policy
-			</a>
-		</div>
-	}
+	</form>
 }
 
-templ EmailInput(value string, err string) {
+type EmailFieldProps struct {
+	Email string
+	Error string
+}
+
+templ EmailField(props EmailFieldProps) {
 	<div hx-target="this" hx-swap="outerHTML">
-		if err != "" {
-			<div class="text-red-600">{ err }</div>
-		}
-		<input
- 			hx-post="/signup/check-email"
- 			id="email"
- 			type="email"
- 			class="w-full p-2 mt-4 mb-4 rounded border border-neutral-900/50"
- 			name="email"
- 			placeholder="Email"
- 			value={ value }
- 			aria-invalid="true"
- 			required
-		/>
+		<div class="mb-4">
+			<input
+ 				hx-post="/signup/check-email"
+ 				type="email"
+ 				name="email"
+ 				id="email"
+ 				value={ props.Email }
+ 				placeholder="Email"
+ 				class="block w-full p-2 mb-1 sm:text-sm border border-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-600"
+			/>
+			<div class="h-2">
+				if props.Error != "" {
+					<p class="px-2 text-sm text-red-600">{ props.Error }</p>
+				}
+			</div>
+		</div>
 	</div>
 }
 
-templ UsernameInput(value string, err string) {
+type UsernameFieldProps struct {
+	Username string
+	Error    string
+}
+
+templ UsernameField(props UsernameFieldProps) {
 	<div hx-target="this" hx-swap="outerHTML">
-		if err != "" {
-			<div class="text-red-600">{ err }</div>
-		}
+		<div class="mb-4">
+			<input
+ 				hx-post="/signup/check-username"
+ 				type="text"
+ 				name="username"
+ 				id="username"
+ 				value={ props.Username }
+ 				placeholder="Username"
+ 				class="block w-full p-2 mb-1 sm:text-sm border border-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-600"
+			/>
+			<div class="h-2">
+				if props.Error != "" {
+					<p class="px-2 text-sm text-red-600">{ props.Error }</p>
+				}
+			</div>
+		</div>
+	</div>
+}
+
+templ PasswordField(err string) {
+	<div class="mb-4">
 		<input
- 			hx-post="/signup/check-username"
- 			id="username"
- 			type="text"
- 			class="w-full p-2 mb-4 rounded border border-neutral-900/50"
- 			name="username"
- 			placeholder="Username"
- 			value={ value }
- 			aria-invalid="true"
- 			required
+ 			type="password"
+ 			name="password"
+ 			id="password"
+ 			placeholder="Password"
+ 			class="block w-full p-2 mb-1 sm:text-sm border border-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-600"
 		/>
+		<div class="h-2">
+			if err != "" {
+				<p class="px-2 text-sm text-red-600">{ err }</p>
+			}
+		</div>
+	</div>
+}
+
+templ ConfirmPasswordField(err string) {
+	<div class="mb-4">
+		<input
+ 			type="password"
+ 			name="confirm-password"
+ 			id="confirm-password"
+ 			placeholder="Confirm Password"
+ 			class="block w-full p-2 mb-1 sm:text-sm border border-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-600"
+		/>
+		<div class="h-2">
+			if err != "" {
+				<p class="px-2 text-sm text-red-600">{ err }</p>
+			}
+		</div>
 	</div>
 }

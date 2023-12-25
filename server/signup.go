@@ -1,16 +1,15 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/joeychilson/inquire/pages/signup"
 )
 
 const (
-	ErrorInternalServer = "internal server error"
-	ErrorEmailExists    = "email is already in use"
-	ErrorUsernameExists = "username is already in use"
+	ErrorInternalServer = "Sorry, something went wrong. Please try again later."
+	ErrorEmailExists    = "Sorry, this email is already in use"
+	ErrorUsernameExists = "Sorry, This username is already in use"
 )
 
 func (s *Server) handleSignUpPage(w http.ResponseWriter, r *http.Request) {
@@ -20,46 +19,52 @@ func (s *Server) handleSignUpPage(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleSignUp(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	username := r.FormValue("username")
-	password := r.FormValue("password")
-	confirmPassword := r.FormValue("confirm-password")
 
-	fmt.Println(email, username, password, confirmPassword)
+	if email == "testing@test.com" {
+		signup.EmailField(signup.EmailFieldProps{Email: email, Error: ErrorEmailExists}).Render(r.Context(), w)
+		return
+	}
+
+	if username == "testing" {
+		signup.UsernameField(signup.UsernameFieldProps{Username: username, Error: ErrorUsernameExists}).Render(r.Context(), w)
+		return
+	}
 }
 
-func (s *Server) handleEmailCheck(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleCheckEmail(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 
 	exists, err := s.queries.CheckEmailExists(r.Context(), email)
 	if err != nil {
 		// TODO: Log error, and make it render an alert instead of input error.
-		signup.EmailInput(email, ErrorInternalServer).Render(r.Context(), w)
+		signup.EmailField(signup.EmailFieldProps{Email: email, Error: ErrorInternalServer}).Render(r.Context(), w)
 		return
 	}
 
 	if exists {
-		signup.EmailInput(email, ErrorEmailExists).Render(r.Context(), w)
+		signup.EmailField(signup.EmailFieldProps{Email: email, Error: ErrorEmailExists}).Render(r.Context(), w)
 		return
 	} else {
-		signup.EmailInput(email, "").Render(r.Context(), w)
+		signup.EmailField(signup.EmailFieldProps{Email: email}).Render(r.Context(), w)
 		return
 	}
 }
 
-func (s *Server) handleUsernameCheck(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleCheckUsername(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 
 	exists, err := s.queries.CheckUsernameExists(r.Context(), username)
 	if err != nil {
 		// TODO: Log error, and make it render an alert instead of input error.
-		signup.UsernameInput(username, ErrorInternalServer).Render(r.Context(), w)
+		signup.UsernameField(signup.UsernameFieldProps{Username: username, Error: ErrorInternalServer}).Render(r.Context(), w)
 		return
 	}
 
 	if exists {
-		signup.UsernameInput(username, ErrorUsernameExists).Render(r.Context(), w)
+		signup.UsernameField(signup.UsernameFieldProps{Username: username, Error: ErrorUsernameExists}).Render(r.Context(), w)
 		return
 	} else {
-		signup.UsernameInput(username, "").Render(r.Context(), w)
+		signup.UsernameField(signup.UsernameFieldProps{Username: username}).Render(r.Context(), w)
 		return
 	}
 }
