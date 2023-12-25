@@ -8,40 +8,34 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/joeychilson/inquire/pages/home"
-	"github.com/joeychilson/inquire/pages/signup"
 	"github.com/joeychilson/inquire/static"
 )
 
 func (s *Server) Router() http.Handler {
 	r := chi.NewRouter()
 
+	// Middleware
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
+	// Static files
 	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
 
+	// Home page
 	r.Get("/", templ.Handler(home.Page()).ServeHTTP)
 
+	r.Route("/login", func(r chi.Router) {
+		r.Get("/", s.handleLoginPage)
+	})
+
+	// Sign up page
 	r.Route("/signup", func(r chi.Router) {
-		r.Get("/", templ.Handler(signup.Page()).ServeHTTP)
-		r.Post("/check-email", func(w http.ResponseWriter, r *http.Request) {
-			email := r.FormValue("email")
-			if email != "testing@test.com" {
-				signup.EmailInput(false, email).Render(r.Context(), w)
-			} else {
-				signup.EmailInput(true, email).Render(r.Context(), w)
-			}
-		})
-		r.Post("/check-username", func(w http.ResponseWriter, r *http.Request) {
-			username := r.FormValue("username")
-			if username != "testing" {
-				signup.UsernameInput(false, username).Render(r.Context(), w)
-			} else {
-				signup.UsernameInput(true, username).Render(r.Context(), w)
-			}
-		})
+		r.Get("/", s.handleSignUpPage)
+		r.Post("/", s.handleSignUp)
+		r.Post("/check-email", s.handleEmailCheck)
+		r.Post("/check-username", s.handleUsernameCheck)
 	})
 	return r
 }

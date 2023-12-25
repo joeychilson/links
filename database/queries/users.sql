@@ -10,6 +10,12 @@ DELETE FROM users WHERE id = $1;
 -- name: FindUserByID :one
 SELECT * FROM users WHERE id = $1;
 
+-- name: CheckEmailExists :one
+SELECT EXISTS(SELECT 1 FROM users WHERE email = $1);
+
+-- name: CheckUsernameExists :one
+SELECT EXISTS(SELECT 1 FROM users WHERE username = $1);
+
 -- name: CreateUserToken :exec
 INSERT INTO user_tokens (user_id, token, context, expires_at) VALUES ($1, $2, $3, $4);
 

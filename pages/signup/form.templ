@@ -5,8 +5,8 @@ import "github.com/joeychilson/inquire/components/form"
 templ Form() {
 	@form.Component(form.Props{ Title: "Sign Up" }) {
 		<form method="POST" hx-post="/signup">
-			@EmailInput(false, "")
-			@UsernameInput(false, "")
+			@EmailInput("", "")
+			@UsernameInput("", "")
 			<input
  				id="password"
  				type="password"
@@ -45,10 +45,10 @@ templ Form() {
 	}
 }
 
-templ EmailInput(taken bool, value string) {
+templ EmailInput(value string, err string) {
 	<div hx-target="this" hx-swap="outerHTML">
-		if taken {
-			<div class="text-red-600">That email is already taken.</div>
+		if err != "" {
+			<div class="text-red-600">{ err }</div>
 		}
 		<input
  			hx-post="/signup/check-email"
@@ -64,10 +64,10 @@ templ EmailInput(taken bool, value string) {
 	</div>
 }
 
-templ UsernameInput(taken bool, value string) {
+templ UsernameInput(value string, err string) {
 	<div hx-target="this" hx-swap="outerHTML">
-		if taken {
-			<div class="text-red-600">That username is already taken.</div>
+		if err != "" {
+			<div class="text-red-600">{ err }</div>
 		}
 		<input
  			hx-post="/signup/check-username"
