@@ -1,8 +1,9 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/joeychilson/lixy/components/header"
-	"github.com/joeychilson/lixy/layouts/base"
 	"github.com/joeychilson/lixy/models"
 )
 
@@ -12,10 +13,20 @@ type Props struct {
 }
 
 templ Layout(props Props) {
-	@base.Layout(props.Title) {
-		@header.Component(header.Props{
+	<html>
+		<head>
+			<title>{ fmt.Sprintf("%s | Lixy", props.Title) }</title>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<link rel="stylesheet" href="/static/css/app.css"/>
+			<script src="/static/js/app.js"></script>
+		</head>
+		<div class="min-h-screen flex flex-col">
+			<main class="flex flex-col flex-1">
+				@header.Component(header.Props{
 			User: props.User,
 		})
-		{ children... }
-	}
+				{ children... }
+			</main>
+		</div>
+	</html>
 }

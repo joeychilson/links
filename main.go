@@ -14,16 +14,16 @@ import (
 func main() {
 	ctx := context.Background()
 
-	dbpool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
-	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
-	}
-	defer dbpool.Close()
-
-	err = database.Migrate(os.Getenv("DATABASE_URL"))
+	err := database.Migrate(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("Unable to migrate database: %v\n", err)
 	}
+
+	dbpool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("Unable to connect to database pool: %v\n", err)
+	}
+	defer dbpool.Close()
 
 	queries := database.New(dbpool)
 	server := server.New(queries)
