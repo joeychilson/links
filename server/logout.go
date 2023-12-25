@@ -4,9 +4,16 @@ import (
 	"net/http"
 
 	"github.com/joeychilson/lixy/database"
+	"github.com/joeychilson/lixy/models"
 )
 
 func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
+	user, _ := r.Context().Value(userKey).(*models.User)
+	if user == nil {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
 	// Attempt to retrieve the session cookie
 	cookie, err := r.Cookie("session")
 	if err != nil {

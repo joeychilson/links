@@ -26,7 +26,7 @@ func (s *Server) Router() http.Handler {
 
 	// Home page
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		user := r.Context().Value(userKey).(models.User)
+		user, _ := r.Context().Value(userKey).(*models.User)
 		home.Page(home.Props{User: user}).Render(r.Context(), w)
 	})
 

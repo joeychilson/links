@@ -13,12 +13,11 @@ import (
 )
 
 func (s *Server) handleLoginPage(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(userKey).(models.User)
-	if user.ID != 0 {
+	user, _ := r.Context().Value(userKey).(*models.User)
+	if user != nil {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-
 	login.Page(login.Props{}).Render(r.Context(), w)
 }
 
@@ -61,6 +60,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		Name:     "session",
 		Value:    token,
 		Path:     "/",
+		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}

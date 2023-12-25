@@ -14,7 +14,7 @@ import "github.com/joeychilson/lixy/layouts/app"
 import "github.com/joeychilson/lixy/models"
 
 type Props struct {
-	User models.User
+	User *models.User
 }
 
 func Page(props Props) templ.Component {

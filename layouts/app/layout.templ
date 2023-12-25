@@ -9,7 +9,7 @@ import (
 
 type Props struct {
 	Title string
-	User  models.User
+	User  *models.User
 }
 
 templ Layout(props Props) {
@@ -23,8 +23,8 @@ templ Layout(props Props) {
 		<div class="min-h-screen flex flex-col">
 			<main class="flex flex-col flex-1">
 				@header.Component(header.Props{
-			User: props.User,
-		})
+					User: props.User,
+				})
 				{ children... }
 			</main>
 		</div>

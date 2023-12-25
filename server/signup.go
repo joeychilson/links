@@ -6,10 +6,11 @@ import (
 	"log"
 	"net/http"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/joeychilson/lixy/database"
 	"github.com/joeychilson/lixy/models"
 	"github.com/joeychilson/lixy/pages/signup"
-	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -22,8 +23,8 @@ var (
 )
 
 func (s *Server) handleSignUpPage(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(userKey).(models.User)
-	if user.ID != 0 {
+	user, _ := r.Context().Value(userKey).(*models.User)
+	if user != nil {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -119,12 +120,13 @@ func (s *Server) handleSignUp(w http.ResponseWriter, r *http.Request) {
 		Name:     "session",
 		Value:    token,
 		Path:     "/",
+		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}
 	http.SetCookie(w, &cookie)
 
-	http.Redirect(w, r, "/login", http.StatusFound)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (s *Server) tokenGenerator() string {

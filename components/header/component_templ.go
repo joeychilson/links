@@ -13,7 +13,7 @@ import "bytes"
 import "github.com/joeychilson/lixy/models"
 
 type Props struct {
-	User models.User
+	User *models.User
 }
 
 func Component(props Props) templ.Component {
@@ -42,7 +42,7 @@ func Component(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.User.ID != 0 {
+		if props.User != nil {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/account\" class=\"px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700\" style=\"box-sizing: border-box; margin: 0;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

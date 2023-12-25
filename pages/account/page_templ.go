@@ -16,7 +16,7 @@ import (
 )
 
 type Props struct {
-	User models.User
+	User *models.User
 }
 
 func Page(props Props) templ.Component {
