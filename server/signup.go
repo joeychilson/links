@@ -1,9 +1,13 @@
 package server
 
 import (
+	"crypto/rand"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/joeychilson/inquire/database"
+	"github.com/joeychilson/inquire/models"
 	"github.com/joeychilson/inquire/pages/signup"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,6 +22,11 @@ var (
 )
 
 func (s *Server) handleSignUpPage(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(userKey).(models.User)
+	if user.ID != 0 {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 	signup.Page(signup.PageProps{}).Render(r.Context(), w)
 }
 
@@ -85,7 +94,7 @@ func (s *Server) handleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.queries.CreateUser(r.Context(), database.CreateUserParams{
+	userID, err := s.queries.CreateUser(r.Context(), database.CreateUserParams{
 		Email:    email,
 		Username: username,
 		Password: string(hashedPassword),
@@ -95,5 +104,31 @@ func (s *Server) handleSignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, err := s.queries.CreateUserToken(r.Context(), database.CreateUserTokenParams{
+		UserID:  userID,
+		Token:   s.tokenGenerator(),
+		Context: "session",
+	})
+	if err != nil {
+		log.Printf("Error creating user token: %v", err)
+		signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
+		return
+	}
+
+	cookie := http.Cookie{
+		Name:     "session",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+	http.SetCookie(w, &cookie)
+
 	http.Redirect(w, r, "/login", http.StatusFound)
+}
+
+func (s *Server) tokenGenerator() string {
+	b := make([]byte, 32)
+	rand.Read(b)
+	return fmt.Sprintf("%x", b)
 }

@@ -3,12 +3,18 @@ package app
 import (
 	"github.com/joeychilson/inquire/components/header"
 	"github.com/joeychilson/inquire/layouts/base"
+	"github.com/joeychilson/inquire/models"
 )
 
-templ Layout(title string) {
-	@base.Layout(title) {
+type Props struct {
+	Title string
+	User  models.User
+}
+
+templ Layout(props Props) {
+	@base.Layout(props.Title) {
 		@header.Component(header.Props{
-			User: "",
+			User: props.User,
 		})
 		{ children... }
 	}

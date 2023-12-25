@@ -10,8 +10,10 @@ import "context"
 import "io"
 import "bytes"
 
+import "github.com/joeychilson/inquire/models"
+
 type Props struct {
-	User string
+	User models.User
 }
 
 func Component(props Props) templ.Component {
@@ -40,8 +42,8 @@ func Component(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.User != "" {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/account\" class=\"px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100\">")
+		if props.User.ID != 0 {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/account\" class=\"px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700\" style=\"box-sizing: border-box; margin: 0;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -50,7 +52,7 @@ func Component(props Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><form action=\"/logout\" method=\"post\"><button class=\"px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><form action=\"/logout\" method=\"POST\" style=\"margin: 0; padding: 0; display: inline;\"><button type=\"submit\" class=\"px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100\" style=\"box-sizing: border-box;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

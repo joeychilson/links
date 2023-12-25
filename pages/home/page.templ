@@ -1,9 +1,12 @@
 package home
 
 import "github.com/joeychilson/inquire/layouts/app"
+import "github.com/joeychilson/inquire/models"
 
-templ Page() {
-	@app.Layout("Home") {
-		<h1>Home</h1>
-	}
+type Props struct {
+	User models.User
+}
+
+templ Page(props Props) {
+	@app.Layout(app.Props{Title: "Home", User: props.User})
 }

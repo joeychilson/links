@@ -3,10 +3,10 @@ package server
 import (
 	"net/http"
 
-	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/joeychilson/inquire/models"
 	"github.com/joeychilson/inquire/pages/home"
 	"github.com/joeychilson/inquire/static"
 )
@@ -19,17 +19,30 @@ func (s *Server) Router() http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(s.Auth)
 
 	// Static files
 	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
 
 	// Home page
-	r.Get("/", templ.Handler(home.Page()).ServeHTTP)
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value(userKey).(models.User)
+		home.Page(home.Props{User: user}).Render(r.Context(), w)
+	})
+
+	// Account page
+	r.Route("/account", func(r chi.Router) {
+		r.Get("/", s.handleAccountPage)
+	})
 
 	// Login page
 	r.Route("/login", func(r chi.Router) {
 		r.Get("/", s.handleLoginPage)
+		r.Post("/", s.handleLogin)
 	})
+
+	// Logout
+	r.Post("/logout", s.handleLogout)
 
 	// Sign up page
 	r.Route("/signup", func(r chi.Router) {

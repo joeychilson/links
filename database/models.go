@@ -24,5 +24,4 @@ type UserToken struct {
 	Token     string
 	Context   string
 	CreatedAt pgtype.Timestamptz
-	ExpiresAt pgtype.Timestamptz
 }

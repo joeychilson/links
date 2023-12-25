@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
-	"github.com/jackc/pgx/v5"
-
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joeychilson/inquire/database"
 	"github.com/joeychilson/inquire/server"
 )
@@ -14,13 +14,14 @@ import (
 func main() {
 	ctx := context.Background()
 
-	conn, err := pgx.Connect(ctx, os.Getenv("DATABASE_URL"))
+	dbpool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatalf("unable to connect to database: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
+		os.Exit(1)
 	}
-	defer conn.Close(ctx)
+	defer dbpool.Close()
 
-	queries := database.New(conn)
+	queries := database.New(dbpool)
 	server := server.New(queries)
 
 	log.Println("Serving inquire application @ http://localhost:8080")

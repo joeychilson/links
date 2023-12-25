@@ -1,7 +1,9 @@
 package header
 
+import "github.com/joeychilson/inquire/models"
+
 type Props struct {
-	User string
+	User models.User
 }
 
 templ Component(props Props) {
@@ -12,16 +14,19 @@ templ Component(props Props) {
 			</div>
 			<div class="flex items-center justify-end md:flex-1 lg:w-0 gap-4">
 				<div class="sm:gap-4 sm:flex">
-					if props.User != "" {
+					if props.User.ID != 0 {
 						<a
  							href="/account"
- 							class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
+ 							class="px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+ 							style="box-sizing: border-box; margin: 0;"
 						>
 							Account
 						</a>
-						<form action="/logout" method="post">
+						<form action="/logout" method="POST" style="margin: 0; padding: 0; display: inline;">
 							<button
+ 								type="submit"
  								class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
+ 								style="box-sizing: border-box;"
 							>
 								Logout
 							</button>
