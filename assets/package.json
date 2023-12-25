@@ -1,0 +1,8 @@
+{
+  "name": "assets",
+  "module": "./js/app.js",
+  "type": "module",
+  "dependencies": {
+    "htmx.org": "^1.9.10"
+  }
+}
