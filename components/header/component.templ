@@ -27,6 +27,12 @@ templ Component(props Props) {
 							</button>
 						</form>
 					} else {
+						<a
+ 							href="/login"
+ 							class="px-4 py-2 rounded-md border border-white text-sm font-medium text-white bg-neutral-900 hover:text-neutral-900 hover:bg-white"
+						>
+							Login
+						</a>
 						<div class="hidden sm:flex">
 							<a
  								href="/signup"
@@ -35,12 +41,6 @@ templ Component(props Props) {
 								Sign Up
 							</a>
 						</div>
-						<a
- 							href="/login"
- 							class="px-4 py-2 rounded-md border border-white text-sm font-medium text-white bg-neutral-900 hover:text-neutral-900 hover:bg-white"
-						>
-							Login
-						</a>
 					}
 				</div>
 			</div>

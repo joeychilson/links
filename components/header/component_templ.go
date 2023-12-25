@@ -64,25 +64,25 @@ func Component(props Props) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"hidden sm:flex\"><a href=\"/signup\" class=\"px-4 py-2 rounded-md border border-transparent text-sm font-medium text-neutral-900 bg-white hover:bg-neutral-900 hover:text-white hover:border-white\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/login\" class=\"px-4 py-2 rounded-md border border-white text-sm font-medium text-white bg-neutral-900 hover:text-neutral-900 hover:bg-white\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var5 := `Sign Up`
+			templ_7745c5c3_Var5 := `Login`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div><a href=\"/login\" class=\"px-4 py-2 rounded-md border border-white text-sm font-medium text-white bg-neutral-900 hover:text-neutral-900 hover:bg-white\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><div class=\"hidden sm:flex\"><a href=\"/signup\" class=\"px-4 py-2 rounded-md border border-transparent text-sm font-medium text-neutral-900 bg-white hover:bg-neutral-900 hover:text-white hover:border-white\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var6 := `Login`
+			templ_7745c5c3_Var6 := `Sign Up`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

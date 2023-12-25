@@ -31,6 +31,7 @@ func (s *Server) handleEmailCheck(w http.ResponseWriter, r *http.Request) {
 
 	exists, err := s.queries.CheckEmailExists(r.Context(), email)
 	if err != nil {
+		// TODO: Log error, and make it render an alert instead of input error.
 		signup.EmailInput(email, ErrorInternalServer).Render(r.Context(), w)
 		return
 	}
@@ -49,6 +50,7 @@ func (s *Server) handleUsernameCheck(w http.ResponseWriter, r *http.Request) {
 
 	exists, err := s.queries.CheckUsernameExists(r.Context(), username)
 	if err != nil {
+		// TODO: Log error, and make it render an alert instead of input error.
 		signup.UsernameInput(username, ErrorInternalServer).Render(r.Context(), w)
 		return
 	}
