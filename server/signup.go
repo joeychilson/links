@@ -32,12 +32,15 @@ func (s *Server) handleEmailCheck(w http.ResponseWriter, r *http.Request) {
 	exists, err := s.queries.CheckEmailExists(r.Context(), email)
 	if err != nil {
 		signup.EmailInput(email, ErrorInternalServer).Render(r.Context(), w)
+		return
 	}
 
 	if exists {
 		signup.EmailInput(email, ErrorEmailExists).Render(r.Context(), w)
+		return
 	} else {
 		signup.EmailInput(email, "").Render(r.Context(), w)
+		return
 	}
 }
 
@@ -47,11 +50,14 @@ func (s *Server) handleUsernameCheck(w http.ResponseWriter, r *http.Request) {
 	exists, err := s.queries.CheckUsernameExists(r.Context(), username)
 	if err != nil {
 		signup.UsernameInput(username, ErrorInternalServer).Render(r.Context(), w)
+		return
 	}
 
 	if exists {
 		signup.UsernameInput(username, ErrorUsernameExists).Render(r.Context(), w)
+		return
 	} else {
 		signup.UsernameInput(username, "").Render(r.Context(), w)
+		return
 	}
 }
