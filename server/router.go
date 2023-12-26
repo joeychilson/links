@@ -6,8 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/joeychilson/lixy/static"
-	"github.com/joeychilson/lixy/templates/pages/errors"
+	"github.com/joeychilson/links/static"
+	"github.com/joeychilson/links/templates/pages/errors"
 )
 
 func (s *Server) Router() http.Handler {

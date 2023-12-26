@@ -1,4 +1,4 @@
-module github.com/joeychilson/lixy
+module github.com/joeychilson/links
 
 go 1.21.5
 

@@ -11,10 +11,10 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/joeychilson/lixy/database"
-	"github.com/joeychilson/lixy/internal/session"
-	"github.com/joeychilson/lixy/templates/components/article"
-	"github.com/joeychilson/lixy/templates/layouts/app"
+	"github.com/joeychilson/links/database"
+	"github.com/joeychilson/links/internal/session"
+	"github.com/joeychilson/links/templates/components/article"
+	"github.com/joeychilson/links/templates/layouts/app"
 )
 
 type Props struct {

@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
-	"github.com/joeychilson/lixy/database"
-	"github.com/joeychilson/lixy/internal/session"
+	"github.com/joeychilson/links/database"
+	"github.com/joeychilson/links/internal/session"
 )
 
 type Server struct {

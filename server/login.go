@@ -4,8 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/joeychilson/lixy/templates/pages/login"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/joeychilson/links/templates/pages/login"
 )
 
 func (s *Server) LoginPage() http.HandlerFunc {

@@ -12,11 +12,12 @@ import "bytes"
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/joeychilson/lixy/database"
-	"strconv"
+
+	"github.com/joeychilson/links/database"
 )
 
 type Props struct {

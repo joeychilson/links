@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
 
-	"github.com/joeychilson/lixy/database"
+	"github.com/joeychilson/links/database"
 )
 
 type ContextKey string

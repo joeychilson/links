@@ -3,8 +3,8 @@ package app
 import (
 	"fmt"
 
-	"github.com/joeychilson/lixy/internal/session"
-	"github.com/joeychilson/lixy/templates/components/header"
+	"github.com/joeychilson/links/internal/session"
+	"github.com/joeychilson/links/templates/components/header"
 )
 
 type Props struct {
@@ -15,7 +15,7 @@ type Props struct {
 templ Layout(props Props) {
 	<html>
 		<head>
-			<title>{ fmt.Sprintf("%s | Lixy", props.Title) }</title>
+			<title>{ fmt.Sprintf("%s | Links", props.Title) }</title>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<link rel="stylesheet" href="/static/css/app.css"/>
 			<script src="/static/js/app.js"></script>

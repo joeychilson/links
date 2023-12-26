@@ -1,6 +1,6 @@
 package header
 
-import "github.com/joeychilson/lixy/internal/session"
+import "github.com/joeychilson/links/internal/session"
 
 type Props struct {
 	User *session.User
@@ -9,7 +9,7 @@ type Props struct {
 templ Component(props Props) {
 	<header class="flex justify-between items-center py-4 md:space-x-10">
 		<div class="flex justify-start items-center gap-12">
-			<a href="/" class="text-xl md:text-2xl font-bold text-gray-800 hover:text-blue-600">Lixy</a>
+			<a href="/" class="text-xl md:text-2xl font-bold text-gray-800 hover:text-blue-600">Links</a>
 			<nav class="hidden md:flex gap-6">
 				<a href="/latest" class="text-sm font-medium text-gray-800 hover:text-blue-600">Latest</a>
 			</nav>

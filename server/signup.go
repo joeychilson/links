@@ -4,9 +4,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/joeychilson/lixy/database"
-	"github.com/joeychilson/lixy/templates/pages/signup"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/joeychilson/links/database"
+	"github.com/joeychilson/links/templates/pages/signup"
 )
 
 var (

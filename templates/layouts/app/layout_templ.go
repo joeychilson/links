@@ -13,8 +13,8 @@ import "bytes"
 import (
 	"fmt"
 
-	"github.com/joeychilson/lixy/internal/session"
-	"github.com/joeychilson/lixy/templates/components/header"
+	"github.com/joeychilson/links/internal/session"
+	"github.com/joeychilson/links/templates/components/header"
 )
 
 type Props struct {
@@ -39,7 +39,7 @@ func Layout(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 string = fmt.Sprintf("%s | Lixy", props.Title)
+		var templ_7745c5c3_Var2 string = fmt.Sprintf("%s | Links", props.Title)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
