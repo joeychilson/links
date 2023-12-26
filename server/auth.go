@@ -12,7 +12,7 @@ type contextKey string
 
 const userKey contextKey = "user"
 
-func (s *Server) Auth(next http.Handler) http.Handler {
+func (s *Server) Authorization(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 

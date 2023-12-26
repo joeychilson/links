@@ -42,7 +42,7 @@ func Page(props Props) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if props.Error != "" {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"max-w-md w-full bg-white border border-red-500 rounded-lg shadow-md p-8 mb-6\"><p class=\"text-red-500 text-center\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"max-w-md w-full bg-white border border-red-500 rounded-lg shadow-md p-4 mb-6\"><p class=\"text-red-500 text-center\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

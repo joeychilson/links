@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -9,7 +8,6 @@ import (
 	"github.com/joeychilson/lixy/database"
 	"github.com/joeychilson/lixy/models"
 	"github.com/joeychilson/lixy/pages/login"
-	"github.com/joeychilson/lixy/pages/signup"
 )
 
 func (s *Server) handleLoginPage(w http.ResponseWriter, r *http.Request) {
@@ -51,8 +49,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		Context: "session",
 	})
 	if err != nil {
-		log.Printf("Error creating user token: %v", err)
-		signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
+		login.Page(login.Props{Error: ErrorInternalServer}).Render(r.Context(), w)
 		return
 	}
 

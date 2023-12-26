@@ -3,7 +3,6 @@ package server
 import (
 	"crypto/rand"
 	"fmt"
-	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -111,7 +110,6 @@ func (s *Server) handleSignUp(w http.ResponseWriter, r *http.Request) {
 		Context: "session",
 	})
 	if err != nil {
-		log.Printf("Error creating user token: %v", err)
 		signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 		return
 	}

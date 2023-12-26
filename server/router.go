@@ -19,7 +19,7 @@ func (s *Server) Router() http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(s.Auth)
+	r.Use(s.Authorization)
 
 	// Static files
 	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
