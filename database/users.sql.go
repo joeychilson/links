@@ -43,9 +43,9 @@ type CreateUserParams struct {
 	Password string
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (int32, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (pgtype.UUID, error) {
 	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.Email, arg.Password)
-	var id int32
+	var id pgtype.UUID
 	err := row.Scan(&id)
 	return id, err
 }
@@ -55,7 +55,7 @@ INSERT INTO user_tokens (user_id, token, context) VALUES ($1, $2, $3) RETURNING 
 `
 
 type CreateUserTokenParams struct {
-	UserID  int32
+	UserID  pgtype.UUID
 	Token   string
 	Context string
 }
@@ -105,7 +105,7 @@ SELECT id, username, email, confirmed_at, created_at, updated_at FROM users WHER
 `
 
 type GetUserByIDRow struct {
-	ID          int32
+	ID          pgtype.UUID
 	Username    string
 	Email       string
 	ConfirmedAt pgtype.Timestamptz
@@ -113,7 +113,7 @@ type GetUserByIDRow struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
-func (q *Queries) GetUserByID(ctx context.Context, id int32) (GetUserByIDRow, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (GetUserByIDRow, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
 	var i GetUserByIDRow
 	err := row.Scan(
@@ -136,9 +136,9 @@ type GetUserIDFromTokenParams struct {
 	Context string
 }
 
-func (q *Queries) GetUserIDFromToken(ctx context.Context, arg GetUserIDFromTokenParams) (int32, error) {
+func (q *Queries) GetUserIDFromToken(ctx context.Context, arg GetUserIDFromTokenParams) (pgtype.UUID, error) {
 	row := q.db.QueryRow(ctx, getUserIDFromToken, arg.Token, arg.Context)
-	var user_id int32
+	var user_id pgtype.UUID
 	err := row.Scan(&user_id)
 	return user_id, err
 }

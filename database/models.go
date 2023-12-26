@@ -9,7 +9,7 @@ import (
 )
 
 type User struct {
-	ID          int32
+	ID          pgtype.UUID
 	Username    string
 	Email       string
 	Password    string
@@ -19,8 +19,8 @@ type User struct {
 }
 
 type UserToken struct {
-	ID        int32
-	UserID    int32
+	ID        pgtype.UUID
+	UserID    pgtype.UUID
 	Token     string
 	Context   string
 	CreatedAt pgtype.Timestamptz

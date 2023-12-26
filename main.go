@@ -20,12 +20,15 @@ func main() {
 
 	ctx := context.Background()
 
-	err := database.Migrate(os.Getenv("DATABASE_URL"))
+	databaseURL := os.Getenv("DATABASE_URL")
+	dropTables := os.Getenv("DROP_TABLES") == "true"
+
+	err := database.Migrate(databaseURL, dropTables)
 	if err != nil {
 		log.Fatalf("Unable to migrate database: %v\n", err)
 	}
 
-	dbpool, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
+	dbpool, err := pgxpool.New(ctx, databaseURL)
 	if err != nil {
 		log.Fatalf("Unable to connect to database pool: %v\n", err)
 	}

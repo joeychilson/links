@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/securecookie"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/joeychilson/lixy/database"
 )
 
@@ -22,7 +23,7 @@ func New(cookie *securecookie.SecureCookie, queries *database.Queries) *Manager 
 	}
 }
 
-func (m *Manager) Set(w http.ResponseWriter, r *http.Request, userID int32) error {
+func (m *Manager) Set(w http.ResponseWriter, r *http.Request, userID pgtype.UUID) error {
 	token, err := m.queries.CreateUserToken(r.Context(), database.CreateUserTokenParams{
 		UserID:  userID,
 		Token:   base64.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32)),

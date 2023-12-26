@@ -9,7 +9,7 @@ import (
 	"github.com/joeychilson/lixy/pkg/users"
 )
 
-func (s *Server) FetchCurrentUser(next http.Handler) http.Handler {
+func (s *Server) UserFromSession(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 

@@ -11,7 +11,7 @@ import (
 //go:embed migrations/*.sql
 var migrations embed.FS
 
-func Migrate(dbURL string) error {
+func Migrate(dbURL string, dropTables bool) error {
 	dburl, err := url.Parse(dbURL)
 	if err != nil {
 		return err
@@ -22,8 +22,14 @@ func Migrate(dbURL string) error {
 	dbmate.MigrationsDir = []string{"migrations"}
 	dbmate.AutoDumpSchema = false
 
-	if _, err = dbmate.Status(false); err != nil {
+	if _, err = dbmate.Status(true); err != nil {
 		return err
+	}
+
+	if dropTables {
+		if err = dbmate.Drop(); err != nil {
+			return err
+		}
 	}
 
 	err = dbmate.CreateAndMigrate()
