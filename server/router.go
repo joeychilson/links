@@ -41,6 +41,11 @@ func (s *Server) Router() http.Handler {
 		r.Get("/", s.Like())
 	})
 
+	// Link
+	r.Route("/link", func(r chi.Router) {
+		r.Get("/", s.Link())
+	})
+
 	// Account page
 	r.Route("/account", func(r chi.Router) {
 		r.Use(s.RequireUser)

@@ -179,7 +179,7 @@ func Page(props Props) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var15 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/link?id=%s", row.Username))
+				var templ_7745c5c3_Var15 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/link?id=%s", row.ID))
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var15)))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

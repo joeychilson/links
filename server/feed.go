@@ -26,27 +26,21 @@ func (s *Server) FeedPage() http.HandlerFunc {
 			return
 		}
 
-		var linkFeedRows []database.LinkFeedRow
-
+		var userID uuid.UUID
 		if user != nil {
-			linkFeedRows, err = s.queries.UserLinkFeed(r.Context(), database.UserLinkFeedParams{
-				UserID: user.ID,
-				Limit:  25,
-				Offset: int32((page - 1) * 25),
-			})
-			if err != nil {
-				feed.Page(feed.Props{User: user}).Render(r.Context(), w)
-				return
-			}
+			userID = user.ID
 		} else {
-			linkFeedRows, err = s.queries.LinkFeed(r.Context(), database.LinkFeedParams{
-				Limit:  25,
-				Offset: int32((page - 1) * 25),
-			})
-			if err != nil {
-				feed.Page(feed.Props{User: user}).Render(r.Context(), w)
-				return
-			}
+			userID = uuid.Nil
+		}
+
+		linkFeedRows, err := s.queries.LinkFeed(r.Context(), database.LinkFeedParams{
+			UserID: userID,
+			Limit:  25,
+			Offset: int32((page - 1) * 25),
+		})
+		if err != nil {
+			feed.Page(feed.Props{User: user}).Render(r.Context(), w)
+			return
 		}
 
 		feed.Page(feed.Props{User: user, LinkFeedRows: linkFeedRows}).Render(r.Context(), w)

@@ -49,7 +49,7 @@ templ Page(props Props) {
 								&middot; 
 								{ fmt.Sprintf("%v likes", row.LikeCount) }
 								&middot; 
-								<a href={ templ.SafeURL(fmt.Sprintf("/link?id=%s", row.Username)) } class="hover:underline">
+								<a href={ templ.SafeURL(fmt.Sprintf("/link?id=%s", row.ID)) } class="hover:underline">
 									{ fmt.Sprintf("%v comments", row.CommentCount) }
 								</a>
 							</p>
