@@ -6,8 +6,9 @@ import (
 
 	"github.com/gorilla/securecookie"
 	"github.com/jackc/pgx/v5/pgtype"
+
 	"github.com/joeychilson/lixy/database"
-	"github.com/joeychilson/lixy/pkg/context"
+	"github.com/joeychilson/lixy/internal/context"
 )
 
 const (

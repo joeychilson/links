@@ -13,7 +13,7 @@ import "bytes"
 import (
 	"fmt"
 
-	"github.com/joeychilson/lixy/pkg/session"
+	"github.com/joeychilson/lixy/internal/session"
 	"github.com/joeychilson/lixy/templates/components/header"
 )
 

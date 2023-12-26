@@ -10,7 +10,7 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/joeychilson/lixy/pkg/session"
+import "github.com/joeychilson/lixy/internal/session"
 
 type Props struct {
 	User *session.User

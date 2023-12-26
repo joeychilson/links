@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/joeychilson/lixy/database"
-	"github.com/joeychilson/lixy/pkg/session"
+	"github.com/joeychilson/lixy/internal/session"
 	"github.com/joeychilson/lixy/server"
 )
 

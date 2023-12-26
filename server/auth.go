@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/joeychilson/lixy/pkg/session"
+	"github.com/joeychilson/lixy/internal/session"
 )
 
 func (s *Server) UserFromSession(next http.Handler) http.Handler {
