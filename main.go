@@ -2,16 +2,22 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"log"
 	"os"
 
+	"github.com/gorilla/securecookie"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 
 	"github.com/joeychilson/lixy/database"
+	"github.com/joeychilson/lixy/pkg/sessions"
 	"github.com/joeychilson/lixy/server"
 )
 
 func main() {
+	_ = godotenv.Load()
+
 	ctx := context.Background()
 
 	err := database.Migrate(os.Getenv("DATABASE_URL"))
@@ -26,7 +32,15 @@ func main() {
 	defer dbpool.Close()
 
 	queries := database.New(dbpool)
-	server := server.New(queries)
+
+	encryptionKey, _ := base64.StdEncoding.DecodeString(os.Getenv("SECURE_COOKIE_ENCRYPTION_KEY"))
+	validationKey, _ := base64.StdEncoding.DecodeString(os.Getenv("SECURE_COOKIE_VALIDATION_KEY"))
+
+	cookie := securecookie.New(encryptionKey, validationKey)
+
+	sessions := sessions.New(cookie, queries)
+
+	server := server.New(queries, sessions)
 
 	log.Println("Serving lixy application @ http://localhost:8080")
 	if err := server.ListenAndServe(":8080"); err != nil {

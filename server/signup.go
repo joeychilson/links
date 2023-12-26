@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/joeychilson/lixy/database"
@@ -32,6 +33,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 
 		emailExists, err := s.queries.CheckEmailExists(r.Context(), email)
 		if err != nil {
+			log.Printf("Error checking email exists: %v\n", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 			return
 		}
@@ -84,6 +86,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
+			log.Printf("Error hashing password: %v\n", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 			return
 		}
@@ -94,29 +97,17 @@ func (s *Server) SignUp() http.HandlerFunc {
 			Password: string(hashedPassword),
 		})
 		if err != nil {
+			log.Printf("Error creating user: %v\n", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 			return
 		}
 
-		token, err := s.queries.CreateUserToken(r.Context(), database.CreateUserTokenParams{
-			UserID:  userID,
-			Token:   tokenGenerator(),
-			Context: "session",
-		})
+		err = s.sessions.Set(w, r, userID)
 		if err != nil {
+			log.Printf("Error setting session: %v\n", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 			return
 		}
-
-		cookie := http.Cookie{
-			Name:     "session",
-			Value:    token,
-			Path:     "/",
-			Secure:   true,
-			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
-		}
-		http.SetCookie(w, &cookie)
 
 		http.Redirect(w, r, "/", http.StatusFound)
 	}

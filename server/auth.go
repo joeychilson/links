@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/joeychilson/lixy/database"
+	"github.com/joeychilson/lixy/pkg/sessions"
 	"github.com/joeychilson/lixy/pkg/users"
 )
 
@@ -12,11 +13,11 @@ func (s *Server) FetchCurrentUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		cookie, err := r.Cookie("session")
+		cookie, err := s.sessions.Get(r)
 		if err == nil {
 			userID, err := s.queries.GetUserIDFromToken(ctx, database.GetUserIDFromTokenParams{
-				Token:   cookie.Value,
-				Context: "session",
+				Token:   cookie,
+				Context: sessions.CookieName,
 			})
 			if err == nil {
 				userRow, err := s.queries.GetUserByID(ctx, userID)
