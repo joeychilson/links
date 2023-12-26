@@ -1,13 +1,14 @@
 package server
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/google/uuid"
 
 	"github.com/joeychilson/links/database"
-	"github.com/joeychilson/links/templates/components/link"
 	"github.com/joeychilson/links/templates/pages/feed"
 	"github.com/joeychilson/links/templates/pages/new"
 )
@@ -27,16 +28,22 @@ func (s *Server) FeedPage() http.HandlerFunc {
 			return
 		}
 
-		linkFeedRow, err := s.queries.LinkFeed(r.Context(), database.LinkFeedParams{
+		linkFeedRows, err := s.queries.LinkFeed(r.Context(), database.LinkFeedParams{
+			UserID: user.ID,
 			Limit:  25,
 			Offset: int32((page - 1) * 25),
 		})
 		if err != nil {
+			log.Println(err)
 			feed.Page(feed.Props{User: user}).Render(r.Context(), w)
 			return
 		}
 
-		feed.Page(feed.Props{User: user, LinkFeedRow: linkFeedRow}).Render(r.Context(), w)
+		for i, linkFeedRow := range linkFeedRows {
+			fmt.Println(i, linkFeedRow.UserVoted)
+		}
+
+		feed.Page(feed.Props{User: user, LinkFeedRows: linkFeedRows}).Render(r.Context(), w)
 	}
 }
 
@@ -99,25 +106,25 @@ func (s *Server) Vote() http.HandlerFunc {
 		}
 
 		if userVoted {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
+			err = s.queries.DeleteVote(r.Context(), database.DeleteVoteParams{
+				UserID: user.ID,
+				LinkID: linkUUID,
+			})
+			if err != nil {
+				http.Redirect(w, r, "/", http.StatusFound)
+				return
+			}
+		} else {
+			err = s.queries.CreateVote(r.Context(), database.CreateVoteParams{
+				UserID: user.ID,
+				LinkID: linkUUID,
+			})
+			if err != nil {
+				http.Redirect(w, r, "/", http.StatusFound)
+				return
+			}
 		}
 
-		err = s.queries.CreateVote(r.Context(), database.CreateVoteParams{
-			UserID: user.ID,
-			LinkID: linkUUID,
-		})
-		if err != nil {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		}
-
-		voteCount, err := s.queries.CountVotes(r.Context(), linkUUID)
-		if err != nil {
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		}
-
-		link.VoteCount(linkUUID, voteCount).Render(r.Context(), w)
+		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }

@@ -52,6 +52,20 @@ func (q *Queries) CreateVote(ctx context.Context, arg CreateVoteParams) error {
 	return err
 }
 
+const deleteVote = `-- name: DeleteVote :exec
+DELETE FROM votes WHERE user_id = $1 AND link_id = $2
+`
+
+type DeleteVoteParams struct {
+	UserID uuid.UUID
+	LinkID uuid.UUID
+}
+
+func (q *Queries) DeleteVote(ctx context.Context, arg DeleteVoteParams) error {
+	_, err := q.db.Exec(ctx, deleteVote, arg.UserID, arg.LinkID)
+	return err
+}
+
 const linkFeed = `-- name: LinkFeed :many
 SELECT 
     l.id AS id,
@@ -60,7 +74,8 @@ SELECT
     l.created_at,
     u.username,
     COUNT(DISTINCT c.id) AS comment_count,
-    COUNT(DISTINCT l.id) AS vote_count
+    COUNT(DISTINCT v.id) AS vote_count,
+    SUM(CASE WHEN v.user_id = $1 THEN 1 ELSE 0 END) AS user_voted
 FROM 
     links l
 JOIN 
@@ -74,12 +89,13 @@ GROUP BY
 ORDER BY 
     l.created_at DESC
 LIMIT 
-    $1
-OFFSET 
     $2
+OFFSET 
+    $3
 `
 
 type LinkFeedParams struct {
+	UserID uuid.UUID
 	Limit  int32
 	Offset int32
 }
@@ -92,10 +108,11 @@ type LinkFeedRow struct {
 	Username     string
 	CommentCount int64
 	VoteCount    int64
+	UserVoted    int64
 }
 
 func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkFeedRow, error) {
-	rows, err := q.db.Query(ctx, linkFeed, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, linkFeed, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -111,6 +128,7 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkFeedR
 			&i.Username,
 			&i.CommentCount,
 			&i.VoteCount,
+			&i.UserVoted,
 		); err != nil {
 			return nil, err
 		}

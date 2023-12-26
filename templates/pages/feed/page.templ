@@ -8,13 +8,13 @@ import (
 )
 
 type Props struct {
-	User        *session.User
-	LinkFeedRow []database.LinkFeedRow
+	User         *session.User
+	LinkFeedRows []database.LinkFeedRow
 }
 
 templ Page(props Props) {
 	@app.Layout(app.Props{Title: "Feed", User: props.User}) {
-		for _, row := range props.LinkFeedRow {
+		for _, row := range props.LinkFeedRows {
 			@link.Component(link.Props{Link: row})
 		}
 	}

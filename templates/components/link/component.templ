@@ -5,8 +5,6 @@ import (
 	"time"
 	"strconv"
 
-	"github.com/google/uuid"
-
 	"github.com/joeychilson/links/database"
 )
 
@@ -15,36 +13,36 @@ type Props struct {
 }
 
 templ Component(props Props) {
-	<article class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg hover:bg-gray-50 transition-colors duration-300">
+	<div class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg hover:bg-gray-50 transition-colors duration-300">
 		<div class="flex items-center">
-			<!-- Voting Section -->
 			<div class="flex flex-col items-center justify-center px-4 py-2">
-				<button hx-post={ fmt.Sprintf("/vote?link_id=%s", props.Link.ID.String()) } hx-target={ fmt.Sprintf("#vote-count-%s", props.Link.ID.String()) } hx-swap="outerHTML" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-					<svg class="h-6 w-6 transform hover:scale-110 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-					</svg>
-				</button>
-				@VoteCount(props.Link.ID, props.Link.VoteCount)
+				<a href={ templ.SafeURL(fmt.Sprintf("/vote?link_id=%s", props.Link.ID.String())) }>
+					<button class={ "font-semibold rounded-md text-white focus:outline-none transition duration-300 ease-in-out px-3 py-1.5" + " " + buttonColor(props.Link.UserVoted) }>
+						{ strconv.Itoa(int(props.Link.VoteCount)) }
+					</button>
+				</a>
 			</div>
-			<!-- Content Section -->
-			<a href={ templ.SafeURL(props.Link.Url) } class="block" aria-label={ props.Link.Title }>
-				<div class="flex-grow flex flex-col justify-between py-2">
-					<p class="font-bold text-blue-600 truncate">{ props.Link.Title }</p>
+			<a href={ templ.SafeURL(props.Link.Url) } class="block flex-grow" aria-label="{ props.Link.Title }">
+				<div class="flex flex-col justify-between py-2">
+					<p class="font-bold text-blue-600 truncate align-middle">{ props.Link.Title }</p>
 					<div>
-						<p class="text-sm text-gray-500">
+						<p class="text-sm text-gray-500 align-middle">
 							{ fmt.Sprintf("Shared by %v", props.Link.Username) } &middot; { TimeAgo(props.Link.CreatedAt.Time.Unix()) } &middot; { fmt.Sprintf("%v comments", props.Link.CommentCount) }
 						</p>
 					</div>
 				</div>
 			</a>
 		</div>
-	</article>
+	</div>
 }
 
-templ VoteCount(linkID uuid.UUID, count int64) {
-	<p id={ fmt.Sprintf("vote-count-%s", linkID.String()) } class="score px-2 text-xs font-semibold rounded-full bg-green-100 text-green-800 my-2">
-		{ strconv.Itoa(int(count)) }
-	</p>
+func buttonColor(voted int64) string {
+	fmt.Println(voted)
+
+	if voted == 1 {
+		return "bg-green-600 hover:bg-green-700"
+	}
+	return "bg-blue-500 hover:bg-blue-600 "
 }
 
 func TimeAgo(postTime int64) string {

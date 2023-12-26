@@ -38,7 +38,7 @@ func (s *Server) Router() http.Handler {
 	// Vote
 	r.Route("/vote", func(r chi.Router) {
 		r.Use(s.RequireUser)
-		r.Post("/", s.Vote())
+		r.Get("/", s.Vote())
 	})
 
 	// Account page

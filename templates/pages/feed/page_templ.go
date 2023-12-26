@@ -18,8 +18,8 @@ import (
 )
 
 type Props struct {
-	User        *session.User
-	LinkFeedRow []database.LinkFeedRow
+	User         *session.User
+	LinkFeedRows []database.LinkFeedRow
 }
 
 func Page(props Props) templ.Component {
@@ -41,7 +41,7 @@ func Page(props Props) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			for _, row := range props.LinkFeedRow {
+			for _, row := range props.LinkFeedRows {
 				templ_7745c5c3_Err = link.Component(link.Props{Link: row}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
