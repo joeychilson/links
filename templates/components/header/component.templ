@@ -8,11 +8,20 @@ type Props struct {
 
 templ Component(props Props) {
 	<header class="flex justify-between items-center py-4 md:space-x-10">
-		<div class="flex items-center gap-12">
+		<div class="flex justify-start items-center gap-12">
 			<a href="/" class="text-xl md:text-2xl font-bold text-gray-800 hover:text-blue-600">Lixy</a>
+			<nav class="hidden md:flex gap-6">
+				<a href="/latest" class="text-sm font-medium text-gray-800 hover:text-blue-600">Latest</a>
+			</nav>
 		</div>
 		<div class="flex items-center justify-end md:flex-1 gap-2">
 			if props.User != nil {
+				<a
+ 					href="/new-article"
+ 					class="px-4 py-2 rounded-md border border-green-600 text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+				>
+					+
+				</a>
 				<a
  					href="/account"
  					class="px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"

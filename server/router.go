@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/joeychilson/lixy/static"
+	"github.com/joeychilson/lixy/templates/pages/errors"
 )
 
 func (s *Server) Router() http.Handler {
@@ -48,6 +49,10 @@ func (s *Server) Router() http.Handler {
 		r.Use(s.RedirectIfLoggedIn)
 		r.Get("/", s.SignUpPage())
 		r.Post("/", s.SignUp())
+	})
+
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		errors.NotFound().Render(r.Context(), w)
 	})
 	return r
 }
