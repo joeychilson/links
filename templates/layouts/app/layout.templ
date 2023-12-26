@@ -3,13 +3,13 @@ package app
 import (
 	"fmt"
 
-	"github.com/joeychilson/lixy/pkg/users"
+	"github.com/joeychilson/lixy/pkg/session"
 	"github.com/joeychilson/lixy/templates/components/header"
 )
 
 type Props struct {
 	Title string
-	User  *users.User
+	User  *session.User
 }
 
 templ Layout(props Props) {
@@ -20,13 +20,11 @@ templ Layout(props Props) {
 			<link rel="stylesheet" href="/static/css/app.css"/>
 			<script src="/static/js/app.js"></script>
 		</head>
-		<div class="min-h-screen flex flex-col">
-			<main class="flex flex-col flex-1">
-				@header.Component(header.Props{
-					User: props.User,
-				})
+		<body class="bg-gray-100">
+			<main class="max-w-6xl mx-auto sm:px-6 lg:px-8">
+				@header.Component(header.Props{User: props.User})
 				{ children... }
 			</main>
-		</div>
+		</body>
 	</html>
 }

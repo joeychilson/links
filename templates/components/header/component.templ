@@ -1,52 +1,48 @@
 package header
 
-import "github.com/joeychilson/lixy/pkg/users"
+import "github.com/joeychilson/lixy/pkg/session"
 
 type Props struct {
-	User *users.User
+	User *session.User
 }
 
 templ Component(props Props) {
-	<header class="bg-white relative w-full mx-auto px-4">
-		<div class="flex justify-between items-center py-4 md:justify-start md:space-x-10">
-			<div class="md:flex md:items-center md:gap-12">
-				<a href="/" class="text-xl md:text-2xl font-bold text-gray-800 hover:text-blue-600">Lixy</a>
-			</div>
-			<div class="flex items-center justify-end md:flex-1 lg:w-0 gap-4">
-				<div class="sm:gap-4 sm:flex">
-					if props.User != nil {
-						<a
- 							href="/account"
- 							class="px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
- 							style="box-sizing: border-box; margin: 0;"
-						>
-							Account
-						</a>
-						<form action="/logout" method="POST" style="margin: 0; padding: 0; display: inline;">
-							<button
- 								type="submit"
- 								class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
- 								style="box-sizing: border-box;"
-							>
-								Logout
-							</button>
-						</form>
-					} else {
-						<a
- 							href="/login"
- 							class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
-						>
-							Login
-						</a>
-						<a
- 							href="/signup"
- 							class="px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-						>
-							Sign Up
-						</a>
-					}
-				</div>
-			</div>
+	<header class="flex justify-between items-center py-4 md:space-x-10">
+		<div class="flex items-center gap-12">
+			<a href="/" class="text-xl md:text-2xl font-bold text-gray-800 hover:text-blue-600">Lixy</a>
+		</div>
+		<div class="flex items-center justify-end md:flex-1 gap-2">
+			if props.User != nil {
+				<a
+ 					href="/account"
+ 					class="px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+ 					style="box-sizing: border-box; margin: 0;"
+				>
+					Account
+				</a>
+				<form action="/logout" method="POST" style="margin: 0; padding: 0; display: inline;">
+					<button
+ 						type="submit"
+ 						class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
+ 						style="box-sizing: border-box;"
+					>
+						Logout
+					</button>
+				</form>
+			} else {
+				<a
+ 					href="/login"
+ 					class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
+				>
+					Login
+				</a>
+				<a
+ 					href="/signup"
+ 					class="px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+				>
+					Sign Up
+				</a>
+			}
 		</div>
 	</header>
 }

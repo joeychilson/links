@@ -4,39 +4,26 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/joeychilson/lixy/database"
-	"github.com/joeychilson/lixy/pkg/sessions"
-	"github.com/joeychilson/lixy/pkg/users"
+	"github.com/joeychilson/lixy/pkg/session"
 )
 
 func (s *Server) UserFromSession(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		cookie, err := s.sessions.Get(r)
-		if err == nil {
-			userID, err := s.queries.GetUserIDFromToken(ctx, database.GetUserIDFromTokenParams{
-				Token:   cookie,
-				Context: sessions.CookieName,
-			})
-			if err == nil {
-				userRow, err := s.queries.GetUserByID(ctx, userID)
-				if err == nil {
-					ctx = context.WithValue(ctx, users.ContextKey, &users.User{
-						ID:       userRow.ID,
-						Email:    userRow.Email,
-						Username: userRow.Username,
-					})
-				}
-			}
+		user, err := s.sessionManager.GetUser(r)
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
 		}
 
+		ctx = context.WithValue(ctx, session.ContextKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-func (s *Server) UserFromContext(ctx context.Context) *users.User {
-	user, _ := ctx.Value(users.ContextKey).(*users.User)
+func (s *Server) UserFromContext(ctx context.Context) *session.User {
+	user, _ := ctx.Value(session.ContextKey).(*session.User)
 	return user
 }
 

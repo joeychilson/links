@@ -1,4 +1,4 @@
-package sessions
+package session
 
 import (
 	"encoding/base64"
@@ -7,16 +7,26 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/joeychilson/lixy/database"
+	"github.com/joeychilson/lixy/pkg/context"
 )
 
-const CookieName = "session"
+const (
+	CookieName                    = "session"
+	ContextKey context.ContextKey = "session"
+)
 
 type Manager struct {
 	cookie  *securecookie.SecureCookie
 	queries *database.Queries
 }
 
-func New(cookie *securecookie.SecureCookie, queries *database.Queries) *Manager {
+type User struct {
+	ID       pgtype.UUID
+	Email    string
+	Username string
+}
+
+func NewManager(cookie *securecookie.SecureCookie, queries *database.Queries) *Manager {
 	return &Manager{
 		cookie:  cookie,
 		queries: queries,
@@ -57,6 +67,29 @@ func (m *Manager) Get(r *http.Request) (string, error) {
 		return "", err
 	}
 	return value, nil
+}
+
+func (m *Manager) GetUser(r *http.Request) (*User, error) {
+	cookie, err := m.Get(r)
+	if err != nil {
+		return nil, err
+	}
+	userID, err := m.queries.UserIDFromToken(r.Context(), database.UserIDFromTokenParams{
+		Token:   cookie,
+		Context: CookieName,
+	})
+	if err != nil {
+		return nil, err
+	}
+	userRow, err := m.queries.UserByID(r.Context(), userID)
+	if err != nil {
+		return nil, err
+	}
+	return &User{
+		ID:       userRow.ID,
+		Email:    userRow.Email,
+		Username: userRow.Username,
+	}, nil
 }
 
 func (m *Manager) Delete(w http.ResponseWriter, r *http.Request) error {

@@ -1,0 +1,21 @@
+package feed
+
+import (
+	"github.com/joeychilson/lixy/pkg/session"
+	"github.com/joeychilson/lixy/templates/components/article"
+	"github.com/joeychilson/lixy/templates/layouts/app"
+	"github.com/joeychilson/lixy/database"
+)
+
+type Props struct {
+	User            *session.User
+	ArticleFeedRows []database.ArticleFeedRow
+}
+
+templ Page(props Props) {
+	@app.Layout(app.Props{Title: "Feed", User: props.User}) {
+		for _, row := range props.ArticleFeedRows {
+			@article.Component(article.Props{Article: row})
+		}
+	}
+}

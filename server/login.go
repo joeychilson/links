@@ -26,7 +26,7 @@ func (s *Server) Login() http.HandlerFunc {
 		}
 
 		// Attempt to log in
-		user, err := s.queries.GetUserByEmail(r.Context(), email)
+		user, err := s.queries.UserByEmail(r.Context(), email)
 		if err != nil {
 			log.Printf("Error getting user by email: %v\n", err)
 			login.Page(login.Props{Error: "Invalid email or password"}).Render(r.Context(), w)
@@ -41,7 +41,7 @@ func (s *Server) Login() http.HandlerFunc {
 		}
 
 		// Set session
-		err = s.sessions.Set(w, r, user.ID)
+		err = s.sessionManager.Set(w, r, user.ID)
 		if err != nil {
 			log.Printf("Error setting session: %v\n", err)
 			login.Page(login.Props{Error: ErrorInternalServer}).Render(r.Context(), w)

@@ -31,7 +31,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 		password := r.FormValue("password")
 		confirmPassword := r.FormValue("confirm-password")
 
-		emailExists, err := s.queries.CheckEmailExists(r.Context(), email)
+		emailExists, err := s.queries.EmailExists(r.Context(), email)
 		if err != nil {
 			log.Printf("Error checking email exists: %v\n", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
@@ -48,7 +48,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 			return
 		}
 
-		usernameExists, err := s.queries.CheckUsernameExists(r.Context(), username)
+		usernameExists, err := s.queries.UsernameExists(r.Context(), username)
 		if err != nil {
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 			return
@@ -102,7 +102,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 			return
 		}
 
-		err = s.sessions.Set(w, r, userID)
+		err = s.sessionManager.Set(w, r, userID)
 		if err != nil {
 			log.Printf("Error setting session: %v\n", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)

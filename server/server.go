@@ -4,18 +4,18 @@ import (
 	"net/http"
 
 	"github.com/joeychilson/lixy/database"
-	"github.com/joeychilson/lixy/pkg/sessions"
+	"github.com/joeychilson/lixy/pkg/session"
 )
 
 type Server struct {
-	queries  *database.Queries
-	sessions *sessions.Manager
+	queries        *database.Queries
+	sessionManager *session.Manager
 }
 
-func New(queries *database.Queries, sessions *sessions.Manager) *Server {
+func New(queries *database.Queries, sessionManager *session.Manager) *Server {
 	return &Server{
-		queries:  queries,
-		sessions: sessions,
+		queries:        queries,
+		sessionManager: sessionManager,
 	}
 }
 

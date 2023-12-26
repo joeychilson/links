@@ -7,7 +7,6 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/joeychilson/lixy/static"
-	"github.com/joeychilson/lixy/templates/pages/home"
 )
 
 func (s *Server) Router() http.Handler {
@@ -23,10 +22,9 @@ func (s *Server) Router() http.Handler {
 	// Static files
 	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
 
-	// Home page
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		user := s.UserFromContext(r.Context())
-		home.Page(home.Props{User: user}).Render(r.Context(), w)
+	// Feed page
+	r.Route("/", func(r chi.Router) {
+		r.Get("/", s.FeedPage())
 	})
 
 	// Account page

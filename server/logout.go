@@ -13,7 +13,7 @@ func (s *Server) Logout() http.HandlerFunc {
 		}
 
 		// Delete session
-		err := s.sessions.Delete(w, r)
+		err := s.sessionManager.Delete(w, r)
 		if err != nil {
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return

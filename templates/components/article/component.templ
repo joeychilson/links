@@ -1,0 +1,77 @@
+package article
+
+import (
+	"fmt"
+	"time"
+	"github.com/joeychilson/lixy/database"
+)
+
+type Props struct {
+	Article database.ArticleFeedRow
+}
+
+templ Component(props Props) {
+	<article class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg hover:bg-gray-50 transition-colors duration-300">
+		<a href={ templ.SafeURL(props.Article.Link) } class="block" aria-label={ props.Article.Title }>
+			<div class="flex items-center">
+				<!-- Voting Section -->
+				<div class="flex flex-col items-center justify-center px-4 py-2">
+					<button aria-label="Upvote" aria-pressed="false" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+						<svg class="h-6 w-6 transform hover:scale-110 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+						</svg>
+					</button>
+					<p class="score px-2 text-xs font-semibold rounded-full bg-green-100 text-green-800 my-2">
+						0
+					</p>
+				</div>
+				<!-- Content Section -->
+				<div class="flex-grow flex flex-col justify-between py-2">
+					<p class="font-bold text-blue-600 truncate">{ props.Article.Title }</p>
+					<div>
+						<p class="text-sm text-gray-500">
+							{ fmt.Sprintf("Shared by %v", props.Article.Username) } &middot; { TimeAgo(props.Article.CreatedAt.Time.Unix()) } &middot; { fmt.Sprintf("%v comments", props.Article.CommentCount) }
+						</p>
+					</div>
+				</div>
+			</div>
+		</a>
+	</article>
+}
+
+func TimeAgo(postTime int64) string {
+	now := time.Now()
+	postTimeUTC := time.Unix(postTime, 0)
+	duration := now.Sub(postTimeUTC)
+
+	if duration < time.Minute {
+		return "just now"
+	} else if duration < time.Hour {
+		if duration/time.Minute == 1 {
+			return "1 minute ago"
+		}
+		return fmt.Sprintf("%d minutes ago", duration/time.Minute)
+	} else if duration < time.Hour*24 {
+		if duration/time.Hour == 1 {
+			return "1 hour ago"
+		}
+		return fmt.Sprintf("%d hours ago", duration/time.Hour)
+	} else if duration < time.Hour*24*31 {
+		if duration/(time.Hour*24) == 1 {
+			return "1 day ago"
+		}
+		return fmt.Sprintf("%d days ago", duration/(time.Hour*24))
+	} else if duration < time.Hour*24*365 {
+		months := duration / (time.Hour * 24 * 30)
+		if months <= 1 {
+			return "1 month ago"
+		}
+		return fmt.Sprintf("%d months ago", months)
+	}
+
+	years := duration / (time.Hour * 24 * 365)
+	if years <= 1 {
+		return "1 year ago"
+	}
+	return fmt.Sprintf("%d years ago", years)
+}

@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/joeychilson/lixy/database"
-	"github.com/joeychilson/lixy/pkg/sessions"
+	"github.com/joeychilson/lixy/pkg/session"
 	"github.com/joeychilson/lixy/server"
 )
 
@@ -37,10 +37,9 @@ func main() {
 	validationKey, _ := base64.StdEncoding.DecodeString(os.Getenv("SECURE_COOKIE_VALIDATION_KEY"))
 
 	cookie := securecookie.New(encryptionKey, validationKey)
+	sessionManager := session.NewManager(cookie, queries)
 
-	sessions := sessions.New(cookie, queries)
-
-	server := server.New(queries, sessions)
+	server := server.New(queries, sessionManager)
 
 	log.Println("Serving lixy application @ http://localhost:8080")
 	if err := server.ListenAndServe(":8080"); err != nil {

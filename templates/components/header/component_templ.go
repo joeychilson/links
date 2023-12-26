@@ -10,10 +10,10 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/joeychilson/lixy/pkg/users"
+import "github.com/joeychilson/lixy/pkg/session"
 
 type Props struct {
-	User *users.User
+	User *session.User
 }
 
 func Component(props Props) templ.Component {
@@ -29,7 +29,7 @@ func Component(props Props) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-white relative w-full mx-auto px-4\"><div class=\"flex justify-between items-center py-4 md:justify-start md:space-x-10\"><div class=\"md:flex md:items-center md:gap-12\"><a href=\"/\" class=\"text-xl md:text-2xl font-bold text-gray-800 hover:text-blue-600\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"flex justify-between items-center py-4 md:space-x-10\"><div class=\"flex items-center gap-12\"><a href=\"/\" class=\"text-xl md:text-2xl font-bold text-gray-800 hover:text-blue-600\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -38,7 +38,7 @@ func Component(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div><div class=\"flex items-center justify-end md:flex-1 lg:w-0 gap-4\"><div class=\"sm:gap-4 sm:flex\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div><div class=\"flex items-center justify-end md:flex-1 gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -89,7 +89,7 @@ func Component(props Props) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div></header>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

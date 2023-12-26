@@ -13,13 +13,13 @@ import "bytes"
 import (
 	"fmt"
 
-	"github.com/joeychilson/lixy/pkg/users"
+	"github.com/joeychilson/lixy/pkg/session"
 	"github.com/joeychilson/lixy/templates/components/header"
 )
 
 type Props struct {
 	Title string
-	User  *users.User
+	User  *session.User
 }
 
 func Layout(props Props) templ.Component {
@@ -53,13 +53,11 @@ func Layout(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script></head><div class=\"min-h-screen flex flex-col\"><main class=\"flex flex-col flex-1\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script></head><body class=\"bg-gray-100\"><main class=\"max-w-6xl mx-auto sm:px-6 lg:px-8\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = header.Component(header.Props{
-			User: props.User,
-		}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = header.Component(header.Props{User: props.User}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,7 +65,7 @@ func Layout(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</main></div></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</main></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

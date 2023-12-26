@@ -11,28 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const checkEmailExists = `-- name: CheckEmailExists :one
-SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)
-`
-
-func (q *Queries) CheckEmailExists(ctx context.Context, email string) (bool, error) {
-	row := q.db.QueryRow(ctx, checkEmailExists, email)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
-}
-
-const checkUsernameExists = `-- name: CheckUsernameExists :one
-SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)
-`
-
-func (q *Queries) CheckUsernameExists(ctx context.Context, username string) (bool, error) {
-	row := q.db.QueryRow(ctx, checkUsernameExists, username)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
-}
-
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id
 `
@@ -81,12 +59,23 @@ func (q *Queries) DeleteUserToken(ctx context.Context, arg DeleteUserTokenParams
 	return err
 }
 
-const getUserByEmail = `-- name: GetUserByEmail :one
+const emailExists = `-- name: EmailExists :one
+SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)
+`
+
+func (q *Queries) EmailExists(ctx context.Context, email string) (bool, error) {
+	row := q.db.QueryRow(ctx, emailExists, email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const userByEmail = `-- name: UserByEmail :one
 SELECT id, username, email, password, confirmed_at, created_at, updated_at FROM users WHERE email = $1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, getUserByEmail, email)
+func (q *Queries) UserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, userByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -100,11 +89,11 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	return i, err
 }
 
-const getUserByID = `-- name: GetUserByID :one
+const userByID = `-- name: UserByID :one
 SELECT id, username, email, confirmed_at, created_at, updated_at FROM users WHERE id = $1
 `
 
-type GetUserByIDRow struct {
+type UserByIDRow struct {
 	ID          pgtype.UUID
 	Username    string
 	Email       string
@@ -113,9 +102,9 @@ type GetUserByIDRow struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
-func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (GetUserByIDRow, error) {
-	row := q.db.QueryRow(ctx, getUserByID, id)
-	var i GetUserByIDRow
+func (q *Queries) UserByID(ctx context.Context, id pgtype.UUID) (UserByIDRow, error) {
+	row := q.db.QueryRow(ctx, userByID, id)
+	var i UserByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Username,
@@ -127,18 +116,29 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (GetUserByIDR
 	return i, err
 }
 
-const getUserIDFromToken = `-- name: GetUserIDFromToken :one
+const userIDFromToken = `-- name: UserIDFromToken :one
 SELECT user_id FROM user_tokens WHERE token = $1 AND context = $2
 `
 
-type GetUserIDFromTokenParams struct {
+type UserIDFromTokenParams struct {
 	Token   string
 	Context string
 }
 
-func (q *Queries) GetUserIDFromToken(ctx context.Context, arg GetUserIDFromTokenParams) (pgtype.UUID, error) {
-	row := q.db.QueryRow(ctx, getUserIDFromToken, arg.Token, arg.Context)
+func (q *Queries) UserIDFromToken(ctx context.Context, arg UserIDFromTokenParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, userIDFromToken, arg.Token, arg.Context)
 	var user_id pgtype.UUID
 	err := row.Scan(&user_id)
 	return user_id, err
+}
+
+const usernameExists = `-- name: UsernameExists :one
+SELECT EXISTS(SELECT 1 FROM users WHERE username = $1)
+`
+
+func (q *Queries) UsernameExists(ctx context.Context, username string) (bool, error) {
+	row := q.db.QueryRow(ctx, usernameExists, username)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
