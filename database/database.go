@@ -8,6 +8,8 @@ import (
 	"github.com/amacneil/dbmate/v2/pkg/dbmate"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+
+	_ "github.com/amacneil/dbmate/v2/pkg/driver/postgres"
 )
 
 //go:embed migrations/*.sql
