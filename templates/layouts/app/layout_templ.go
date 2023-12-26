@@ -13,13 +13,13 @@ import "bytes"
 import (
 	"fmt"
 
-	"github.com/joeychilson/lixy/components/header"
-	"github.com/joeychilson/lixy/models"
+	"github.com/joeychilson/lixy/pkg/users"
+	"github.com/joeychilson/lixy/templates/components/header"
 )
 
 type Props struct {
 	Title string
-	User  *models.User
+	User  *users.User
 }
 
 func Layout(props Props) templ.Component {

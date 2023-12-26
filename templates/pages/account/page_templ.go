@@ -11,12 +11,12 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/joeychilson/lixy/layouts/app"
-	"github.com/joeychilson/lixy/models"
+	"github.com/joeychilson/lixy/pkg/users"
+	"github.com/joeychilson/lixy/templates/layouts/app"
 )
 
 type Props struct {
-	User *models.User
+	User *users.User
 }
 
 func Page(props Props) templ.Component {

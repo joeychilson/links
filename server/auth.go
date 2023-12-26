@@ -5,14 +5,10 @@ import (
 	"net/http"
 
 	"github.com/joeychilson/lixy/database"
-	"github.com/joeychilson/lixy/models"
+	"github.com/joeychilson/lixy/pkg/users"
 )
 
-type contextKey string
-
-const userKey contextKey = "user"
-
-func (s *Server) Authorization(next http.Handler) http.Handler {
+func (s *Server) FetchCurrentUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -25,7 +21,7 @@ func (s *Server) Authorization(next http.Handler) http.Handler {
 			if err == nil {
 				userRow, err := s.queries.GetUserByID(ctx, userID)
 				if err == nil {
-					ctx = context.WithValue(ctx, userKey, &models.User{
+					ctx = context.WithValue(ctx, users.ContextKey, &users.User{
 						ID:       userRow.ID,
 						Email:    userRow.Email,
 						Username: userRow.Username,
@@ -35,5 +31,32 @@ func (s *Server) Authorization(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (s *Server) UserFromContext(ctx context.Context) *users.User {
+	user, _ := ctx.Value(users.ContextKey).(*users.User)
+	return user
+}
+
+func (s *Server) RedirectIfLoggedIn(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := s.UserFromContext(r.Context())
+		if user != nil {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) RequireUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := s.UserFromContext(r.Context())
+		if user == nil {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		next.ServeHTTP(w, r)
 	})
 }

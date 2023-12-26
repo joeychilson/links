@@ -10,10 +10,10 @@ import "context"
 import "io"
 import "bytes"
 
-import "github.com/joeychilson/lixy/models"
+import "github.com/joeychilson/lixy/pkg/users"
 
 type Props struct {
-	User *models.User
+	User *users.User
 }
 
 func Component(props Props) templ.Component {

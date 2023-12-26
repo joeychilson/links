@@ -6,9 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/joeychilson/lixy/models"
-	"github.com/joeychilson/lixy/pages/home"
 	"github.com/joeychilson/lixy/static"
+	"github.com/joeychilson/lixy/templates/pages/home"
 )
 
 func (s *Server) Router() http.Handler {
@@ -19,35 +18,38 @@ func (s *Server) Router() http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(s.Authorization)
+	r.Use(s.FetchCurrentUser)
 
 	// Static files
 	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
 
 	// Home page
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		user, _ := r.Context().Value(userKey).(*models.User)
+		user := s.UserFromContext(r.Context())
 		home.Page(home.Props{User: user}).Render(r.Context(), w)
 	})
 
 	// Account page
 	r.Route("/account", func(r chi.Router) {
-		r.Get("/", s.handleAccountPage)
+		r.Use(s.RequireUser)
+		r.Get("/", s.AccountPage())
 	})
 
 	// Login page
 	r.Route("/login", func(r chi.Router) {
-		r.Get("/", s.handleLoginPage)
-		r.Post("/", s.handleLogin)
+		r.Use(s.RedirectIfLoggedIn)
+		r.Get("/", s.LoginPage())
+		r.Post("/", s.Login())
 	})
 
 	// Logout
-	r.Post("/logout", s.handleLogout)
+	r.Post("/logout", s.Logout())
 
 	// Sign up page
 	r.Route("/signup", func(r chi.Router) {
-		r.Get("/", s.handleSignUpPage)
-		r.Post("/", s.handleSignUp)
+		r.Use(s.RedirectIfLoggedIn)
+		r.Get("/", s.SignUpPage())
+		r.Post("/", s.SignUp())
 	})
 	return r
 }

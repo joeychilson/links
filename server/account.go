@@ -3,15 +3,12 @@ package server
 import (
 	"net/http"
 
-	"github.com/joeychilson/lixy/models"
-	"github.com/joeychilson/lixy/pages/account"
+	"github.com/joeychilson/lixy/templates/pages/account"
 )
 
-func (s *Server) handleAccountPage(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(userKey).(*models.User)
-	if user == nil {
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
+func (s *Server) AccountPage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user := s.UserFromContext(r.Context())
+		account.Page(account.Props{User: user}).Render(r.Context(), w)
 	}
-	account.Page(account.Props{User: user}).Render(r.Context(), w)
 }
