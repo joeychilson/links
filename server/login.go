@@ -6,7 +6,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/joeychilson/links/templates/pages/login"
+	"github.com/joeychilson/links/pages/login"
 )
 
 func (s *Server) LoginPage() http.HandlerFunc {

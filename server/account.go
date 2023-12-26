@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/joeychilson/links/templates/pages/account"
+	"github.com/joeychilson/links/pages/account"
 )
 
 func (s *Server) AccountPage() http.HandlerFunc {

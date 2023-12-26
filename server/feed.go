@@ -1,16 +1,14 @@
 package server
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/google/uuid"
 
 	"github.com/joeychilson/links/database"
-	"github.com/joeychilson/links/templates/pages/feed"
-	"github.com/joeychilson/links/templates/pages/new"
+	"github.com/joeychilson/links/pages/feed"
+	"github.com/joeychilson/links/pages/new"
 )
 
 func (s *Server) FeedPage() http.HandlerFunc {
@@ -34,13 +32,8 @@ func (s *Server) FeedPage() http.HandlerFunc {
 			Offset: int32((page - 1) * 25),
 		})
 		if err != nil {
-			log.Println(err)
 			feed.Page(feed.Props{User: user}).Render(r.Context(), w)
 			return
-		}
-
-		for i, linkFeedRow := range linkFeedRows {
-			fmt.Println(i, linkFeedRow.UserVoted)
 		}
 
 		feed.Page(feed.Props{User: user, LinkFeedRows: linkFeedRows}).Render(r.Context(), w)
@@ -80,7 +73,7 @@ func (s *Server) New() http.HandlerFunc {
 	}
 }
 
-func (s *Server) Vote() http.HandlerFunc {
+func (s *Server) Like() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := s.UserFromContext(r.Context())
 		linkID := r.URL.Query().Get("link_id")
@@ -96,7 +89,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			return
 		}
 
-		userVoted, err := s.queries.UserVoted(r.Context(), database.UserVotedParams{
+		userVoted, err := s.queries.UserLiked(r.Context(), database.UserLikedParams{
 			UserID: user.ID,
 			LinkID: linkUUID,
 		})
@@ -115,7 +108,7 @@ func (s *Server) Vote() http.HandlerFunc {
 				return
 			}
 		} else {
-			err = s.queries.CreateVote(r.Context(), database.CreateVoteParams{
+			err = s.queries.CreateLike(r.Context(), database.CreateLikeParams{
 				UserID: user.ID,
 				LinkID: linkUUID,
 			})

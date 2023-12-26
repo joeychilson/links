@@ -12,15 +12,29 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const countVotes = `-- name: CountVotes :one
-SELECT COUNT(*) FROM votes WHERE link_id = $1
+const countLikes = `-- name: CountLikes :one
+SELECT COUNT(*) FROM likes WHERE link_id = $1
 `
 
-func (q *Queries) CountVotes(ctx context.Context, linkID uuid.UUID) (int64, error) {
-	row := q.db.QueryRow(ctx, countVotes, linkID)
+func (q *Queries) CountLikes(ctx context.Context, linkID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countLikes, linkID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const createLike = `-- name: CreateLike :exec
+INSERT INTO likes (user_id, link_id) VALUES ($1, $2)
+`
+
+type CreateLikeParams struct {
+	UserID uuid.UUID
+	LinkID uuid.UUID
+}
+
+func (q *Queries) CreateLike(ctx context.Context, arg CreateLikeParams) error {
+	_, err := q.db.Exec(ctx, createLike, arg.UserID, arg.LinkID)
+	return err
 }
 
 const createLink = `-- name: CreateLink :exec
@@ -38,22 +52,8 @@ func (q *Queries) CreateLink(ctx context.Context, arg CreateLinkParams) error {
 	return err
 }
 
-const createVote = `-- name: CreateVote :exec
-INSERT INTO votes (user_id, link_id) VALUES ($1, $2)
-`
-
-type CreateVoteParams struct {
-	UserID uuid.UUID
-	LinkID uuid.UUID
-}
-
-func (q *Queries) CreateVote(ctx context.Context, arg CreateVoteParams) error {
-	_, err := q.db.Exec(ctx, createVote, arg.UserID, arg.LinkID)
-	return err
-}
-
 const deleteVote = `-- name: DeleteVote :exec
-DELETE FROM votes WHERE user_id = $1 AND link_id = $2
+DELETE FROM likes WHERE user_id = $1 AND link_id = $2
 `
 
 type DeleteVoteParams struct {
@@ -74,8 +74,8 @@ SELECT
     l.created_at,
     u.username,
     COUNT(DISTINCT c.id) AS comment_count,
-    COUNT(DISTINCT v.id) AS vote_count,
-    SUM(CASE WHEN v.user_id = $1 THEN 1 ELSE 0 END) AS user_voted
+    COUNT(DISTINCT lk.id) AS like_count,
+    SUM(CASE WHEN lk.user_id = $1 THEN 1 ELSE 0 END) AS user_voted
 FROM 
     links l
 JOIN 
@@ -83,7 +83,7 @@ JOIN
 LEFT JOIN 
     comments c ON l.id = c.link_id
 LEFT JOIN 
-    votes v ON l.id = v.link_id
+    likes lk ON l.id = lk.link_id
 GROUP BY 
     l.id, u.username
 ORDER BY 
@@ -107,7 +107,7 @@ type LinkFeedRow struct {
 	CreatedAt    pgtype.Timestamptz
 	Username     string
 	CommentCount int64
-	VoteCount    int64
+	LikeCount    int64
 	UserVoted    int64
 }
 
@@ -127,7 +127,7 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkFeedR
 			&i.CreatedAt,
 			&i.Username,
 			&i.CommentCount,
-			&i.VoteCount,
+			&i.LikeCount,
 			&i.UserVoted,
 		); err != nil {
 			return nil, err
@@ -140,17 +140,17 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkFeedR
 	return items, nil
 }
 
-const userVoted = `-- name: UserVoted :one
-SELECT EXISTS(SELECT 1 FROM votes WHERE user_id = $1 AND link_id = $2)
+const userLiked = `-- name: UserLiked :one
+SELECT EXISTS(SELECT 1 FROM likes WHERE user_id = $1 AND link_id = $2)
 `
 
-type UserVotedParams struct {
+type UserLikedParams struct {
 	UserID uuid.UUID
 	LinkID uuid.UUID
 }
 
-func (q *Queries) UserVoted(ctx context.Context, arg UserVotedParams) (bool, error) {
-	row := q.db.QueryRow(ctx, userVoted, arg.UserID, arg.LinkID)
+func (q *Queries) UserLiked(ctx context.Context, arg UserLikedParams) (bool, error) {
+	row := q.db.QueryRow(ctx, userLiked, arg.UserID, arg.LinkID)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err

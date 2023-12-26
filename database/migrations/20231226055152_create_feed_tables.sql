@@ -22,7 +22,7 @@ CREATE TABLE comments (
 CREATE INDEX idx_comments_link_id ON comments(link_id);
 CREATE INDEX idx_comments_user_id ON comments(user_id);
 
-CREATE TABLE votes (
+CREATE TABLE likes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     link_id UUID NOT NULL REFERENCES links(id) ON DELETE CASCADE ON UPDATE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -31,11 +31,11 @@ CREATE TABLE votes (
     UNIQUE (link_id, user_id)
 );
 
-CREATE INDEX idx_votes_link_id ON votes(link_id);
-CREATE INDEX idx_votes_user_id ON votes(user_id);
+CREATE INDEX idx_likes_link_id ON likes(link_id);
+CREATE INDEX idx_likes_user_id ON likes(user_id);
 
 -- migrate:down
-DROP TABLE votes;
+DROP TABLE likes;
 DROP TABLE comments;
 DROP TABLE links;
 

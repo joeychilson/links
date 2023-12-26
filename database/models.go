@@ -18,6 +18,14 @@ type Comment struct {
 	UpdatedAt pgtype.Timestamptz
 }
 
+type Like struct {
+	ID        uuid.UUID
+	LinkID    uuid.UUID
+	UserID    uuid.UUID
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
 type Link struct {
 	ID        uuid.UUID
 	UserID    uuid.UUID
@@ -43,12 +51,4 @@ type UserToken struct {
 	Token     string
 	Context   string
 	CreatedAt pgtype.Timestamptz
-}
-
-type Vote struct {
-	ID        uuid.UUID
-	LinkID    uuid.UUID
-	UserID    uuid.UUID
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
 }

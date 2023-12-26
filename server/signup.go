@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/joeychilson/links/database"
-	"github.com/joeychilson/links/templates/pages/signup"
+	"github.com/joeychilson/links/pages/signup"
 )
 
 var (

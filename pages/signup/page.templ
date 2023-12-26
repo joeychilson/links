@@ -1,7 +1,7 @@
 package signup
 
 import (
-	"github.com/joeychilson/links/templates/layouts/app"
+	"github.com/joeychilson/links/pages/layout"
 )
 
 type PageProps struct {
@@ -10,7 +10,7 @@ type PageProps struct {
 }
 
 templ Page(props PageProps) {
-	@app.Layout(app.Props{Title: "Sign Up"}) {
+	@layout.Layout(layout.Props{Title: "Sign Up"}) {
 		<div class="flex-1 flex flex-col items-center justify-center">
 			if props.Error != "" {
 				<div class="max-w-md w-full bg-white border border-red-500 rounded-lg shadow-md p-4 mb-6">

@@ -2,7 +2,7 @@ package account
 
 import (
 	"github.com/joeychilson/links/internal/session"
-	"github.com/joeychilson/links/templates/layouts/app"
+	"github.com/joeychilson/links/pages/layout"
 )
 
 type Props struct {
@@ -10,7 +10,7 @@ type Props struct {
 }
 
 templ Page(props Props) {
-	@app.Layout(app.Props{Title: "Account", User: props.User}) {
+	@layout.Layout(layout.Props{Title: "Account", User: props.User}) {
 		<div class="flex-1 flex flex-col items-center mt-12">
 			<div class="max-w-md w-full bg-white border border-gray-200 rounded-lg shadow-md p-8">
 				<!-- Title for the Form -->

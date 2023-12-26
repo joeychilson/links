@@ -6,8 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/joeychilson/links/pages/errors"
 	"github.com/joeychilson/links/static"
-	"github.com/joeychilson/links/templates/pages/errors"
 )
 
 func (s *Server) Router() http.Handler {
@@ -35,10 +35,10 @@ func (s *Server) Router() http.Handler {
 		r.Post("/", s.New())
 	})
 
-	// Vote
-	r.Route("/vote", func(r chi.Router) {
+	// Like
+	r.Route("/like", func(r chi.Router) {
 		r.Use(s.RequireUser)
-		r.Get("/", s.Vote())
+		r.Get("/", s.Like())
 	})
 
 	// Account page

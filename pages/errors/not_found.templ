@@ -2,11 +2,11 @@ package errors
 
 import (
 	"github.com/joeychilson/links/internal/session"
-	"github.com/joeychilson/links/templates/layouts/app"
+	"github.com/joeychilson/links/pages/layout"
 )
 
 templ NotFound(user *session.User) {
-	@app.Layout(app.Props{Title: "Page Not Found", User: user}) {
+	@layout.Layout(layout.Props{Title: "Page Not Found", User: user}) {
 		<div class="flex flex-col items-center justify-center px-5 text-center">
 			<svg class="w-16 h-16 text-blue-600 mb-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
 				<path d="M16.24 7.76a6 6 0 11-8.48 8.48 6 6 0 018.48-8.48z"></path>
