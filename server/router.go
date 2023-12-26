@@ -26,8 +26,13 @@ func (s *Server) Router() http.Handler {
 	// Feed page
 	r.Route("/", func(r chi.Router) {
 		r.Get("/", s.FeedPage())
-		r.Get("/new", s.NewPage())
-		r.Post("/new", s.New())
+	})
+
+	// New post page
+	r.Route("/new", func(r chi.Router) {
+		r.Use(s.RequireUser)
+		r.Get("/", s.NewPage())
+		r.Post("/", s.New())
 	})
 
 	// Account page

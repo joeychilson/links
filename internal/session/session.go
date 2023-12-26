@@ -8,12 +8,13 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/joeychilson/lixy/database"
-	"github.com/joeychilson/lixy/internal/context"
 )
 
+type ContextKey string
+
 const (
-	CookieName                    = "session"
-	ContextKey context.ContextKey = "session"
+	CookieName            = "session"
+	SessionKey ContextKey = "session"
 )
 
 type Manager struct {

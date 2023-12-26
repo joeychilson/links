@@ -17,13 +17,13 @@ func (s *Server) UserFromSession(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx = context.WithValue(ctx, session.ContextKey, user)
+		ctx = context.WithValue(ctx, session.SessionKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
 func (s *Server) UserFromContext(ctx context.Context) *session.User {
-	user, _ := ctx.Value(session.ContextKey).(*session.User)
+	user, _ := ctx.Value(session.SessionKey).(*session.User)
 	return user
 }
 
