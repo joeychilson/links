@@ -17,13 +17,10 @@ import (
 
 func main() {
 	_ = godotenv.Load()
-
 	ctx := context.Background()
-
 	databaseURL := os.Getenv("DATABASE_URL")
-	dropTables := os.Getenv("DROP_TABLES") == "true"
 
-	err := database.Migrate(databaseURL, dropTables)
+	err := database.Migrate(databaseURL)
 	if err != nil {
 		log.Fatalf("Unable to migrate database: %v\n", err)
 	}
