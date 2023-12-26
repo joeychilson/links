@@ -34,22 +34,27 @@ templ Page(props Props) {
 							</button>
 						</a>
 					</div>
-					<a href={ templ.SafeURL(row.Url) } class="block flex-grow" aria-label="{ props.Link.Title }">
-						<div class="flex flex-col justify-between py-2">
-							<p class="font-bold text-blue-600 truncate align-middle">{ row.Title }</p>
-							<div>
-								<p class="text-sm text-gray-500 align-middle">
-									{ fmt.Sprintf("Shared by %v", row.Username) }
-									&middot; 
-									{ timeAgo(row.CreatedAt.Time.Unix()) }
-									&middot; 
-									{ fmt.Sprintf("%v likes", row.LikeCount) }
-									&middot; 
+					<div class="flex flex-col justify-between py-2">
+						<a href={ templ.SafeURL(row.Url) }>
+							<p class="font-bold text-blue-600 hover:underline">{ row.Title }</p>
+						</a>
+						<div>
+							<p class="text-sm text-gray-500">
+								Shared By
+								<a href={ templ.SafeURL(fmt.Sprintf("/user?id=%s", row.Username)) } class="hover:underline">
+									{ row.Username }
+								</a>
+								&middot; 
+								{ timeAgo(row.CreatedAt.Time.Unix()) }
+								&middot; 
+								{ fmt.Sprintf("%v likes", row.LikeCount) }
+								&middot; 
+								<a href={ templ.SafeURL(fmt.Sprintf("/link?id=%s", row.Username)) } class="hover:underline">
 									{ fmt.Sprintf("%v comments", row.CommentCount) }
-								</p>
-							</div>
+								</a>
+							</p>
 						</div>
-					</a>
+					</div>
 				</div>
 			</div>
 		}

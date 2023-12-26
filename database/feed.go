@@ -91,7 +91,7 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkFeedR
 		GROUP BY 
 			l.id, u.username
 		ORDER BY 
-			l.created_at DESC
+			like_count DESC, comment_count DESC, l.created_at DESC
 		LIMIT 
 			$1
 		OFFSET 
@@ -154,7 +154,7 @@ func (q *Queries) UserLinkFeed(ctx context.Context, arg UserLinkFeedParams) ([]L
 		GROUP BY 
 			l.id, u.username
 		ORDER BY 
-			l.created_at DESC
+			like_count DESC, comment_count DESC, l.created_at DESC
 		LIMIT 
 			$2
 		OFFSET 
