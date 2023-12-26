@@ -7,13 +7,10 @@ css:
 js:
 	bun build ./assets/js/app.js --outdir ./static/js
 
-sql:
-	sqlc generate
-
 build:
 	go build -o ./tmp/main .
 
 serve:
 	./tmp/main
 
-dev: templ css js sql build
+dev: templ css js build
