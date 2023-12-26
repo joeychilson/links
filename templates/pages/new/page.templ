@@ -1,0 +1,28 @@
+package new
+
+import (
+	"github.com/joeychilson/lixy/templates/layouts/app"
+	"github.com/joeychilson/lixy/internal/session"
+)
+
+type PageProps struct {
+	User  *session.User
+	Error string
+}
+
+templ Page(props PageProps) {
+	@app.Layout(app.Props{Title: "New", User: props.User}) {
+		<div class="flex-1 flex flex-col items-center justify-center">
+			if props.Error != "" {
+				<div class="max-w-md w-full bg-white border border-red-500 rounded-lg shadow-md p-4 mb-6">
+					<p class="text-red-500 text-center">{ props.Error }</p>
+				</div>
+			}
+			<div class="max-w-md w-full bg-white border border-gray-200 rounded-lg shadow-md p-8">
+				<!-- Title for the Form -->
+				<h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">New</h2>
+				@Form()
+			</div>
+		</div>
+	}
+}

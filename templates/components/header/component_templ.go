@@ -52,7 +52,7 @@ func Component(props Props) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if props.User != nil {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/new-article\" class=\"px-4 py-2 rounded-md border border-green-600 text-sm font-medium text-white bg-green-600 hover:bg-green-700\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/new\" class=\"px-4 py-2 rounded-md border border-green-600 text-sm font-medium text-white bg-green-600 hover:bg-green-700\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

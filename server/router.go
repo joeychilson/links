@@ -26,6 +26,8 @@ func (s *Server) Router() http.Handler {
 	// Feed page
 	r.Route("/", func(r chi.Router) {
 		r.Get("/", s.FeedPage())
+		r.Get("/new", s.NewPage())
+		r.Post("/new", s.New())
 	})
 
 	// Account page
@@ -52,7 +54,8 @@ func (s *Server) Router() http.Handler {
 	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		errors.NotFound().Render(r.Context(), w)
+		user := s.UserFromContext(r.Context())
+		errors.NotFound(user).Render(r.Context(), w)
 	})
 	return r
 }
