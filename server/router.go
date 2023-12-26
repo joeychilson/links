@@ -35,6 +35,12 @@ func (s *Server) Router() http.Handler {
 		r.Post("/", s.New())
 	})
 
+	// Like
+	r.Route("/like", func(r chi.Router) {
+		r.Use(s.RequireUser)
+		r.Post("/", s.Like())
+	})
+
 	// Account page
 	r.Route("/account", func(r chi.Router) {
 		r.Use(s.RequireUser)

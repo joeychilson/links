@@ -4,8 +4,8 @@ import (
 	"encoding/base64"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
-	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/joeychilson/lixy/database"
 )
@@ -23,7 +23,7 @@ type Manager struct {
 }
 
 type User struct {
-	ID       pgtype.UUID
+	ID       uuid.UUID
 	Email    string
 	Username string
 }
@@ -35,7 +35,7 @@ func NewManager(cookie *securecookie.SecureCookie, queries *database.Queries) *M
 	}
 }
 
-func (m *Manager) Set(w http.ResponseWriter, r *http.Request, userID pgtype.UUID) error {
+func (m *Manager) Set(w http.ResponseWriter, r *http.Request, userID uuid.UUID) error {
 	token, err := m.queries.CreateUserToken(r.Context(), database.CreateUserTokenParams{
 		UserID:  userID,
 		Token:   base64.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32)),

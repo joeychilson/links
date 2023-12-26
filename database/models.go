@@ -5,12 +5,13 @@
 package database
 
 import (
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Article struct {
-	ID        pgtype.UUID
-	UserID    pgtype.UUID
+	ID        uuid.UUID
+	UserID    uuid.UUID
 	Title     string
 	Link      string
 	CreatedAt pgtype.Timestamptz
@@ -18,24 +19,24 @@ type Article struct {
 }
 
 type Comment struct {
-	ID        pgtype.UUID
-	ArticleID pgtype.UUID
-	UserID    pgtype.UUID
+	ID        uuid.UUID
+	ArticleID uuid.UUID
+	UserID    uuid.UUID
 	Content   string
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
 }
 
 type Like struct {
-	ID        pgtype.UUID
-	ArticleID pgtype.UUID
-	UserID    pgtype.UUID
+	ID        uuid.UUID
+	ArticleID uuid.UUID
+	UserID    uuid.UUID
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
 }
 
 type User struct {
-	ID          pgtype.UUID
+	ID          uuid.UUID
 	Username    string
 	Email       string
 	Password    string
@@ -45,8 +46,8 @@ type User struct {
 }
 
 type UserToken struct {
-	ID        pgtype.UUID
-	UserID    pgtype.UUID
+	ID        uuid.UUID
+	UserID    uuid.UUID
 	Token     string
 	Context   string
 	CreatedAt pgtype.Timestamptz

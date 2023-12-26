@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -21,9 +22,9 @@ type CreateUserParams struct {
 	Password string
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (pgtype.UUID, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.Email, arg.Password)
-	var id pgtype.UUID
+	var id uuid.UUID
 	err := row.Scan(&id)
 	return id, err
 }
@@ -33,7 +34,7 @@ INSERT INTO user_tokens (user_id, token, context) VALUES ($1, $2, $3) RETURNING 
 `
 
 type CreateUserTokenParams struct {
-	UserID  pgtype.UUID
+	UserID  uuid.UUID
 	Token   string
 	Context string
 }
@@ -94,7 +95,7 @@ SELECT id, username, email, confirmed_at, created_at, updated_at FROM users WHER
 `
 
 type UserByIDRow struct {
-	ID          pgtype.UUID
+	ID          uuid.UUID
 	Username    string
 	Email       string
 	ConfirmedAt pgtype.Timestamptz
@@ -102,7 +103,7 @@ type UserByIDRow struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
-func (q *Queries) UserByID(ctx context.Context, id pgtype.UUID) (UserByIDRow, error) {
+func (q *Queries) UserByID(ctx context.Context, id uuid.UUID) (UserByIDRow, error) {
 	row := q.db.QueryRow(ctx, userByID, id)
 	var i UserByIDRow
 	err := row.Scan(
@@ -125,9 +126,9 @@ type UserIDFromTokenParams struct {
 	Context string
 }
 
-func (q *Queries) UserIDFromToken(ctx context.Context, arg UserIDFromTokenParams) (pgtype.UUID, error) {
+func (q *Queries) UserIDFromToken(ctx context.Context, arg UserIDFromTokenParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, userIDFromToken, arg.Token, arg.Context)
-	var user_id pgtype.UUID
+	var user_id uuid.UUID
 	err := row.Scan(&user_id)
 	return user_id, err
 }

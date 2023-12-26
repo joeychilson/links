@@ -3,7 +3,10 @@ package article
 import (
 	"fmt"
 	"time"
+
 	"github.com/joeychilson/lixy/database"
+	"strconv"
+	"github.com/google/uuid"
 )
 
 type Props struct {
@@ -12,20 +15,18 @@ type Props struct {
 
 templ Component(props Props) {
 	<article class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg hover:bg-gray-50 transition-colors duration-300">
-		<a href={ templ.SafeURL(props.Article.Link) } class="block" aria-label={ props.Article.Title }>
-			<div class="flex items-center">
-				<!-- Voting Section -->
-				<div class="flex flex-col items-center justify-center px-4 py-2">
-					<button aria-label="Upvote" aria-pressed="false" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-						<svg class="h-6 w-6 transform hover:scale-110 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-						</svg>
-					</button>
-					<p class="score px-2 text-xs font-semibold rounded-full bg-green-100 text-green-800 my-2">
-						0
-					</p>
-				</div>
-				<!-- Content Section -->
+		<div class="flex items-center">
+			<!-- Voting Section -->
+			<div class="flex flex-col items-center justify-center px-4 py-2">
+				<button hx-post={ fmt.Sprintf("/like?articleID=%s", props.Article.ArticleID.String()) } hx-target={ fmt.Sprintf("#vote-count-%s", props.Article.ArticleID.String()) } hx-swap="outerHTML" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+					<svg class="h-6 w-6 transform hover:scale-110 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+					</svg>
+				</button>
+				@VoteCount(props.Article.ArticleID, props.Article.LikeCount)
+			</div>
+			<!-- Content Section -->
+			<a href={ templ.SafeURL(props.Article.Link) } class="block" aria-label={ props.Article.Title }>
 				<div class="flex-grow flex flex-col justify-between py-2">
 					<p class="font-bold text-blue-600 truncate">{ props.Article.Title }</p>
 					<div>
@@ -34,9 +35,15 @@ templ Component(props Props) {
 						</p>
 					</div>
 				</div>
-			</div>
-		</a>
+			</a>
+		</div>
 	</article>
+}
+
+templ VoteCount(articleID uuid.UUID, count int64) {
+	<p id={ fmt.Sprintf("vote-count-%s", articleID.String()) } class="score px-2 text-xs font-semibold rounded-full bg-green-100 text-green-800 my-2">
+		{ strconv.Itoa(int(count)) }
+	</p>
 }
 
 func TimeAgo(postTime int64) string {

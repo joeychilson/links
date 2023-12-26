@@ -1,10 +1,15 @@
 package server
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/google/uuid"
+
 	"github.com/joeychilson/lixy/database"
+	"github.com/joeychilson/lixy/templates/components/article"
 	"github.com/joeychilson/lixy/templates/pages/feed"
 	"github.com/joeychilson/lixy/templates/pages/new"
 )
@@ -56,7 +61,7 @@ func (s *Server) New() http.HandlerFunc {
 			return
 		}
 
-		_, err := s.queries.CreateArticle(r.Context(), database.CreateArticleParams{
+		err := s.queries.CreateArticle(r.Context(), database.CreateArticleParams{
 			UserID: user.ID,
 			Title:  title,
 			Link:   link,
@@ -67,5 +72,46 @@ func (s *Server) New() http.HandlerFunc {
 		}
 
 		http.Redirect(w, r, "/", http.StatusFound)
+	}
+}
+
+func (s *Server) Like() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("like")
+
+		user := s.UserFromContext(r.Context())
+		articleID := r.URL.Query().Get("articleID")
+
+		if articleID == "" {
+			log.Printf("no article id provided")
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
+		articleUUID, err := uuid.Parse(articleID)
+		if err != nil {
+			log.Printf("failed to parse article id: %v", err)
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
+		err = s.queries.CreateLike(r.Context(), database.CreateLikeParams{
+			UserID:    user.ID,
+			ArticleID: articleUUID,
+		})
+		if err != nil {
+			log.Printf("failed to create like: %v", err)
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
+		likeCount, err := s.queries.CountLikes(r.Context(), articleUUID)
+		if err != nil {
+			log.Printf("failed to count likes: %v", err)
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
+		article.VoteCount(articleUUID, likeCount).Render(r.Context(), w)
 	}
 }

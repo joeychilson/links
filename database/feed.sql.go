@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -18,13 +19,16 @@ SELECT
     a.link,
     a.created_at,
     u.username,
-    COUNT(c.id) AS comment_count
+    COUNT(DISTINCT c.id) AS comment_count,
+    COUNT(DISTINCT l.id) AS like_count
 FROM 
     articles a
 JOIN 
     users u ON a.user_id = u.id
 LEFT JOIN 
     comments c ON a.id = c.article_id
+LEFT JOIN 
+    likes l ON a.id = l.article_id
 GROUP BY 
     a.id, u.username
 ORDER BY 
@@ -41,12 +45,13 @@ type ArticleFeedParams struct {
 }
 
 type ArticleFeedRow struct {
-	ArticleID    pgtype.UUID
+	ArticleID    uuid.UUID
 	Title        string
 	Link         string
 	CreatedAt    pgtype.Timestamptz
 	Username     string
 	CommentCount int64
+	LikeCount    int64
 }
 
 func (q *Queries) ArticleFeed(ctx context.Context, arg ArticleFeedParams) ([]ArticleFeedRow, error) {
@@ -65,6 +70,7 @@ func (q *Queries) ArticleFeed(ctx context.Context, arg ArticleFeedParams) ([]Art
 			&i.CreatedAt,
 			&i.Username,
 			&i.CommentCount,
+			&i.LikeCount,
 		); err != nil {
 			return nil, err
 		}
@@ -76,26 +82,42 @@ func (q *Queries) ArticleFeed(ctx context.Context, arg ArticleFeedParams) ([]Art
 	return items, nil
 }
 
-const createArticle = `-- name: CreateArticle :one
-INSERT INTO articles (user_id, title, link) VALUES ($1, $2, $3) RETURNING id, user_id, title, link, created_at, updated_at
+const countLikes = `-- name: CountLikes :one
+SELECT COUNT(*) FROM likes WHERE article_id = $1
+`
+
+func (q *Queries) CountLikes(ctx context.Context, articleID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countLikes, articleID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const createArticle = `-- name: CreateArticle :exec
+INSERT INTO articles (user_id, title, link) VALUES ($1, $2, $3)
 `
 
 type CreateArticleParams struct {
-	UserID pgtype.UUID
+	UserID uuid.UUID
 	Title  string
 	Link   string
 }
 
-func (q *Queries) CreateArticle(ctx context.Context, arg CreateArticleParams) (Article, error) {
-	row := q.db.QueryRow(ctx, createArticle, arg.UserID, arg.Title, arg.Link)
-	var i Article
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Title,
-		&i.Link,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) CreateArticle(ctx context.Context, arg CreateArticleParams) error {
+	_, err := q.db.Exec(ctx, createArticle, arg.UserID, arg.Title, arg.Link)
+	return err
+}
+
+const createLike = `-- name: CreateLike :exec
+INSERT INTO likes (user_id, article_id) VALUES ($1, $2)
+`
+
+type CreateLikeParams struct {
+	UserID    uuid.UUID
+	ArticleID uuid.UUID
+}
+
+func (q *Queries) CreateLike(ctx context.Context, arg CreateLikeParams) error {
+	_, err := q.db.Exec(ctx, createLike, arg.UserID, arg.ArticleID)
+	return err
 }
