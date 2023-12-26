@@ -1,40 +1,41 @@
 -- migrate:up
-CREATE TABLE articles (
+CREATE TABLE links (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     title VARCHAR(255) NOT NULL,
-    link TEXT NOT NULL,
+    url TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_articles_user_id ON articles(user_id);
+CREATE INDEX idx_links_user_id ON links(user_id);
 
 CREATE TABLE comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    article_id UUID NOT NULL REFERENCES articles(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    link_id UUID NOT NULL REFERENCES links(id) ON DELETE CASCADE ON UPDATE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     content TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_comments_article_id ON comments(article_id);
+CREATE INDEX idx_comments_link_id ON comments(link_id);
 CREATE INDEX idx_comments_user_id ON comments(user_id);
 
-CREATE TABLE likes (
+CREATE TABLE votes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    article_id UUID NOT NULL REFERENCES articles(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    link_id UUID NOT NULL REFERENCES links(id) ON DELETE CASCADE ON UPDATE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (link_id, user_id)
 );
 
-CREATE INDEX idx_likes_article_id ON likes(article_id);
-CREATE INDEX idx_likes_user_id ON likes(user_id);
+CREATE INDEX idx_votes_link_id ON votes(link_id);
+CREATE INDEX idx_votes_user_id ON votes(user_id);
 
 -- migrate:down
-DROP TABLE likes;
+DROP TABLE votes;
 DROP TABLE comments;
-DROP TABLE articles;
+DROP TABLE links;
 

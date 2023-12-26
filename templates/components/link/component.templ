@@ -1,4 +1,4 @@
-package article
+package link
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 )
 
 type Props struct {
-	Article database.ArticleFeedRow
+	Link database.LinkFeedRow
 }
 
 templ Component(props Props) {
@@ -19,20 +19,20 @@ templ Component(props Props) {
 		<div class="flex items-center">
 			<!-- Voting Section -->
 			<div class="flex flex-col items-center justify-center px-4 py-2">
-				<button hx-post={ fmt.Sprintf("/like?articleID=%s", props.Article.ArticleID.String()) } hx-target={ fmt.Sprintf("#vote-count-%s", props.Article.ArticleID.String()) } hx-swap="outerHTML" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+				<button hx-post={ fmt.Sprintf("/vote?link_id=%s", props.Link.ID.String()) } hx-target={ fmt.Sprintf("#vote-count-%s", props.Link.ID.String()) } hx-swap="outerHTML" class="text-gray-500 hover:text-gray-700 focus:outline-none">
 					<svg class="h-6 w-6 transform hover:scale-110 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
 					</svg>
 				</button>
-				@VoteCount(props.Article.ArticleID, props.Article.LikeCount)
+				@VoteCount(props.Link.ID, props.Link.VoteCount)
 			</div>
 			<!-- Content Section -->
-			<a href={ templ.SafeURL(props.Article.Link) } class="block" aria-label={ props.Article.Title }>
+			<a href={ templ.SafeURL(props.Link.Url) } class="block" aria-label={ props.Link.Title }>
 				<div class="flex-grow flex flex-col justify-between py-2">
-					<p class="font-bold text-blue-600 truncate">{ props.Article.Title }</p>
+					<p class="font-bold text-blue-600 truncate">{ props.Link.Title }</p>
 					<div>
 						<p class="text-sm text-gray-500">
-							{ fmt.Sprintf("Shared by %v", props.Article.Username) } &middot; { TimeAgo(props.Article.CreatedAt.Time.Unix()) } &middot; { fmt.Sprintf("%v comments", props.Article.CommentCount) }
+							{ fmt.Sprintf("Shared by %v", props.Link.Username) } &middot; { TimeAgo(props.Link.CreatedAt.Time.Unix()) } &middot; { fmt.Sprintf("%v comments", props.Link.CommentCount) }
 						</p>
 					</div>
 				</div>
@@ -41,8 +41,8 @@ templ Component(props Props) {
 	</article>
 }
 
-templ VoteCount(articleID uuid.UUID, count int64) {
-	<p id={ fmt.Sprintf("vote-count-%s", articleID.String()) } class="score px-2 text-xs font-semibold rounded-full bg-green-100 text-green-800 my-2">
+templ VoteCount(linkID uuid.UUID, count int64) {
+	<p id={ fmt.Sprintf("vote-count-%s", linkID.String()) } class="score px-2 text-xs font-semibold rounded-full bg-green-100 text-green-800 my-2">
 		{ strconv.Itoa(int(count)) }
 	</p>
 }

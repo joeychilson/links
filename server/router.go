@@ -35,10 +35,10 @@ func (s *Server) Router() http.Handler {
 		r.Post("/", s.New())
 	})
 
-	// Like
-	r.Route("/like", func(r chi.Router) {
+	// Vote
+	r.Route("/vote", func(r chi.Router) {
 		r.Use(s.RequireUser)
-		r.Post("/", s.Like())
+		r.Post("/", s.Vote())
 	})
 
 	// Account page

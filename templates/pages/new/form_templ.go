@@ -36,12 +36,12 @@ func Form() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var3 := ` Link Field `
+		templ_7745c5c3_Var3 := ` URL Field `
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"mb-4\"><input id=\"link\" type=\"text\" name=\"link\" placeholder=\"Link\" class=\"block w-full p-2 mb-1 sm:text-sm border border-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-600\"></div><!--")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"mb-4\"><input id=\"url\" type=\"text\" name=\"url\" placeholder=\"URL\" class=\"block w-full p-2 mb-1 sm:text-sm border border-gray-200 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-600\"></div><!--")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -54,7 +54,7 @@ func Form() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var5 := `Post`
+		templ_7745c5c3_Var5 := `Share`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

@@ -1,34 +1,37 @@
--- name: CreateArticle :exec
-INSERT INTO articles (user_id, title, link) VALUES ($1, $2, $3);
+-- name: CreateLink :exec
+INSERT INTO links (user_id, title, url) VALUES ($1, $2, $3);
 
--- name: ArticleFeed :many
+-- name: LinkFeed :many
 SELECT 
-    a.id AS article_id,
-    a.title,
-    a.link,
-    a.created_at,
+    l.id AS id,
+    l.title,
+    l.url,
+    l.created_at,
     u.username,
     COUNT(DISTINCT c.id) AS comment_count,
-    COUNT(DISTINCT l.id) AS like_count
+    COUNT(DISTINCT l.id) AS vote_count
 FROM 
-    articles a
+    links l
 JOIN 
-    users u ON a.user_id = u.id
+    users u ON l.user_id = u.id
 LEFT JOIN 
-    comments c ON a.id = c.article_id
+    comments c ON l.id = c.link_id
 LEFT JOIN 
-    likes l ON a.id = l.article_id
+    votes v ON l.id = v.link_id
 GROUP BY 
-    a.id, u.username
+    l.id, u.username
 ORDER BY 
-    a.created_at DESC
+    l.created_at DESC
 LIMIT 
     $1
 OFFSET 
     $2;
 
--- name: CreateLike :exec
-INSERT INTO likes (user_id, article_id) VALUES ($1, $2);
+-- name: CreateVote :exec
+INSERT INTO votes (user_id, link_id) VALUES ($1, $2);
 
--- name: CountLikes :one
-SELECT COUNT(*) FROM likes WHERE article_id = $1;
+-- name: CountVotes :one
+SELECT COUNT(*) FROM votes WHERE link_id = $1;
+
+-- name: UserVoted :one
+SELECT EXISTS(SELECT 1 FROM votes WHERE user_id = $1 AND link_id = $2);

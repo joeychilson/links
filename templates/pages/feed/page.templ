@@ -3,19 +3,19 @@ package feed
 import (
 	"github.com/joeychilson/links/database"
 	"github.com/joeychilson/links/internal/session"
-	"github.com/joeychilson/links/templates/components/article"
+	"github.com/joeychilson/links/templates/components/link"
 	"github.com/joeychilson/links/templates/layouts/app"
 )
 
 type Props struct {
-	User            *session.User
-	ArticleFeedRows []database.ArticleFeedRow
+	User        *session.User
+	LinkFeedRow []database.LinkFeedRow
 }
 
 templ Page(props Props) {
 	@app.Layout(app.Props{Title: "Feed", User: props.User}) {
-		for _, row := range props.ArticleFeedRows {
-			@article.Component(article.Props{Article: row})
+		for _, row := range props.LinkFeedRow {
+			@link.Component(link.Props{Link: row})
 		}
 	}
 }

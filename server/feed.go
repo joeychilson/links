@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/joeychilson/links/database"
-	"github.com/joeychilson/links/templates/components/article"
+	"github.com/joeychilson/links/templates/components/link"
 	"github.com/joeychilson/links/templates/pages/feed"
 	"github.com/joeychilson/links/templates/pages/new"
 )
@@ -27,7 +27,7 @@ func (s *Server) FeedPage() http.HandlerFunc {
 			return
 		}
 
-		articleFeedRows, err := s.queries.ArticleFeed(r.Context(), database.ArticleFeedParams{
+		linkFeedRow, err := s.queries.LinkFeed(r.Context(), database.LinkFeedParams{
 			Limit:  25,
 			Offset: int32((page - 1) * 25),
 		})
@@ -36,7 +36,7 @@ func (s *Server) FeedPage() http.HandlerFunc {
 			return
 		}
 
-		feed.Page(feed.Props{User: user, ArticleFeedRows: articleFeedRows}).Render(r.Context(), w)
+		feed.Page(feed.Props{User: user, LinkFeedRow: linkFeedRow}).Render(r.Context(), w)
 	}
 }
 
@@ -52,17 +52,17 @@ func (s *Server) New() http.HandlerFunc {
 		user := s.UserFromContext(r.Context())
 
 		title := r.FormValue("title")
-		link := r.FormValue("link")
+		url := r.FormValue("url")
 
-		if title == "" || link == "" {
+		if title == "" || url == "" {
 			new.Page(new.PageProps{User: user}).Render(r.Context(), w)
 			return
 		}
 
-		err := s.queries.CreateArticle(r.Context(), database.CreateArticleParams{
+		err := s.queries.CreateLink(r.Context(), database.CreateLinkParams{
 			UserID: user.ID,
 			Title:  title,
-			Link:   link,
+			Url:    url,
 		})
 		if err != nil {
 			new.Page(new.PageProps{User: user}).Render(r.Context(), w)
@@ -73,37 +73,51 @@ func (s *Server) New() http.HandlerFunc {
 	}
 }
 
-func (s *Server) Like() http.HandlerFunc {
+func (s *Server) Vote() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := s.UserFromContext(r.Context())
-		articleID := r.URL.Query().Get("articleID")
+		linkID := r.URL.Query().Get("link_id")
 
-		if articleID == "" {
+		if linkID == "" {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 
-		articleUUID, err := uuid.Parse(articleID)
+		linkUUID, err := uuid.Parse(linkID)
 		if err != nil {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 
-		err = s.queries.CreateLike(r.Context(), database.CreateLikeParams{
-			UserID:    user.ID,
-			ArticleID: articleUUID,
+		userVoted, err := s.queries.UserVoted(r.Context(), database.UserVotedParams{
+			UserID: user.ID,
+			LinkID: linkUUID,
 		})
 		if err != nil {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 
-		likeCount, err := s.queries.CountLikes(r.Context(), articleUUID)
+		if userVoted {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
+		err = s.queries.CreateVote(r.Context(), database.CreateVoteParams{
+			UserID: user.ID,
+			LinkID: linkUUID,
+		})
 		if err != nil {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 
-		article.VoteCount(articleUUID, likeCount).Render(r.Context(), w)
+		voteCount, err := s.queries.CountVotes(r.Context(), linkUUID)
+		if err != nil {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
+		link.VoteCount(linkUUID, voteCount).Render(r.Context(), w)
 	}
 }

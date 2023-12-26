@@ -13,13 +13,13 @@ import "bytes"
 import (
 	"github.com/joeychilson/links/database"
 	"github.com/joeychilson/links/internal/session"
-	"github.com/joeychilson/links/templates/components/article"
+	"github.com/joeychilson/links/templates/components/link"
 	"github.com/joeychilson/links/templates/layouts/app"
 )
 
 type Props struct {
-	User            *session.User
-	ArticleFeedRows []database.ArticleFeedRow
+	User        *session.User
+	LinkFeedRow []database.LinkFeedRow
 }
 
 func Page(props Props) templ.Component {
@@ -41,8 +41,8 @@ func Page(props Props) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			for _, row := range props.ArticleFeedRows {
-				templ_7745c5c3_Err = article.Component(article.Props{Article: row}).Render(ctx, templ_7745c5c3_Buffer)
+			for _, row := range props.LinkFeedRow {
+				templ_7745c5c3_Err = link.Component(link.Props{Link: row}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

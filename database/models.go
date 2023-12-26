@@ -9,28 +9,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Article struct {
-	ID        uuid.UUID
-	UserID    uuid.UUID
-	Title     string
-	Link      string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-}
-
 type Comment struct {
 	ID        uuid.UUID
-	ArticleID uuid.UUID
+	LinkID    uuid.UUID
 	UserID    uuid.UUID
 	Content   string
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
 }
 
-type Like struct {
+type Link struct {
 	ID        uuid.UUID
-	ArticleID uuid.UUID
 	UserID    uuid.UUID
+	Title     string
+	Url       string
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
 }
@@ -51,4 +43,12 @@ type UserToken struct {
 	Token     string
 	Context   string
 	CreatedAt pgtype.Timestamptz
+}
+
+type Vote struct {
+	ID        uuid.UUID
+	LinkID    uuid.UUID
+	UserID    uuid.UUID
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
 }
