@@ -617,8 +617,16 @@ video {
   width: 100%;
 }
 
+.min-w-0 {
+  min-width: 0px;
+}
+
 .max-w-6xl {
   max-width: 72rem;
+}
+
+.max-w-full {
+  max-width: 100%;
 }
 
 .max-w-md {
@@ -671,6 +679,10 @@ video {
 
 .overflow-hidden {
   overflow: hidden;
+}
+
+.break-all {
+  word-break: break-all;
 }
 
 .rounded-lg {

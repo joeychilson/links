@@ -61,16 +61,16 @@ func Layout(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><nav class=\"hidden md:flex gap-6\"><a href=\"/latest\" class=\"text-sm font-medium text-gray-700 hover:text-blue-600\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><nav class=\"hidden md:flex gap-6\"><!--")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var5 := `Latest`
+		templ_7745c5c3_Var5 := `- <a href="/latest" class="text-sm font-medium text-gray-700 hover:text-blue-600">Latest</a> `
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></nav></div><div class=\"flex items-center justify-end md:flex-1 gap-2\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--></nav></div><div class=\"flex items-center justify-end md:flex-1 gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

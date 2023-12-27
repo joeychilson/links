@@ -193,7 +193,7 @@ func Component(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></a></p><div><p class=\"pr-4 pb-1 mt-4 text-sm text-gray-600\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></a></p><div><p class=\"break-all min-w-0 max-w-full pr-4 pb-1 mt-4 text-sm text-gray-600\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
