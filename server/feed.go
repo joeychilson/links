@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -101,33 +102,16 @@ func (s *Server) Like() http.HandlerFunc {
 			return
 		}
 
-		userVoted, err := s.queries.UserLiked(r.Context(), database.UserLikedParams{
+		log.Printf("like user %s link %s", user.ID, linkUUID)
+
+		err = s.queries.ToggleLike(r.Context(), database.ToggleLikeParams{
 			UserID: user.ID,
 			LinkID: linkUUID,
 		})
 		if err != nil {
+			log.Println("like err", err)
 			http.Redirect(w, r, redirectURL, http.StatusFound)
 			return
-		}
-
-		if userVoted {
-			err = s.queries.DeleteVote(r.Context(), database.DeleteVoteParams{
-				UserID: user.ID,
-				LinkID: linkUUID,
-			})
-			if err != nil {
-				http.Redirect(w, r, redirectURL, http.StatusFound)
-				return
-			}
-		} else {
-			err = s.queries.CreateLike(r.Context(), database.CreateLikeParams{
-				UserID: user.ID,
-				LinkID: linkUUID,
-			})
-			if err != nil {
-				http.Redirect(w, r, redirectURL, http.StatusFound)
-				return
-			}
 		}
 
 		http.Redirect(w, r, redirectURL, http.StatusFound)

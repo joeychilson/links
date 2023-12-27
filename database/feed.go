@@ -7,25 +7,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func (q *Queries) CountLikes(ctx context.Context, linkID uuid.UUID) (int64, error) {
-	query := "SELECT COUNT(*) FROM likes WHERE link_id = $1"
-	row := q.db.QueryRow(ctx, query, linkID)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-type CreateLikeParams struct {
-	UserID uuid.UUID
-	LinkID uuid.UUID
-}
-
-func (q *Queries) CreateLike(ctx context.Context, arg CreateLikeParams) error {
-	query := "INSERT INTO likes (user_id, link_id) VALUES ($1, $2)"
-	_, err := q.db.Exec(ctx, query, arg.UserID, arg.LinkID)
-	return err
-}
-
 type CreateLinkParams struct {
 	UserID uuid.UUID
 	Title  string
@@ -35,17 +16,6 @@ type CreateLinkParams struct {
 func (q *Queries) CreateLink(ctx context.Context, arg CreateLinkParams) error {
 	query := "INSERT INTO links (user_id, title, url) VALUES ($1, $2, $3)"
 	_, err := q.db.Exec(ctx, query, arg.UserID, arg.Title, arg.Url)
-	return err
-}
-
-type DeleteVoteParams struct {
-	UserID uuid.UUID
-	LinkID uuid.UUID
-}
-
-func (q *Queries) DeleteVote(ctx context.Context, arg DeleteVoteParams) error {
-	query := "DELETE FROM likes WHERE user_id = $1 AND link_id = $2"
-	_, err := q.db.Exec(ctx, query, arg.UserID, arg.LinkID)
 	return err
 }
 
@@ -174,19 +144,6 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkRow, error) 
 	return linkRow, nil
 }
 
-type UserLikedParams struct {
-	UserID uuid.UUID
-	LinkID uuid.UUID
-}
-
-func (q *Queries) UserLiked(ctx context.Context, arg UserLikedParams) (bool, error) {
-	query := "SELECT EXISTS(SELECT 1 FROM likes WHERE user_id = $1 AND link_id = $2)"
-	row := q.db.QueryRow(ctx, query, arg.UserID, arg.LinkID)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
-}
-
 type UserFeedParams struct {
 	UserID   uuid.UUID
 	Username string
@@ -253,4 +210,29 @@ func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]LinkRow, 
 		return nil, err
 	}
 	return items, nil
+}
+
+type ToggleLikeParams struct {
+	UserID uuid.UUID
+	LinkID uuid.UUID
+}
+
+func (q *Queries) ToggleLike(ctx context.Context, arg ToggleLikeParams) error {
+	query := `
+        WITH deleted AS (
+            DELETE FROM likes WHERE user_id = $1 AND link_id = $2 RETURNING *
+        )
+        INSERT INTO likes (user_id, link_id)
+        SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM deleted);
+    `
+	_, err := q.db.Exec(ctx, query, arg.UserID, arg.LinkID)
+	return err
+}
+
+func (q *Queries) CountLikes(ctx context.Context, linkID uuid.UUID) (int64, error) {
+	query := "SELECT COUNT(*) FROM likes WHERE link_id = $1"
+	row := q.db.QueryRow(ctx, query, linkID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
