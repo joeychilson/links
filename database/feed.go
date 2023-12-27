@@ -126,8 +126,8 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkFeedR
 }
 
 type LinkParams struct {
-	LinkID uuid.UUID
 	UserID uuid.UUID
+	LinkID uuid.UUID
 }
 
 func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkFeedRow, error) {
@@ -141,7 +141,7 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkFeedRow, err
 			COUNT(DISTINCT c.id) AS comment_count,
 			COUNT(DISTINCT lk.id) AS like_count,
 			CASE 
-				WHEN $2::uuid IS NOT NULL THEN SUM(CASE WHEN lk.user_id = $2::uuid THEN 1 ELSE 0 END)
+				WHEN $1::uuid IS NOT NULL THEN SUM(CASE WHEN lk.user_id = $1::uuid THEN 1 ELSE 0 END)
 				ELSE 0 
 			END AS user_liked
 		FROM 
@@ -153,7 +153,7 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkFeedRow, err
 		LEFT JOIN 
 			likes lk ON l.id = lk.link_id
 		WHERE 
-			l.id = $1::uuid
+			l.id = $2::uuid
 		GROUP BY 
 			l.id, u.username
 	`
@@ -185,4 +185,72 @@ func (q *Queries) UserLiked(ctx context.Context, arg UserLikedParams) (bool, err
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
+}
+
+type UserFeedParams struct {
+	UserID   uuid.UUID
+	Username string
+	Limit    int32
+	Offset   int32
+}
+
+func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]LinkFeedRow, error) {
+	query := `
+		SELECT 
+			l.id AS id,
+			l.title,
+			l.url,
+			l.created_at,
+			u.username,
+			COUNT(DISTINCT c.id) AS comment_count,
+			COUNT(DISTINCT lk.id) AS like_count,
+			CASE 
+				WHEN $1::uuid IS NOT NULL THEN SUM(CASE WHEN lk.user_id = $1::uuid THEN 1 ELSE 0 END)
+				ELSE 0 
+			END AS user_liked
+		FROM 
+			links l
+		JOIN 
+			users u ON l.user_id = u.id
+		LEFT JOIN 
+			comments c ON l.id = c.link_id
+		LEFT JOIN 
+			likes lk ON l.id = lk.link_id
+		WHERE 
+			u.username = $2
+		GROUP BY 
+			l.id, u.username
+		ORDER BY 
+			like_count DESC, comment_count DESC, l.created_at DESC
+		LIMIT 
+			$3
+		OFFSET 
+			$4
+	`
+	rows, err := q.db.Query(ctx, query, arg.UserID, arg.Username, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LinkFeedRow
+	for rows.Next() {
+		var i LinkFeedRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Url,
+			&i.CreatedAt,
+			&i.Username,
+			&i.CommentCount,
+			&i.LikeCount,
+			&i.UserLiked,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

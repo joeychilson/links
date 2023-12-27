@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/joeychilson/links/database"
-	"github.com/joeychilson/links/internal/session"
+	"github.com/joeychilson/links/pkg/session"
 )
 
 type Server struct {

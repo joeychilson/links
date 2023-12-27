@@ -11,8 +11,8 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/joeychilson/links/internal/session"
 	"github.com/joeychilson/links/pages/layout"
+	"github.com/joeychilson/links/pkg/session"
 )
 
 func NotFound(user *session.User) templ.Component {

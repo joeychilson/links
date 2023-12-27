@@ -11,7 +11,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/joeychilson/links/database"
-	"github.com/joeychilson/links/internal/session"
+	"github.com/joeychilson/links/pkg/session"
 	"github.com/joeychilson/links/server"
 )
 

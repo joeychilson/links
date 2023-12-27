@@ -85,14 +85,19 @@ func (s *Server) Like() http.HandlerFunc {
 		user := s.UserFromContext(r.Context())
 		linkID := r.URL.Query().Get("link_id")
 
+		redirectURL := r.URL.Query().Get("redirect_url")
+		if redirectURL == "" {
+			redirectURL = "/"
+		}
+
 		if linkID == "" {
-			http.Redirect(w, r, "/", http.StatusFound)
+			http.Redirect(w, r, redirectURL, http.StatusFound)
 			return
 		}
 
 		linkUUID, err := uuid.Parse(linkID)
 		if err != nil {
-			http.Redirect(w, r, "/", http.StatusFound)
+			http.Redirect(w, r, redirectURL, http.StatusFound)
 			return
 		}
 
@@ -101,7 +106,7 @@ func (s *Server) Like() http.HandlerFunc {
 			LinkID: linkUUID,
 		})
 		if err != nil {
-			http.Redirect(w, r, "/", http.StatusFound)
+			http.Redirect(w, r, redirectURL, http.StatusFound)
 			return
 		}
 
@@ -111,7 +116,7 @@ func (s *Server) Like() http.HandlerFunc {
 				LinkID: linkUUID,
 			})
 			if err != nil {
-				http.Redirect(w, r, "/", http.StatusFound)
+				http.Redirect(w, r, redirectURL, http.StatusFound)
 				return
 			}
 		} else {
@@ -120,11 +125,11 @@ func (s *Server) Like() http.HandlerFunc {
 				LinkID: linkUUID,
 			})
 			if err != nil {
-				http.Redirect(w, r, "/", http.StatusFound)
+				http.Redirect(w, r, redirectURL, http.StatusFound)
 				return
 			}
 		}
 
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, redirectURL, http.StatusFound)
 	}
 }

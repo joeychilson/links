@@ -1,4 +1,4 @@
-package feed
+package user
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ type Props struct {
 }
 
 templ Page(props Props) {
-	@layout.Layout(layout.Props{Title: "Feed", User: props.User}) {
+	@layout.Layout(layout.Props{Title: "Links", User: props.User}) {
 		for _, row := range props.LinkFeedRows {
 			<div class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg hover:bg-gray-50 transition-colors duration-300">
 				<div class="flex items-center">
@@ -41,7 +41,7 @@ templ Page(props Props) {
 						<div>
 							<p class="text-sm text-gray-500">
 								Shared By
-								<a href={ templ.SafeURL(fmt.Sprintf("/user?name=%s", row.Username)) } class="hover:underline">
+								<a href={ templ.SafeURL(fmt.Sprintf("/user?id=%s", row.Username)) } class="hover:underline">
 									{ row.Username }
 								</a>
 								&middot; 

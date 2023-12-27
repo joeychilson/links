@@ -32,8 +32,8 @@ func (s *Server) Link() http.HandlerFunc {
 		}
 
 		linkRow, err := s.queries.Link(r.Context(), database.LinkParams{
-			LinkID: linkUUID,
 			UserID: userID,
+			LinkID: linkUUID,
 		})
 		if err != nil {
 			http.Redirect(w, r, "/", http.StatusFound)

@@ -13,7 +13,7 @@ import "bytes"
 import (
 	"fmt"
 
-	"github.com/joeychilson/links/internal/session"
+	"github.com/joeychilson/links/pkg/session"
 )
 
 type Props struct {

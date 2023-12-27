@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"github.com/joeychilson/links/database"
-	"github.com/joeychilson/links/internal/session"
 	"github.com/joeychilson/links/pages/layout"
+	"github.com/joeychilson/links/pkg/session"
 )
 
 type Props struct {
@@ -115,7 +115,7 @@ func Page(props Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/user?id=%s", props.Link.Username))
+			var templ_7745c5c3_Var8 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/user?name=%s", props.Link.Username))
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var8)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
