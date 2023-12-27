@@ -49,13 +49,7 @@ func (q *Queries) DeleteVote(ctx context.Context, arg DeleteVoteParams) error {
 	return err
 }
 
-type LinkFeedParams struct {
-	UserID uuid.UUID
-	Limit  int32
-	Offset int32
-}
-
-type LinkFeedRow struct {
+type LinkRow struct {
 	ID           uuid.UUID
 	Title        string
 	Url          string
@@ -66,7 +60,13 @@ type LinkFeedRow struct {
 	UserLiked    int32
 }
 
-func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkFeedRow, error) {
+type LinkFeedParams struct {
+	UserID uuid.UUID
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -102,9 +102,9 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkFeedR
 		return nil, err
 	}
 	defer rows.Close()
-	var items []LinkFeedRow
+	var items []LinkRow
 	for rows.Next() {
-		var i LinkFeedRow
+		var i LinkRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -130,7 +130,7 @@ type LinkParams struct {
 	LinkID uuid.UUID
 }
 
-func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkFeedRow, error) {
+func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -158,7 +158,7 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkFeedRow, err
 			l.id, u.username
 	`
 	row := q.db.QueryRow(ctx, query, params.UserID, params.LinkID)
-	var linkRow LinkFeedRow
+	var linkRow LinkRow
 	if err := row.Scan(
 		&linkRow.ID,
 		&linkRow.Title,
@@ -169,7 +169,7 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkFeedRow, err
 		&linkRow.LikeCount,
 		&linkRow.UserLiked,
 	); err != nil {
-		return LinkFeedRow{}, err
+		return LinkRow{}, err
 	}
 	return linkRow, nil
 }
@@ -194,7 +194,7 @@ type UserFeedParams struct {
 	Offset   int32
 }
 
-func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]LinkFeedRow, error) {
+func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]LinkRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -232,9 +232,9 @@ func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]LinkFeedR
 		return nil, err
 	}
 	defer rows.Close()
-	var items []LinkFeedRow
+	var items []LinkRow
 	for rows.Next() {
-		var i LinkFeedRow
+		var i LinkRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,

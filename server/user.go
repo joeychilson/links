@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
@@ -28,7 +27,6 @@ func (s *Server) UserPage() http.HandlerFunc {
 
 		page, err := strconv.Atoi(pageStr)
 		if err != nil {
-			log.Printf("error getting feed: %v", err)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
@@ -40,7 +38,7 @@ func (s *Server) UserPage() http.HandlerFunc {
 			userID = uuid.Nil
 		}
 
-		linkFeedRows, err := s.queries.UserFeed(r.Context(), database.UserFeedParams{
+		links, err := s.queries.UserFeed(r.Context(), database.UserFeedParams{
 			UserID:   userID,
 			Username: username,
 			Limit:    25,
@@ -51,6 +49,6 @@ func (s *Server) UserPage() http.HandlerFunc {
 			return
 		}
 
-		userpage.Page(userpage.Props{User: user, LinkFeedRows: linkFeedRows}).Render(r.Context(), w)
+		userpage.Page(userpage.Props{User: user, Links: links}).Render(r.Context(), w)
 	}
 }

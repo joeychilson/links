@@ -33,7 +33,7 @@ func (s *Server) FeedPage() http.HandlerFunc {
 			userID = uuid.Nil
 		}
 
-		linkFeedRows, err := s.queries.LinkFeed(r.Context(), database.LinkFeedParams{
+		links, err := s.queries.LinkFeed(r.Context(), database.LinkFeedParams{
 			UserID: userID,
 			Limit:  25,
 			Offset: int32((page - 1) * 25),
@@ -43,7 +43,7 @@ func (s *Server) FeedPage() http.HandlerFunc {
 			return
 		}
 
-		feed.Page(feed.Props{User: user, LinkFeedRows: linkFeedRows}).Render(r.Context(), w)
+		feed.Page(feed.Props{User: user, Links: links}).Render(r.Context(), w)
 	}
 }
 
