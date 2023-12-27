@@ -14,8 +14,8 @@ type FeedRow struct {
 	CreatedAt    pgtype.Timestamptz
 	Username     string
 	CommentCount int64
-	LikeCount    int64
-	UserLiked    int32
+	VoteScore    int64
+	UserVoted    int32
 }
 
 type LinkFeedParams struct {
@@ -32,31 +32,42 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]FeedRow, 
 			l.url,
 			l.created_at,
 			u.username,
-			COUNT(DISTINCT c.id) AS comment_count,
-			COUNT(DISTINCT lk.id) AS like_count,
-			COALESCE(ul.user_liked, 0) AS user_liked
+			COALESCE(c.comment_count, 0) AS comment_count,
+			COALESCE(v.vote_score, 0) AS vote_score,
+			COALESCE(uv.user_voted, 0) AS user_voted
 		FROM 
 			links l
 		JOIN 
 			users u ON l.user_id = u.id
 		LEFT JOIN 
-			comments c ON l.id = c.link_id
-		LEFT JOIN 
-			link_likes lk ON l.id = lk.link_id
+			(SELECT 
+				link_id, 
+				COUNT(*) AS comment_count
+			FROM 
+				comments
+			GROUP BY link_id
+			) c ON l.id = c.link_id
 		LEFT JOIN 
 			(SELECT 
 				link_id, 
-				COUNT(*) AS user_liked 
+				SUM(vote) AS vote_score
 			FROM 
-				link_likes 
-			WHERE 
+				link_votes 
+			GROUP BY link_id
+			) v ON l.id = v.link_id
+		LEFT JOIN 
+			(SELECT 
+				link_id, 
+				vote AS user_voted 
+			FROM 
+				link_votes 
+				WHERE 
 				user_id = $1::uuid
-			GROUP BY 
-				link_id) ul ON l.id = ul.link_id
+			) uv ON l.id = uv.link_id
 		GROUP BY 
-			l.id, u.username, ul.user_liked
+			l.id, u.username, uv.user_voted, c.comment_count, v.vote_score
 		ORDER BY 
-			like_count DESC, comment_count DESC, l.created_at DESC
+			vote_score DESC, comment_count DESC, l.created_at DESC
 		LIMIT 
 			$2
 		OFFSET 
@@ -77,8 +88,8 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]FeedRow, 
 			&i.CreatedAt,
 			&i.Username,
 			&i.CommentCount,
-			&i.LikeCount,
-			&i.UserLiked,
+			&i.VoteScore,
+			&i.UserVoted,
 		); err != nil {
 			return nil, err
 		}
@@ -103,31 +114,42 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (FeedRow, error) 
 			l.url,
 			l.created_at,
 			u.username,
-			COUNT(DISTINCT c.id) AS comment_count,
-			COUNT(DISTINCT lk.id) AS like_count,
-			COALESCE(ul.user_liked, 0) AS user_liked
+			COALESCE(comment_count, 0) AS comment_count,
+			COALESCE(vote_score, 0) AS vote_score,
+			COALESCE(uv.user_voted, 0) AS user_voted
 		FROM 
 			links l
 		JOIN 
 			users u ON l.user_id = u.id
 		LEFT JOIN 
-			comments c ON l.id = c.link_id
-		LEFT JOIN 
-			link_likes lk ON l.id = lk.link_id
+			(SELECT 
+				link_id, 
+				COUNT(*) AS comment_count
+			 FROM 
+				comments
+			 GROUP BY link_id
+			) c ON l.id = c.link_id
 		LEFT JOIN 
 			(SELECT 
 				link_id, 
-				COUNT(*) AS user_liked 
-			FROM 
-				link_likes 
-			WHERE 
+				SUM(vote) AS vote_score
+			 FROM 
+				link_votes 
+			 GROUP BY link_id
+			) v ON l.id = v.link_id
+		LEFT JOIN 
+			(SELECT 
+				link_id, 
+				vote AS user_voted 
+			 FROM 
+				link_votes 
+			 WHERE 
 				user_id = $1::uuid
-			GROUP BY 
-				link_id) ul ON l.id = ul.link_id
+			) uv ON l.id = uv.link_id
 		WHERE 
 			l.id = $2::uuid
 		GROUP BY 
-			l.id, u.username, ul.user_liked
+			l.id, u.username, uv.user_voted, c.comment_count, v.vote_score
 	`
 	row := q.db.QueryRow(ctx, query, params.UserID, params.LinkID)
 	var linkRow FeedRow
@@ -138,8 +160,8 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (FeedRow, error) 
 		&linkRow.CreatedAt,
 		&linkRow.Username,
 		&linkRow.CommentCount,
-		&linkRow.LikeCount,
-		&linkRow.UserLiked,
+		&linkRow.VoteScore,
+		&linkRow.UserVoted,
 	); err != nil {
 		return FeedRow{}, err
 	}
@@ -161,33 +183,44 @@ func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]FeedRow, 
 			l.url,
 			l.created_at,
 			u.username,
-			COUNT(DISTINCT c.id) AS comment_count,
-			COUNT(DISTINCT lk.id) AS like_count,
-			COALESCE(ul.user_liked, 0) AS user_liked
+			COALESCE(c.comment_count, 0) AS comment_count,
+			COALESCE(v.vote_score, 0) AS vote_score,
+			COALESCE(uv.user_voted, 0) AS user_voted
 		FROM 
 			links l
 		JOIN 
 			users u ON l.user_id = u.id
 		LEFT JOIN 
-			comments c ON l.id = c.link_id
-		LEFT JOIN 
-			link_likes lk ON l.id = lk.link_id
+			(SELECT 
+				link_id, 
+				COUNT(*) AS comment_count
+			FROM 
+				comments
+			GROUP BY link_id
+			) c ON l.id = c.link_id
 		LEFT JOIN 
 			(SELECT 
 				link_id, 
-				COUNT(*) AS user_liked 
+				SUM(vote) AS vote_score
 			FROM 
-				link_likes 
-			WHERE 
+				link_votes 
+			GROUP BY link_id
+			) v ON l.id = v.link_id
+		LEFT JOIN 
+			(SELECT 
+				link_id, 
+				vote AS user_voted 
+			FROM 
+				link_votes 
+				WHERE 
 				user_id = $1::uuid
-			GROUP BY 
-				link_id) ul ON l.id = ul.link_id
+			) uv ON l.id = uv.link_id
 		WHERE 
 			u.username = $2
 		GROUP BY 
-			l.id, u.username, ul.user_liked
+			l.id, u.username, uv.user_voted, c.comment_count, v.vote_score
 		ORDER BY 
-			like_count DESC, comment_count DESC, l.created_at DESC
+			vote_score DESC, comment_count DESC, l.created_at DESC
 		LIMIT 
 			$3
 		OFFSET 
@@ -208,8 +241,8 @@ func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]FeedRow, 
 			&i.CreatedAt,
 			&i.Username,
 			&i.CommentCount,
-			&i.LikeCount,
-			&i.UserLiked,
+			&i.VoteScore,
+			&i.UserVoted,
 		); err != nil {
 			return nil, err
 		}
@@ -235,23 +268,45 @@ func (q *Queries) LikedFeed(ctx context.Context, arg LikedFeedParams) ([]FeedRow
 			l.url,
 			l.created_at,
 			u.username,
-			COUNT(DISTINCT c.id) AS comment_count,
-			COUNT(DISTINCT lk.id) AS like_count,
-			1 AS user_liked -- Since the query is filtered by lk.user_id = $1::uuid
+			COALESCE(c.comment_count, 0) AS comment_count,
+			COALESCE(v.vote_score, 0) AS vote_score,
+			COALESCE(uv.user_voted, 0) AS user_voted
 		FROM 
 			links l
 		JOIN 
 			users u ON l.user_id = u.id
 		LEFT JOIN 
-			comments c ON l.id = c.link_id
-		JOIN 
-			link_likes lk ON l.id = lk.link_id
+			(SELECT 
+				link_id, 
+				COUNT(*) AS comment_count
+			FROM 
+				comments
+			GROUP BY link_id
+			) c ON l.id = c.link_id
+		LEFT JOIN 
+			(SELECT 
+				link_id, 
+				SUM(vote) AS vote_score,
+				user_id
+			FROM 
+				link_votes 
+			GROUP BY link_id, user_id
+			) v ON l.id = v.link_id
+		LEFT JOIN 
+			(SELECT 
+				link_id, 
+				vote AS user_voted 
+			FROM 
+				link_votes 
+				WHERE 
+				user_id = $1::uuid
+			) uv ON l.id = uv.link_id
 		WHERE 
-			lk.user_id = $1::uuid
+			v.user_id = $1::uuid
 		GROUP BY 
-			l.id, u.username
+			l.id, u.username, uv.user_voted, c.comment_count, v.vote_score
 		ORDER BY 
-			like_count DESC, comment_count DESC, l.created_at DESC
+			vote_score DESC, comment_count DESC, l.created_at DESC
 		LIMIT 
 			$2
 		OFFSET 
@@ -272,8 +327,8 @@ func (q *Queries) LikedFeed(ctx context.Context, arg LikedFeedParams) ([]FeedRow
 			&i.CreatedAt,
 			&i.Username,
 			&i.CommentCount,
-			&i.LikeCount,
-			&i.UserLiked,
+			&i.VoteScore,
+			&i.UserVoted,
 		); err != nil {
 			return nil, err
 		}

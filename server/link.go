@@ -57,8 +57,59 @@ func (s *Server) Link() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("link page loaded", "link_id", linkID, "comments", len(commentRows), "liked", linkRow.UserLiked)
+		oplog.Info("link page loaded", "link_id", linkID, "comments", len(commentRows), "vote", linkRow.UserVoted)
 		link.Page(link.Props{User: user, Link: linkRow, Comments: commentRows}).Render(r.Context(), w)
+	}
+}
+
+func (s *Server) LinkVote() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		oplog := httplog.LogEntry(r.Context())
+		user := s.UserFromContext(r.Context())
+
+		linkID := r.URL.Query().Get("link_id")
+		voteDir := r.URL.Query().Get("vote")
+
+		redirectURL := r.URL.Query().Get("redirect_url")
+		if redirectURL == "" {
+			redirectURL = "/"
+		}
+
+		if linkID == "" {
+			http.Redirect(w, r, redirectURL, http.StatusFound)
+			return
+		}
+
+		linkUUID, err := uuid.Parse(linkID)
+		if err != nil {
+			oplog.Error("failed to parse link id", "error", err)
+			http.Redirect(w, r, redirectURL, http.StatusFound)
+			return
+		}
+
+		var vote int32
+		if voteDir == "up" {
+			vote = 1
+		} else if voteDir == "down" {
+			vote = -1
+		} else {
+			http.Redirect(w, r, redirectURL, http.StatusFound)
+			return
+		}
+
+		err = s.queries.LinkVote(r.Context(), database.LinkVoteParams{
+			UserID: user.ID,
+			LinkID: linkUUID,
+			Vote:   vote,
+		})
+		if err != nil {
+			oplog.Error("failed to toggle like", "error", err)
+			http.Redirect(w, r, redirectURL, http.StatusFound)
+			return
+		}
+
+		oplog.Info("user toggled like", "link_id", linkID)
+		http.Redirect(w, r, redirectURL, http.StatusFound)
 	}
 }
 

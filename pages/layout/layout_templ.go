@@ -52,7 +52,7 @@ func Layout(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script></head><body class=\"bg-gray-100\"><main class=\"max-w-6xl mx-auto sm:px-6 lg:px-8\"><header class=\"flex justify-between items-center py-4 md:space-x-10\"><div class=\"flex justify-start items-center gap-12\"><a href=\"/\" class=\"text-xl md:text-2xl font-bold text-gray-700 hover:text-blue-600\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script></head><body class=\"bg-gray-100\"><main class=\"max-w-6xl mx-auto sm:px-6 lg:px-8\"><header class=\"flex justify-between items-center py-4 md:space-x-10\"><div class=\"flex justify-start items-center gap-8\"><a href=\"/\" class=\"text-xl md:text-2xl font-bold text-gray-700 hover:text-blue-600\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

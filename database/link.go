@@ -18,27 +18,32 @@ func (q *Queries) CreateLink(ctx context.Context, arg CreateLinkParams) error {
 	return err
 }
 
-type ToggleLikeParams struct {
+type LinkVoteParams struct {
 	UserID uuid.UUID
 	LinkID uuid.UUID
+	Vote   int32
 }
 
-func (q *Queries) ToggleLike(ctx context.Context, arg ToggleLikeParams) error {
+func (q *Queries) LinkVote(ctx context.Context, arg LinkVoteParams) error {
 	query := `
-        WITH deleted AS (
-            DELETE FROM link_likes WHERE user_id = $1 AND link_id = $2 RETURNING *
+        WITH existing_vote AS (
+            SELECT vote FROM link_votes WHERE user_id = $1 AND link_id = $2 FOR UPDATE
+        ), deleted AS (
+            DELETE FROM link_votes WHERE user_id = $1 AND link_id = $2 AND vote = $3
+        ), updated AS (
+            UPDATE link_votes SET vote = $3 WHERE user_id = $1 AND link_id = $2 AND vote != $3
         )
-        INSERT INTO link_likes (user_id, link_id)
-        SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM deleted);
+        INSERT INTO link_votes (user_id, link_id, vote)
+        SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM existing_vote);
     `
-	_, err := q.db.Exec(ctx, query, arg.UserID, arg.LinkID)
+	_, err := q.db.Exec(ctx, query, arg.UserID, arg.LinkID, arg.Vote)
 	return err
 }
 
-func (q *Queries) CountLikes(ctx context.Context, linkID uuid.UUID) (int64, error) {
-	query := "SELECT COUNT(*) FROM link_likes WHERE link_id = $1"
+func (q *Queries) ScoreLink(ctx context.Context, linkID uuid.UUID) (int64, error) {
+	query := "SELECT COALESCE(SUM(vote), 0) FROM link_votes WHERE link_id = $1"
 	row := q.db.QueryRow(ctx, query, linkID)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
+	var score int64
+	err := row.Scan(&score)
+	return score, err
 }

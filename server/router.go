@@ -34,15 +34,13 @@ func (s *Server) Router() http.Handler {
 		r.Post("/", s.New())
 	})
 
-	// Like
-	r.Route("/like", func(r chi.Router) {
-		r.Use(s.RequireUser)
-		r.Get("/", s.Like())
-	})
-
 	// Link
 	r.Route("/link", func(r chi.Router) {
 		r.Get("/", s.Link())
+		r.Route("/vote", func(r chi.Router) {
+			r.Use(s.RequireUser)
+			r.Get("/", s.LinkVote())
+		})
 	})
 
 	// Comment
