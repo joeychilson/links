@@ -47,7 +47,7 @@ func (s *Server) FeedPage() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("feed page loaded", "user_id", userID.String(), "count", len(feedRows))
+		oplog.Info("feed page loaded", "count", len(feedRows))
 		feed.Page(feed.Props{User: user, Feed: feedRows}).Render(r.Context(), w)
 	}
 }
@@ -83,7 +83,7 @@ func (s *Server) New() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("user created link", "user_id", user.ID.String(), "title", title, "url", url)
+		oplog.Info("user created link", "title", title, "url", url)
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
@@ -121,7 +121,7 @@ func (s *Server) Like() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("user toggled like", "user_id", user.ID.String(), "link_id", linkID)
+		oplog.Info("user toggled like", "link_id", linkID)
 		http.Redirect(w, r, redirectURL, http.StatusFound)
 	}
 }

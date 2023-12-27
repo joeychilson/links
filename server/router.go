@@ -15,8 +15,6 @@ func (s *Server) Router() http.Handler {
 	r := chi.NewRouter()
 
 	// Middleware
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
 	r.Use(httplog.RequestLogger(s.logger))
 	r.Use(middleware.Recoverer)
 	r.Use(s.UserFromSession)

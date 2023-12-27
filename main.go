@@ -24,6 +24,7 @@ func main() {
 	logger := httplog.NewLogger("links", httplog.Options{
 		LogLevel:         slog.LevelDebug,
 		Concise:          true,
+		JSON:             false,
 		RequestHeaders:   false,
 		ResponseHeaders:  false,
 		MessageFieldName: "message",

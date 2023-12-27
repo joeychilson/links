@@ -57,7 +57,7 @@ func (s *Server) Link() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("link page loaded", "user_id", userID.String(), "link_id", linkID, "count", len(commentRows))
+		oplog.Info("link page loaded", "link_id", linkID, "comments", len(commentRows), "liked", linkRow.UserLiked)
 		link.Page(link.Props{User: user, Link: linkRow, Comments: commentRows}).Render(r.Context(), w)
 	}
 }
@@ -105,7 +105,7 @@ func (s *Server) Comment() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("user created comment", "user_id", userID.String(), "link_id", linkID, "content", content)
+		oplog.Info("user created comment", "link_id", linkID)
 		http.Redirect(w, r, "/link?id="+linkID, http.StatusFound)
 	}
 }

@@ -34,10 +34,7 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]FeedRow, 
 			u.username,
 			COUNT(DISTINCT c.id) AS comment_count,
 			COUNT(DISTINCT lk.id) AS like_count,
-			CASE 
-				WHEN $1::uuid IS NOT NULL THEN SUM(CASE WHEN lk.user_id = $1::uuid THEN 1 ELSE 0 END)
-				ELSE 0 
-			END AS user_liked
+			COALESCE(ul.user_liked, 0) AS user_liked
 		FROM 
 			links l
 		JOIN 
@@ -46,8 +43,18 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]FeedRow, 
 			comments c ON l.id = c.link_id
 		LEFT JOIN 
 			link_likes lk ON l.id = lk.link_id
+		LEFT JOIN 
+			(SELECT 
+				link_id, 
+				COUNT(*) AS user_liked 
+			FROM 
+				link_likes 
+			WHERE 
+				user_id = $1::uuid
+			GROUP BY 
+				link_id) ul ON l.id = ul.link_id
 		GROUP BY 
-			l.id, u.username
+			l.id, u.username, ul.user_liked
 		ORDER BY 
 			like_count DESC, comment_count DESC, l.created_at DESC
 		LIMIT 
@@ -98,10 +105,7 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (FeedRow, error) 
 			u.username,
 			COUNT(DISTINCT c.id) AS comment_count,
 			COUNT(DISTINCT lk.id) AS like_count,
-			CASE 
-				WHEN $1::uuid IS NOT NULL THEN SUM(CASE WHEN lk.user_id = $1::uuid THEN 1 ELSE 0 END)
-				ELSE 0 
-			END AS user_liked
+			COALESCE(ul.user_liked, 0) AS user_liked
 		FROM 
 			links l
 		JOIN 
@@ -110,10 +114,20 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (FeedRow, error) 
 			comments c ON l.id = c.link_id
 		LEFT JOIN 
 			link_likes lk ON l.id = lk.link_id
+		LEFT JOIN 
+			(SELECT 
+				link_id, 
+				COUNT(*) AS user_liked 
+			FROM 
+				link_likes 
+			WHERE 
+				user_id = $1::uuid
+			GROUP BY 
+				link_id) ul ON l.id = ul.link_id
 		WHERE 
 			l.id = $2::uuid
 		GROUP BY 
-			l.id, u.username
+			l.id, u.username, ul.user_liked
 	`
 	row := q.db.QueryRow(ctx, query, params.UserID, params.LinkID)
 	var linkRow FeedRow
@@ -149,10 +163,7 @@ func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]FeedRow, 
 			u.username,
 			COUNT(DISTINCT c.id) AS comment_count,
 			COUNT(DISTINCT lk.id) AS like_count,
-			CASE 
-				WHEN $1::uuid IS NOT NULL THEN SUM(CASE WHEN lk.user_id = $1::uuid THEN 1 ELSE 0 END)
-				ELSE 0 
-			END AS user_liked
+			COALESCE(ul.user_liked, 0) AS user_liked
 		FROM 
 			links l
 		JOIN 
@@ -161,10 +172,20 @@ func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]FeedRow, 
 			comments c ON l.id = c.link_id
 		LEFT JOIN 
 			link_likes lk ON l.id = lk.link_id
+		LEFT JOIN 
+			(SELECT 
+				link_id, 
+				COUNT(*) AS user_liked 
+			FROM 
+				link_likes 
+			WHERE 
+				user_id = $1::uuid
+			GROUP BY 
+				link_id) ul ON l.id = ul.link_id
 		WHERE 
 			u.username = $2
 		GROUP BY 
-			l.id, u.username
+			l.id, u.username, ul.user_liked
 		ORDER BY 
 			like_count DESC, comment_count DESC, l.created_at DESC
 		LIMIT 
@@ -216,10 +237,7 @@ func (q *Queries) LikedFeed(ctx context.Context, arg LikedFeedParams) ([]FeedRow
 			u.username,
 			COUNT(DISTINCT c.id) AS comment_count,
 			COUNT(DISTINCT lk.id) AS like_count,
-			CASE 
-				WHEN $1::uuid IS NOT NULL THEN SUM(CASE WHEN lk.user_id = $1::uuid THEN 1 ELSE 0 END)
-				ELSE 0 
-			END AS user_liked
+			1 AS user_liked -- Since the query is filtered by lk.user_id = $1::uuid
 		FROM 
 			links l
 		JOIN 

@@ -53,7 +53,7 @@ func (s *Server) UserPage() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("user page loaded", "user_id", user.ID.String(), "count", len(feed))
+		oplog.Info("user page loaded", "count", len(feed))
 		userpage.Page(userpage.Props{User: user, Feed: feed}).Render(r.Context(), w)
 	}
 }

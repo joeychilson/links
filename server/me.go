@@ -25,7 +25,7 @@ func (s *Server) MePage() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("me page loaded", "user_id", user.ID.String(), "count", len(feed))
+		oplog.Info("me page loaded", "count", len(feed))
 		me.Page(me.Props{User: user, Feed: feed}).Render(r.Context(), w)
 	}
 }
