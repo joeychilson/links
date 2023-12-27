@@ -2,15 +2,15 @@ package link
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/joeychilson/links/database"
 	"github.com/joeychilson/links/pkg/session"
+	"github.com/joeychilson/links/pkg/time"
 )
 
 type Props struct {
 	User        *session.User
-	Link        database.LinkRow
+	Link        database.FeedRow
 	RedirectURL string
 }
 
@@ -43,7 +43,7 @@ templ Component(props Props) {
 							{ props.Link.Username }
 						</a>
 						&middot; 
-						{ timeAgo(props.Link.CreatedAt.Time.Unix()) }
+						{ time.TimeAgo(props.Link.CreatedAt.Time.Unix()) }
 						&middot; 
 						{ fmt.Sprintf("%v likes", props.Link.LikeCount) }
 						&middot; 
@@ -62,41 +62,4 @@ func starButtonClass(voted int32) string {
 		return "text-yellow-400 hover:text-yellow-500"
 	}
 	return "text-gray-400 hover:text-gray-500"
-}
-
-func timeAgo(postTime int64) string {
-	now := time.Now()
-	postTimeUTC := time.Unix(postTime, 0)
-	duration := now.Sub(postTimeUTC)
-
-	if duration < time.Minute {
-		return "just now"
-	} else if duration < time.Hour {
-		if duration/time.Minute == 1 {
-			return "1 minute ago"
-		}
-		return fmt.Sprintf("%d minutes ago", duration/time.Minute)
-	} else if duration < time.Hour*24 {
-		if duration/time.Hour == 1 {
-			return "1 hour ago"
-		}
-		return fmt.Sprintf("%d hours ago", duration/time.Hour)
-	} else if duration < time.Hour*24*31 {
-		if duration/(time.Hour*24) == 1 {
-			return "1 day ago"
-		}
-		return fmt.Sprintf("%d days ago", duration/(time.Hour*24))
-	} else if duration < time.Hour*24*365 {
-		months := duration / (time.Hour * 24 * 30)
-		if months <= 1 {
-			return "1 month ago"
-		}
-		return fmt.Sprintf("%d months ago", months)
-	}
-
-	years := duration / (time.Hour * 24 * 365)
-	if years <= 1 {
-		return "1 year ago"
-	}
-	return fmt.Sprintf("%d years ago", years)
 }

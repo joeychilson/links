@@ -1,17 +1,20 @@
 package server
 
 import (
-	"log"
 	"net/http"
 
+	"github.com/go-chi/httplog/v2"
 	"github.com/google/uuid"
+
 	"github.com/joeychilson/links/database"
 	"github.com/joeychilson/links/pages/link"
 )
 
 func (s *Server) Link() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		oplog := httplog.LogEntry(r.Context())
 		user := s.UserFromContext(r.Context())
+
 		linkID := r.URL.Query().Get("id")
 
 		if linkID == "" {
@@ -21,6 +24,7 @@ func (s *Server) Link() http.HandlerFunc {
 
 		linkUUID, err := uuid.Parse(linkID)
 		if err != nil {
+			oplog.Error("failed to parse link id", "error", err)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
@@ -37,11 +41,71 @@ func (s *Server) Link() http.HandlerFunc {
 			LinkID: linkUUID,
 		})
 		if err != nil {
-			log.Printf("error getting link: %v", err)
+			oplog.Error("failed to get link", "error", err)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 
-		link.Page(link.Props{User: user, Link: linkRow}).Render(r.Context(), w)
+		commentRows, err := s.queries.CommentFeed(r.Context(), database.CommentFeedParams{
+			LinkID: linkUUID,
+			Limit:  100,
+			Offset: 0,
+		})
+		if err != nil {
+			oplog.Error("failed to get comment feed", "error", err)
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
+		oplog.Info("link page loaded", "user_id", userID.String(), "link_id", linkID, "count", len(commentRows))
+		link.Page(link.Props{User: user, Link: linkRow, Comments: commentRows}).Render(r.Context(), w)
+	}
+}
+
+func (s *Server) Comment() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		oplog := httplog.LogEntry(r.Context())
+		user := s.UserFromContext(r.Context())
+
+		linkID := r.FormValue("link_id")
+		content := r.FormValue("content")
+
+		if linkID == "" {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
+		linkUUID, err := uuid.Parse(linkID)
+		if err != nil {
+			oplog.Error("failed to parse link id", "error", err)
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
+		if content == "" {
+			http.Redirect(w, r, "/link?id="+linkID, http.StatusFound)
+			return
+		}
+
+		var userID uuid.UUID
+		if user != nil {
+			userID = user.ID
+		} else {
+			userID = uuid.Nil
+		}
+
+		err = s.queries.CreateComment(r.Context(), database.CreateCommentParams{
+			UserID:  userID,
+			LinkID:  linkUUID,
+			Content: content,
+		})
+		if err != nil {
+			oplog.Error("failed to create comment", "error", err)
+			http.Redirect(w, r, "/link?id="+linkID, http.StatusFound)
+			return
+		}
+
+		oplog.Info("user created comment", "user_id", userID.String(), "link_id", linkID, "content", content)
+		http.Redirect(w, r, "/link?id="+linkID, http.StatusFound)
 	}
 }

@@ -2,7 +2,10 @@ package server
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
+
+	"github.com/go-chi/httplog/v2"
 
 	"github.com/joeychilson/links/pkg/session"
 )
@@ -17,8 +20,8 @@ func (s *Server) UserFromSession(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx = context.WithValue(ctx, session.SessionKey, user)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		httplog.LogEntrySetField(ctx, "user_id", slog.StringValue(user.ID.String()))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, session.SessionKey, user)))
 	})
 }
 

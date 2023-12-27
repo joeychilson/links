@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"encoding/base64"
-	"log"
+	"log/slog"
 	"os"
+	"time"
 
+	"github.com/go-chi/httplog/v2"
 	"github.com/gorilla/securecookie"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -18,16 +20,28 @@ import (
 func main() {
 	_ = godotenv.Load()
 	ctx := context.Background()
+
+	logger := httplog.NewLogger("links", httplog.Options{
+		LogLevel:         slog.LevelDebug,
+		Concise:          true,
+		RequestHeaders:   false,
+		ResponseHeaders:  false,
+		MessageFieldName: "message",
+		QuietDownPeriod:  10 * time.Second,
+	})
+
 	databaseURL := os.Getenv("DATABASE_URL")
 
 	err := database.Migrate(databaseURL)
 	if err != nil {
-		log.Fatalf("Unable to migrate database: %v\n", err)
+		slog.Error("failed to migrate database", "error", err)
+		os.Exit(1)
 	}
 
 	dbpool, err := pgxpool.New(ctx, databaseURL)
 	if err != nil {
-		log.Fatalf("Unable to connect to database pool: %v\n", err)
+		slog.Error("failed to connect to database", "error", err)
+		os.Exit(1)
 	}
 	defer dbpool.Close()
 
@@ -39,10 +53,11 @@ func main() {
 	cookie := securecookie.New(encryptionKey, validationKey)
 	sessionManager := session.NewManager(cookie, queries)
 
-	server := server.New(queries, sessionManager)
+	server := server.New(logger, queries, sessionManager)
 
-	log.Println("Serving lixy application @ http://localhost:8080")
+	slog.Info("Starting links application @ http://localhost:8080")
 	if err := server.ListenAndServe(":8080"); err != nil {
-		log.Fatal(err)
+		slog.Error("failed to start server", "error", err)
+		os.Exit(1)
 	}
 }

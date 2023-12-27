@@ -3,17 +3,20 @@ package server
 import (
 	"net/http"
 
+	"github.com/go-chi/httplog/v2"
 	"github.com/joeychilson/links/database"
 	"github.com/joeychilson/links/pkg/session"
 )
 
 type Server struct {
+	logger         *httplog.Logger
 	queries        *database.Queries
 	sessionManager *session.Manager
 }
 
-func New(queries *database.Queries, sessionManager *session.Manager) *Server {
+func New(logger *httplog.Logger, queries *database.Queries, sessionManager *session.Manager) *Server {
 	return &Server{
+		logger:         logger,
 		queries:        queries,
 		sessionManager: sessionManager,
 	}

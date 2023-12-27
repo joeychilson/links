@@ -1,10 +1,10 @@
 package server
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/go-chi/httplog/v2"
 	"github.com/google/uuid"
 
 	"github.com/joeychilson/links/database"
@@ -14,6 +14,7 @@ import (
 
 func (s *Server) FeedPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		oplog := httplog.LogEntry(r.Context())
 		user := s.UserFromContext(r.Context())
 
 		pageStr := r.URL.Query().Get("page")
@@ -23,6 +24,7 @@ func (s *Server) FeedPage() http.HandlerFunc {
 
 		page, err := strconv.Atoi(pageStr)
 		if err != nil {
+			oplog.Error("failed to parse page number", "error", err)
 			feed.Page(feed.Props{User: user}).Render(r.Context(), w)
 			return
 		}
@@ -34,17 +36,19 @@ func (s *Server) FeedPage() http.HandlerFunc {
 			userID = uuid.Nil
 		}
 
-		links, err := s.queries.LinkFeed(r.Context(), database.LinkFeedParams{
+		feedRows, err := s.queries.LinkFeed(r.Context(), database.LinkFeedParams{
 			UserID: userID,
 			Limit:  25,
 			Offset: int32((page - 1) * 25),
 		})
 		if err != nil {
+			oplog.Error("failed to get link feed", "error", err)
 			feed.Page(feed.Props{User: user}).Render(r.Context(), w)
 			return
 		}
 
-		feed.Page(feed.Props{User: user, Links: links}).Render(r.Context(), w)
+		oplog.Info("feed page loaded", "user_id", userID.String(), "count", len(feedRows))
+		feed.Page(feed.Props{User: user, Feed: feedRows}).Render(r.Context(), w)
 	}
 }
 
@@ -57,6 +61,7 @@ func (s *Server) NewPage() http.HandlerFunc {
 
 func (s *Server) New() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		oplog := httplog.LogEntry(r.Context())
 		user := s.UserFromContext(r.Context())
 
 		title := r.FormValue("title")
@@ -73,16 +78,19 @@ func (s *Server) New() http.HandlerFunc {
 			Url:    url,
 		})
 		if err != nil {
+			oplog.Error("failed to create link", "error", err)
 			new.Page(new.PageProps{User: user}).Render(r.Context(), w)
 			return
 		}
 
+		oplog.Info("user created link", "user_id", user.ID.String(), "title", title, "url", url)
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
 
 func (s *Server) Like() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		oplog := httplog.LogEntry(r.Context())
 		user := s.UserFromContext(r.Context())
 		linkID := r.URL.Query().Get("link_id")
 
@@ -98,22 +106,22 @@ func (s *Server) Like() http.HandlerFunc {
 
 		linkUUID, err := uuid.Parse(linkID)
 		if err != nil {
+			oplog.Error("failed to parse link id", "error", err)
 			http.Redirect(w, r, redirectURL, http.StatusFound)
 			return
 		}
-
-		log.Printf("like user %s link %s", user.ID, linkUUID)
 
 		err = s.queries.ToggleLike(r.Context(), database.ToggleLikeParams{
 			UserID: user.ID,
 			LinkID: linkUUID,
 		})
 		if err != nil {
-			log.Println("like err", err)
+			oplog.Error("failed to toggle like", "error", err)
 			http.Redirect(w, r, redirectURL, http.StatusFound)
 			return
 		}
 
+		oplog.Info("user toggled like", "user_id", user.ID.String(), "link_id", linkID)
 		http.Redirect(w, r, redirectURL, http.StatusFound)
 	}
 }

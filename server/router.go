@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httplog/v2"
 
 	"github.com/joeychilson/links/pages/errors"
 	"github.com/joeychilson/links/static"
@@ -16,7 +17,7 @@ func (s *Server) Router() http.Handler {
 	// Middleware
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
+	r.Use(httplog.RequestLogger(s.logger))
 	r.Use(middleware.Recoverer)
 	r.Use(s.UserFromSession)
 
@@ -44,6 +45,12 @@ func (s *Server) Router() http.Handler {
 	// Link
 	r.Route("/link", func(r chi.Router) {
 		r.Get("/", s.Link())
+	})
+
+	// Comment
+	r.Route("/comment", func(r chi.Router) {
+		r.Use(s.RequireUser)
+		r.Post("/", s.Comment())
 	})
 
 	// User

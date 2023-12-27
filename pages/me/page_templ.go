@@ -18,8 +18,8 @@ import (
 )
 
 type Props struct {
-	User  *session.User
-	Links []database.LinkRow
+	User *session.User
+	Feed []database.FeedRow
 }
 
 func Page(props Props) templ.Component {
@@ -54,7 +54,7 @@ func Page(props Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, row := range props.Links {
+			for _, row := range props.Feed {
 				templ_7745c5c3_Err = link.Component(link.Props{User: props.User, Link: row, RedirectURL: "/me"}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

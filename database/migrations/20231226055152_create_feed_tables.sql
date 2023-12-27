@@ -10,19 +10,7 @@ CREATE TABLE links (
 
 CREATE INDEX idx_links_user_id ON links(user_id);
 
-CREATE TABLE comments (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    link_id UUID NOT NULL REFERENCES links(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_comments_link_id ON comments(link_id);
-CREATE INDEX idx_comments_user_id ON comments(user_id);
-
-CREATE TABLE likes (
+CREATE TABLE link_likes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     link_id UUID NOT NULL REFERENCES links(id) ON DELETE CASCADE ON UPDATE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -31,11 +19,37 @@ CREATE TABLE likes (
     UNIQUE (link_id, user_id)
 );
 
-CREATE INDEX idx_likes_link_id ON likes(link_id);
-CREATE INDEX idx_likes_user_id ON likes(user_id);
+CREATE INDEX idx_link_likes_link_id ON link_likes(link_id);
+CREATE INDEX idx_link_likes_user_id ON link_likes(user_id);
+
+CREATE TABLE comments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    link_id UUID NOT NULL REFERENCES links(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    parent_id UUID REFERENCES comments(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_comments_link_id ON comments(link_id);
+CREATE INDEX idx_comments_user_id ON comments(user_id);
+CREATE INDEX idx_comments_parent_id ON comments(parent_id);
+
+CREATE TABLE comment_likes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    comment_id UUID NOT NULL REFERENCES comments(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (comment_id, user_id)
+);
+
+CREATE INDEX idx_comment_likes_comment_id ON comment_likes(comment_id);
+CREATE INDEX idx_comment_likes_user_id ON comment_likes(user_id);
 
 -- migrate:down
-DROP TABLE likes;
+DROP TABLE comment_likes;
 DROP TABLE comments;
+DROP TABLE link_likes;
 DROP TABLE links;
 

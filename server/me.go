@@ -1,28 +1,31 @@
 package server
 
 import (
-	"log"
 	"net/http"
 
+	"github.com/go-chi/httplog/v2"
+
 	"github.com/joeychilson/links/database"
-	account "github.com/joeychilson/links/pages/me"
+	"github.com/joeychilson/links/pages/me"
 )
 
 func (s *Server) MePage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		oplog := httplog.LogEntry(r.Context())
 		user := s.UserFromContext(r.Context())
 
-		likedLinks, err := s.queries.LikedFeed(r.Context(), database.LikedFeedParams{
+		feed, err := s.queries.LikedFeed(r.Context(), database.LikedFeedParams{
 			UserID: user.ID,
 			Limit:  25,
 			Offset: 0,
 		})
 		if err != nil {
-			log.Printf("error getting liked links: %v", err)
+			oplog.Error("failed to get liked feed", "error", err)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 
-		account.Page(account.Props{User: user, Links: likedLinks}).Render(r.Context(), w)
+		oplog.Info("me page loaded", "user_id", user.ID.String(), "count", len(feed))
+		me.Page(me.Props{User: user, Feed: feed}).Render(r.Context(), w)
 	}
 }

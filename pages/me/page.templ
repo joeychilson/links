@@ -8,8 +8,8 @@ import (
 )
 
 type Props struct {
-	User  *session.User
-	Links []database.LinkRow
+	User *session.User
+	Feed []database.FeedRow
 }
 
 templ Page(props Props) {
@@ -17,7 +17,7 @@ templ Page(props Props) {
 		<div class="p-2">
 			<h2 class="text-xl font-semibold text-gray-700">Your Activity</h2>
 		</div>
-		for _, row := range props.Links {
+		for _, row := range props.Feed {
 			@link.Component(link.Props{User: props.User, Link: row, RedirectURL: "/me"})
 		}
 	}

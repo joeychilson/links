@@ -1,11 +1,11 @@
 package server
 
 import (
-	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/go-chi/httplog/v2"
 	"github.com/joeychilson/links/database"
 	"github.com/joeychilson/links/pages/signup"
 )
@@ -27,6 +27,8 @@ func (s *Server) SignUpPage() http.HandlerFunc {
 
 func (s *Server) SignUp() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		oplog := httplog.LogEntry(r.Context())
+
 		email := r.FormValue("email")
 		username := r.FormValue("username")
 		password := r.FormValue("password")
@@ -34,7 +36,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 
 		emailExists, err := s.queries.EmailExists(r.Context(), email)
 		if err != nil {
-			log.Printf("Error checking email exists: %v\n", err)
+			oplog.Error("failed to check if email exists", "error", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 			return
 		}
@@ -51,6 +53,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 
 		usernameExists, err := s.queries.UsernameExists(r.Context(), username)
 		if err != nil {
+			oplog.Error("failed to check if username exists", "error", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 			return
 		}
@@ -87,7 +90,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
-			log.Printf("Error hashing password: %v\n", err)
+			oplog.Error("failed to hash password", "error", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 			return
 		}
@@ -98,18 +101,19 @@ func (s *Server) SignUp() http.HandlerFunc {
 			Password: string(hashedPassword),
 		})
 		if err != nil {
-			log.Printf("Error creating user: %v\n", err)
+			oplog.Error("failed to create user", "error", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 			return
 		}
 
 		err = s.sessionManager.Set(w, r, userID)
 		if err != nil {
-			log.Printf("Error setting session: %v\n", err)
+			oplog.Error("failed to set session", "error", err)
 			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
 			return
 		}
 
+		oplog.Info("user signed up", "user_id", userID.String())
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }

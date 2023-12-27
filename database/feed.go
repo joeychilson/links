@@ -7,19 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type CreateLinkParams struct {
-	UserID uuid.UUID
-	Title  string
-	Url    string
-}
-
-func (q *Queries) CreateLink(ctx context.Context, arg CreateLinkParams) error {
-	query := "INSERT INTO links (user_id, title, url) VALUES ($1, $2, $3)"
-	_, err := q.db.Exec(ctx, query, arg.UserID, arg.Title, arg.Url)
-	return err
-}
-
-type LinkRow struct {
+type FeedRow struct {
 	ID           uuid.UUID
 	Title        string
 	Url          string
@@ -36,7 +24,7 @@ type LinkFeedParams struct {
 	Offset int32
 }
 
-func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkRow, error) {
+func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]FeedRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -57,7 +45,7 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkRow, 
 		LEFT JOIN 
 			comments c ON l.id = c.link_id
 		LEFT JOIN 
-			likes lk ON l.id = lk.link_id
+			link_likes lk ON l.id = lk.link_id
 		GROUP BY 
 			l.id, u.username
 		ORDER BY 
@@ -72,9 +60,9 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkRow, 
 		return nil, err
 	}
 	defer rows.Close()
-	var items []LinkRow
+	var items []FeedRow
 	for rows.Next() {
-		var i LinkRow
+		var i FeedRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -100,7 +88,7 @@ type LinkParams struct {
 	LinkID uuid.UUID
 }
 
-func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkRow, error) {
+func (q *Queries) Link(ctx context.Context, params LinkParams) (FeedRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -121,14 +109,14 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkRow, error) 
 		LEFT JOIN 
 			comments c ON l.id = c.link_id
 		LEFT JOIN 
-			likes lk ON l.id = lk.link_id
+			link_likes lk ON l.id = lk.link_id
 		WHERE 
 			l.id = $2::uuid
 		GROUP BY 
 			l.id, u.username
 	`
 	row := q.db.QueryRow(ctx, query, params.UserID, params.LinkID)
-	var linkRow LinkRow
+	var linkRow FeedRow
 	if err := row.Scan(
 		&linkRow.ID,
 		&linkRow.Title,
@@ -139,7 +127,7 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkRow, error) 
 		&linkRow.LikeCount,
 		&linkRow.UserLiked,
 	); err != nil {
-		return LinkRow{}, err
+		return FeedRow{}, err
 	}
 	return linkRow, nil
 }
@@ -151,7 +139,7 @@ type UserFeedParams struct {
 	Offset   int32
 }
 
-func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]LinkRow, error) {
+func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]FeedRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -172,7 +160,7 @@ func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]LinkRow, 
 		LEFT JOIN 
 			comments c ON l.id = c.link_id
 		LEFT JOIN 
-			likes lk ON l.id = lk.link_id
+			link_likes lk ON l.id = lk.link_id
 		WHERE 
 			u.username = $2
 		GROUP BY 
@@ -189,9 +177,9 @@ func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]LinkRow, 
 		return nil, err
 	}
 	defer rows.Close()
-	var items []LinkRow
+	var items []FeedRow
 	for rows.Next() {
-		var i LinkRow
+		var i FeedRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -218,7 +206,7 @@ type LikedFeedParams struct {
 	Offset int32
 }
 
-func (q *Queries) LikedFeed(ctx context.Context, arg LikedFeedParams) ([]LinkRow, error) {
+func (q *Queries) LikedFeed(ctx context.Context, arg LikedFeedParams) ([]FeedRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -239,7 +227,7 @@ func (q *Queries) LikedFeed(ctx context.Context, arg LikedFeedParams) ([]LinkRow
 		LEFT JOIN 
 			comments c ON l.id = c.link_id
 		JOIN 
-			likes lk ON l.id = lk.link_id
+			link_likes lk ON l.id = lk.link_id
 		WHERE 
 			lk.user_id = $1::uuid
 		GROUP BY 
@@ -256,9 +244,9 @@ func (q *Queries) LikedFeed(ctx context.Context, arg LikedFeedParams) ([]LinkRow
 		return nil, err
 	}
 	defer rows.Close()
-	var items []LinkRow
+	var items []FeedRow
 	for rows.Next() {
-		var i LinkRow
+		var i FeedRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -277,29 +265,4 @@ func (q *Queries) LikedFeed(ctx context.Context, arg LikedFeedParams) ([]LinkRow
 		return nil, err
 	}
 	return items, nil
-}
-
-type ToggleLikeParams struct {
-	UserID uuid.UUID
-	LinkID uuid.UUID
-}
-
-func (q *Queries) ToggleLike(ctx context.Context, arg ToggleLikeParams) error {
-	query := `
-        WITH deleted AS (
-            DELETE FROM likes WHERE user_id = $1 AND link_id = $2 RETURNING *
-        )
-        INSERT INTO likes (user_id, link_id)
-        SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM deleted);
-    `
-	_, err := q.db.Exec(ctx, query, arg.UserID, arg.LinkID)
-	return err
-}
-
-func (q *Queries) CountLikes(ctx context.Context, linkID uuid.UUID) (int64, error) {
-	query := "SELECT COUNT(*) FROM likes WHERE link_id = $1"
-	row := q.db.QueryRow(ctx, query, linkID)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
 }
