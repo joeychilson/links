@@ -1,0 +1,24 @@
+package me
+
+import (
+	"github.com/joeychilson/links/pages/layout"
+	"github.com/joeychilson/links/pkg/session"
+	"github.com/joeychilson/links/database"
+	"github.com/joeychilson/links/components/link"
+)
+
+type Props struct {
+	User  *session.User
+	Links []database.LinkRow
+}
+
+templ Page(props Props) {
+	@layout.Layout(layout.Props{Title: props.User.Username, User: props.User}) {
+		<div class="p-2">
+			<h2 class="text-xl font-semibold text-gray-700">Your Activity</h2>
+		</div>
+		for _, row := range props.Links {
+			@link.Component(link.Props{User: props.User, Link: row, RedirectURL: "/me"})
+		}
+	}
+}

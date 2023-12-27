@@ -212,6 +212,73 @@ func (q *Queries) UserFeed(ctx context.Context, arg UserFeedParams) ([]LinkRow, 
 	return items, nil
 }
 
+type LikedFeedParams struct {
+	UserID uuid.UUID
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) LikedFeed(ctx context.Context, arg LikedFeedParams) ([]LinkRow, error) {
+	query := `
+		SELECT 
+			l.id AS id,
+			l.title,
+			l.url,
+			l.created_at,
+			u.username,
+			COUNT(DISTINCT c.id) AS comment_count,
+			COUNT(DISTINCT lk.id) AS like_count,
+			CASE 
+				WHEN $1::uuid IS NOT NULL THEN SUM(CASE WHEN lk.user_id = $1::uuid THEN 1 ELSE 0 END)
+				ELSE 0 
+			END AS user_liked
+		FROM 
+			links l
+		JOIN 
+			users u ON l.user_id = u.id
+		LEFT JOIN 
+			comments c ON l.id = c.link_id
+		JOIN 
+			likes lk ON l.id = lk.link_id
+		WHERE 
+			lk.user_id = $1::uuid
+		GROUP BY 
+			l.id, u.username
+		ORDER BY 
+			like_count DESC, comment_count DESC, l.created_at DESC
+		LIMIT 
+			$2
+		OFFSET 
+			$3
+	`
+	rows, err := q.db.Query(ctx, query, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LinkRow
+	for rows.Next() {
+		var i LinkRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Url,
+			&i.CreatedAt,
+			&i.Username,
+			&i.CommentCount,
+			&i.LikeCount,
+			&i.UserLiked,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 type ToggleLikeParams struct {
 	UserID uuid.UUID
 	LinkID uuid.UUID

@@ -52,7 +52,7 @@ func Layout(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script></head><body class=\"bg-gray-100\"><main class=\"max-w-6xl mx-auto sm:px-6 lg:px-8\"><header class=\"flex justify-between items-center py-4 md:space-x-10\"><div class=\"flex justify-start items-center gap-12\"><a href=\"/\" class=\"text-xl md:text-2xl font-bold text-gray-800 hover:text-blue-600\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script></head><body class=\"bg-gray-100\"><main class=\"max-w-6xl mx-auto sm:px-6 lg:px-8\"><header class=\"flex justify-between items-center py-4 md:space-x-10\"><div class=\"flex justify-start items-center gap-12\"><a href=\"/\" class=\"text-xl md:text-2xl font-bold text-gray-700 hover:text-blue-600\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -61,7 +61,7 @@ func Layout(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><nav class=\"hidden md:flex gap-6\"><a href=\"/latest\" class=\"text-sm font-medium text-gray-800 hover:text-blue-600\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><nav class=\"hidden md:flex gap-6\"><a href=\"/latest\" class=\"text-sm font-medium text-gray-700 hover:text-blue-600\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -84,16 +84,16 @@ func Layout(props Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> <a href=\"/account\" class=\"px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700\" style=\"box-sizing: border-box; margin: 0;\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> <a href=\"/me\" class=\"px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700\" style=\"box-sizing: border-box; margin: 0;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var7 := `Account`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
+			var templ_7745c5c3_Var7 string = props.User.Username
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><form action=\"/logout\" method=\"POST\" style=\"margin: 0; padding: 0; display: inline;\"><button type=\"submit\" class=\"px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100\" style=\"box-sizing: border-box;\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><form action=\"/logout\" method=\"POST\" style=\"margin: 0; padding: 0; display: inline;\"><button type=\"submit\" class=\"px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-100\" style=\"box-sizing: border-box;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -107,7 +107,7 @@ func Layout(props Props) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/login\" class=\"px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/login\" class=\"px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-100\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

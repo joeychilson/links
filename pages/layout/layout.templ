@@ -23,9 +23,9 @@ templ Layout(props Props) {
 			<main class="max-w-6xl mx-auto sm:px-6 lg:px-8">
 				<header class="flex justify-between items-center py-4 md:space-x-10">
 					<div class="flex justify-start items-center gap-12">
-						<a href="/" class="text-xl md:text-2xl font-bold text-gray-800 hover:text-blue-600">Links</a>
+						<a href="/" class="text-xl md:text-2xl font-bold text-gray-700 hover:text-blue-600">Links</a>
 						<nav class="hidden md:flex gap-6">
-							<a href="/latest" class="text-sm font-medium text-gray-800 hover:text-blue-600">Latest</a>
+							<a href="/latest" class="text-sm font-medium text-gray-700 hover:text-blue-600">Latest</a>
 						</nav>
 					</div>
 					<div class="flex items-center justify-end md:flex-1 gap-2">
@@ -37,16 +37,16 @@ templ Layout(props Props) {
 								+
 							</a>
 							<a
- 								href="/account"
+ 								href="/me"
  								class="px-4 py-2 rounded-md border border-blue-600 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
  								style="box-sizing: border-box; margin: 0;"
 							>
-								Account
+								{ props.User.Username }
 							</a>
 							<form action="/logout" method="POST" style="margin: 0; padding: 0; display: inline;">
 								<button
  									type="submit"
- 									class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
+ 									class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-100"
  									style="box-sizing: border-box;"
 								>
 									Logout
@@ -55,7 +55,7 @@ templ Layout(props Props) {
 						} else {
 							<a
  								href="/login"
- 								class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-800 bg-white hover:bg-gray-100"
+ 								class="px-4 py-2 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-100"
 							>
 								Login
 							</a>

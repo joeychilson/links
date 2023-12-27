@@ -51,10 +51,10 @@ func (s *Server) Router() http.Handler {
 		r.Get("/", s.UserPage())
 	})
 
-	// Account page
-	r.Route("/account", func(r chi.Router) {
+	// Me page
+	r.Route("/me", func(r chi.Router) {
 		r.Use(s.RequireUser)
-		r.Get("/", s.AccountPage())
+		r.Get("/", s.MePage())
 	})
 
 	// Login page
