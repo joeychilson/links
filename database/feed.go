@@ -157,7 +157,7 @@ func (q *Queries) Link(ctx context.Context, params LinkParams) (LinkFeedRow, err
 		GROUP BY 
 			l.id, u.username
 	`
-	row := q.db.QueryRow(ctx, query, params.LinkID, params.UserID)
+	row := q.db.QueryRow(ctx, query, params.UserID, params.LinkID)
 	var linkRow LinkFeedRow
 	if err := row.Scan(
 		&linkRow.ID,

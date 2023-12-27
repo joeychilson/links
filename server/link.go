@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -36,6 +37,7 @@ func (s *Server) Link() http.HandlerFunc {
 			LinkID: linkUUID,
 		})
 		if err != nil {
+			log.Printf("error getting link: %v", err)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
