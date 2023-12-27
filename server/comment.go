@@ -5,17 +5,16 @@ import (
 
 	"github.com/go-chi/httplog/v2"
 	"github.com/google/uuid"
-
 	"github.com/joeychilson/links/database"
-	"github.com/joeychilson/links/pages/link"
 )
 
-func (s *Server) Link() http.HandlerFunc {
+func (s *Server) Comment() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		oplog := httplog.LogEntry(r.Context())
 		user := s.UserFromContext(r.Context())
 
-		linkID := r.URL.Query().Get("id")
+		linkID := r.FormValue("link_id")
+		content := r.FormValue("content")
 
 		if linkID == "" {
 			http.Redirect(w, r, "/", http.StatusFound)
@@ -26,6 +25,11 @@ func (s *Server) Link() http.HandlerFunc {
 		if err != nil {
 			oplog.Error("failed to parse link id", "error", err)
 			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+
+		if content == "" {
+			http.Redirect(w, r, "/link?id="+linkID, http.StatusFound)
 			return
 		}
 
@@ -36,39 +40,28 @@ func (s *Server) Link() http.HandlerFunc {
 			userID = uuid.Nil
 		}
 
-		linkRow, err := s.queries.Link(r.Context(), database.LinkParams{
-			UserID: userID,
-			LinkID: linkUUID,
+		err = s.queries.CreateComment(r.Context(), database.CreateCommentParams{
+			UserID:  userID,
+			LinkID:  linkUUID,
+			Content: content,
 		})
 		if err != nil {
-			oplog.Error("failed to get link", "error", err)
-			http.Redirect(w, r, "/", http.StatusFound)
+			oplog.Error("failed to create comment", "error", err)
+			http.Redirect(w, r, "/link?id="+linkID, http.StatusFound)
 			return
 		}
 
-		commentRows, err := s.queries.CommentFeed(r.Context(), database.CommentFeedParams{
-			UserID: userID,
-			LinkID: linkUUID,
-			Limit:  100,
-			Offset: 0,
-		})
-		if err != nil {
-			oplog.Error("failed to get comment feed", "error", err)
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		}
-
-		oplog.Info("link page loaded", "link_id", linkID, "comments", len(commentRows), "vote", linkRow.UserVoted)
-		link.Page(link.Props{User: user, Link: linkRow, Comments: commentRows}).Render(r.Context(), w)
+		oplog.Info("user created comment", "link_id", linkID)
+		http.Redirect(w, r, "/link?id="+linkID, http.StatusFound)
 	}
 }
 
-func (s *Server) LinkVote() http.HandlerFunc {
+func (s *Server) CommentVote() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		oplog := httplog.LogEntry(r.Context())
 		user := s.UserFromContext(r.Context())
 
-		linkID := r.URL.Query().Get("link_id")
+		commentID := r.URL.Query().Get("comment_id")
 		voteDir := r.URL.Query().Get("vote")
 
 		redirectURL := r.URL.Query().Get("redirect_url")
@@ -76,14 +69,14 @@ func (s *Server) LinkVote() http.HandlerFunc {
 			redirectURL = "/"
 		}
 
-		if linkID == "" {
+		if commentID == "" {
 			http.Redirect(w, r, redirectURL, http.StatusFound)
 			return
 		}
 
-		linkUUID, err := uuid.Parse(linkID)
+		commentUUID, err := uuid.Parse(commentID)
 		if err != nil {
-			oplog.Error("failed to parse link id", "error", err)
+			oplog.Error("failed to parse comment id", "error", err)
 			http.Redirect(w, r, redirectURL, http.StatusFound)
 			return
 		}
@@ -98,18 +91,18 @@ func (s *Server) LinkVote() http.HandlerFunc {
 			return
 		}
 
-		err = s.queries.LinkVote(r.Context(), database.LinkVoteParams{
-			UserID: user.ID,
-			LinkID: linkUUID,
-			Vote:   vote,
+		err = s.queries.CommentVote(r.Context(), database.CommentVoteParams{
+			UserID:    user.ID,
+			CommentID: commentUUID,
+			Vote:      vote,
 		})
 		if err != nil {
-			oplog.Error("failed to vote on link", "error", err)
+			oplog.Error("failed to vote on comment", "error", err)
 			http.Redirect(w, r, redirectURL, http.StatusFound)
 			return
 		}
 
-		oplog.Info("user voted on link", "link_id", linkID)
+		oplog.Info("user voted on comment", "comment_id", commentUUID)
 		http.Redirect(w, r, redirectURL, http.StatusFound)
 	}
 }

@@ -40,7 +40,7 @@ templ Page(props Props) {
 			</div>
 		</div>
 		for _, row := range props.Comments {
-			@comment.Component(comment.Props{User: props.User, Comment: row})
+			@comment.Component(comment.Props{User: props.User, Comment: row, RedirectURL: fmt.Sprintf("/link?id=%s", props.Link.ID)})
 		}
 	}
 }

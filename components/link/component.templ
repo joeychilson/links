@@ -52,7 +52,7 @@ templ Component(props Props) {
 				<div>
 					<p class="text-sm text-gray-500">
 						Shared By
-						<a href={ templ.SafeURL(fmt.Sprintf("/user?name=%s", props.Link.Username)) } class="hover:underline">
+						<a href={ templ.SafeURL(fmt.Sprintf("/user?name=%s", props.Link.Username)) } class="text-blue-600 hover:underline">
 							{ props.Link.Username }
 						</a>
 						&middot; 
@@ -60,7 +60,7 @@ templ Component(props Props) {
 						&middot; 
 						{ fmt.Sprintf("%v score", props.Link.VoteScore) }
 						&middot; 
-						<a href={ templ.SafeURL(fmt.Sprintf("/link?id=%s", props.Link.ID)) } class="hover:underline">
+						<a href={ templ.SafeURL(fmt.Sprintf("/link?id=%s", props.Link.ID)) } class="text-blue-600 hover:underline">
 							{ fmt.Sprintf("%v comments", props.Link.CommentCount) }
 						</a>
 					</p>
