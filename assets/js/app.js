@@ -1,1 +1,0 @@
-const htmx = require('htmx.org');
