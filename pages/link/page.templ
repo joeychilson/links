@@ -34,7 +34,7 @@ templ CommentFeed(props CommentFeedProps) {
 		if props.User != nil {
 			<div class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg">
 				<div class="px-4 py-4">
-					<form hx-post="/comment" hx-target="#comment-feed" hx-swap="outerHTML">
+					<form hx-post="/comment" hx-target="#comment-feed" hx-swap="outerHTML" style="margin-bottom: 0;">
 						<input type="hidden" name="link_id" value={ props.LinkID }/>
 						<textarea
  							id="content"

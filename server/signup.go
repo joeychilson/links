@@ -126,8 +126,6 @@ func (s *Server) SignUp() http.HandlerFunc {
 		}
 
 		oplog.Info("user signed up", "user_id", userID.String())
-
-		w.Header().Set("HX-Redirect", "/")
-		w.WriteHeader(http.StatusOK)
+		s.Redirect(w, "/")
 	}
 }

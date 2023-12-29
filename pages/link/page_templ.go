@@ -97,7 +97,7 @@ func CommentFeed(props CommentFeedProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if props.User != nil {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mb-4 bg-white shadow overflow-hidden sm:rounded-lg\"><div class=\"px-4 py-4\"><form hx-post=\"/comment\" hx-target=\"#comment-feed\" hx-swap=\"outerHTML\"><input type=\"hidden\" name=\"link_id\" value=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mb-4 bg-white shadow overflow-hidden sm:rounded-lg\"><div class=\"px-4 py-4\"><form hx-post=\"/comment\" hx-target=\"#comment-feed\" hx-swap=\"outerHTML\" style=\"margin-bottom: 0;\"><input type=\"hidden\" name=\"link_id\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -15,7 +15,10 @@ type Props struct {
 }
 
 templ Component(props Props) {
-	<div id={ fmt.Sprintf("comment-%s", props.Comment.ID) } class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg">
+	<div
+ 		id={ fmt.Sprintf("comment-%s", props.Comment.ID) }
+ 		class={ "mb-4 bg-white shadow overflow-hidden sm:rounded-lg", borderClass(props.Comment.VoteScore) }
+	>
 		<div class="flex items-center">
 			<div class="flex items-center justify-center px-4 py-2">
 				<a
@@ -80,6 +83,19 @@ templ Component(props Props) {
 			</div>
 		</div>
 	</div>
+}
+
+func borderClass(score int64) string {
+	if score == 0 {
+		return "border-b border-blue-600"
+	}
+	if score > 0 {
+		return "border-b border-green-600"
+	}
+	if score < 0 {
+		return "border-b border-red-600"
+	}
+	return ""
 }
 
 func starButtonClass(voted int32) string {

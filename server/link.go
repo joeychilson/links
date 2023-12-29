@@ -47,7 +47,7 @@ func (s *Server) Link() http.HandlerFunc {
 			return
 		}
 
-		commentRows, err := s.queries.CommentFeed(ctx, database.CommentFeedParams{
+		commentFeed, err := s.queries.CommentFeed(ctx, database.CommentFeedParams{
 			UserID: userID,
 			LinkID: linkUUID,
 			Limit:  100,
@@ -59,7 +59,7 @@ func (s *Server) Link() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("link page loaded", "link_id", linkID, "comments", len(commentRows), "vote", linkRow.UserVoted)
-		link.Page(link.Props{User: user, Link: linkRow, Comments: commentRows}).Render(ctx, w)
+		oplog.Info("link page loaded", "link_id", linkID, "comments", len(commentFeed), "vote", linkRow.UserVoted)
+		link.Page(link.Props{User: user, Link: linkRow, Comments: commentFeed}).Render(ctx, w)
 	}
 }

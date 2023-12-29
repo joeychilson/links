@@ -25,3 +25,8 @@ func New(logger *httplog.Logger, queries *database.Queries, sessionManager *sess
 func (s *Server) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, s.Router())
 }
+
+func (s *Server) Redirect(w http.ResponseWriter, path string) {
+	w.Header().Set("HX-Redirect", path)
+	w.WriteHeader(http.StatusOK)
+}

@@ -15,7 +15,10 @@ type Props struct {
 }
 
 templ Component(props Props) {
-	<div id={ fmt.Sprintf("link-%s", props.Link.ID) } class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg hover:bg-gray-50 transition-colors duration-300">
+	<div
+ 		id={ fmt.Sprintf("link-%s", props.Link.ID) }
+ 		class={ "mb-4 bg-white shadow overflow-hidden sm:rounded-lg hover:bg-gray-50 transition-colors duration-300", borderClass(props.Link.VoteScore) }
+	>
 		<div class="flex items-center">
 			<div class="flex items-center justify-center px-4 py-2">
 				<a
@@ -76,4 +79,17 @@ templ Component(props Props) {
 			</div>
 		</div>
 	</div>
+}
+
+func borderClass(score int64) string {
+	if score == 0 {
+		return "border-b border-blue-600"
+	}
+	if score > 0 {
+		return "border-b border-green-600"
+	}
+	if score < 0 {
+		return "border-b border-red-600"
+	}
+	return ""
 }

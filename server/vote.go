@@ -24,16 +24,14 @@ func (s *Server) Vote() http.HandlerFunc {
 		redirect := r.URL.Query().Get("redirect")
 
 		if linkID == "" {
-			w.Header().Set("HX-Redirect", redirect)
-			w.WriteHeader(http.StatusOK)
+			s.Redirect(w, redirect)
 			return
 		}
 
 		linkUUID, err := uuid.Parse(linkID)
 		if err != nil {
 			oplog.Error("failed to parse link id", "error", err)
-			w.Header().Set("HX-Redirect", redirect)
-			w.WriteHeader(http.StatusOK)
+			s.Redirect(w, redirect)
 			return
 		}
 
@@ -43,8 +41,7 @@ func (s *Server) Vote() http.HandlerFunc {
 		} else if voteDir == "down" {
 			vote = -1
 		} else {
-			w.Header().Set("HX-Redirect", redirect)
-			w.WriteHeader(http.StatusOK)
+			s.Redirect(w, redirect)
 			return
 		}
 
@@ -52,8 +49,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			commentUUID, err := uuid.Parse(commentID)
 			if err != nil {
 				oplog.Error("failed to parse comment id", "error", err)
-				w.Header().Set("HX-Redirect", redirect)
-				w.WriteHeader(http.StatusOK)
+				s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
 				return
 			}
 
@@ -64,8 +60,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			})
 			if err != nil {
 				oplog.Error("failed to vote on comment", "error", err)
-				w.Header().Set("HX-Redirect", fmt.Sprintf("/link?id=%s", linkID))
-				w.WriteHeader(http.StatusOK)
+				s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
 				return
 			}
 
@@ -75,8 +70,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			})
 			if err != nil {
 				oplog.Error("failed to get comment", "error", err)
-				w.Header().Set("HX-Redirect", fmt.Sprintf("/link?id=%s", linkID))
-				w.WriteHeader(http.StatusOK)
+				s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
 				return
 			}
 
@@ -91,8 +85,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			})
 			if err != nil {
 				oplog.Error("failed to vote on link", "error", err)
-				w.Header().Set("HX-Redirect", redirect)
-				w.WriteHeader(http.StatusOK)
+				s.Redirect(w, redirect)
 				return
 			}
 
@@ -102,8 +95,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			})
 			if err != nil {
 				oplog.Error("failed to get link", "error", err)
-				w.Header().Set("HX-Redirect", redirect)
-				w.WriteHeader(http.StatusOK)
+				s.Redirect(w, redirect)
 				return
 			}
 
