@@ -19,11 +19,23 @@ type Props struct {
 templ Page(props Props) {
 	@layout.Layout(layout.Props{Title: props.Link.Title, User: props.User}) {
 		@link.Component(link.Props{User: props.User, Link: props.Link, RedirectURL: fmt.Sprintf("/link?id=%s", props.Link.ID)})
+		@CommentFeed(CommentFeedProps{User: props.User, LinkID: props.Link.ID.String(), Comments: props.Comments})
+	}
+}
+
+type CommentFeedProps struct {
+	User     *session.User
+	LinkID   string
+	Comments []database.CommentRow
+}
+
+templ CommentFeed(props CommentFeedProps) {
+	<div id="comment-feed">
 		if props.User != nil {
 			<div class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg">
 				<div class="px-4 py-4">
-					<form action="/comment" method="POST" style="margin-bottom: 0;">
-						<input type="hidden" name="link_id" value={ props.Link.ID.String() }/>
+					<form hx-post="/comment" hx-target="#comment-feed" hx-swap="outerHTML">
+						<input type="hidden" name="link_id" value={ props.LinkID }/>
 						<textarea
  							id="content"
  							name="content"
@@ -44,5 +56,5 @@ templ Page(props Props) {
 		for _, row := range props.Comments {
 			@comment.Component(comment.Props{User: props.User, Comment: row})
 		}
-	}
+	</div>
 }
