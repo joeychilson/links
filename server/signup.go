@@ -14,6 +14,7 @@ var (
 	ErrorInternalServer = "Sorry, something went wrong. Please try again later."
 	ErrorEmailExists    = map[string]string{"email": "Sorry, this email is already in use"}
 	ErrorUsernameExists = map[string]string{"username": "Sorry, this username is already in use"}
+	ErrorUsernameLength = map[string]string{"username": "Username must be at least 4 characters"}
 	ErrorPasswordLength = map[string]string{"password": "Password must be at least 8 characters"}
 	ErrorPasswordSymbol = map[string]string{"password": "Password must contain at least one symbol"}
 	ErrorPasswordsMatch = map[string]string{"confirm-password": "Passwords do not match"}
@@ -43,12 +44,12 @@ func (s *Server) SignUp() http.HandlerFunc {
 		}
 
 		if emailExists {
-			formProps := signup.FormProps{
+			props := signup.FormProps{
 				Email:    email,
 				Username: username,
 				Error:    ErrorEmailExists,
 			}
-			signup.Page(signup.PageProps{FormProps: formProps}).Render(ctx, w)
+			signup.Form(props).Render(ctx, w)
 			return
 		}
 
@@ -60,32 +61,42 @@ func (s *Server) SignUp() http.HandlerFunc {
 		}
 
 		if usernameExists {
-			formProps := signup.FormProps{
+			props := signup.FormProps{
 				Email:    email,
 				Username: username,
 				Error:    ErrorUsernameExists,
 			}
-			signup.Page(signup.PageProps{FormProps: formProps}).Render(ctx, w)
+			signup.Form(props).Render(ctx, w)
+			return
+		}
+
+		if len(username) < 4 {
+			props := signup.FormProps{
+				Email:    email,
+				Username: username,
+				Error:    ErrorUsernameLength,
+			}
+			signup.Form(props).Render(ctx, w)
 			return
 		}
 
 		if len(password) < 8 {
-			formProps := signup.FormProps{
+			props := signup.FormProps{
 				Email:    email,
 				Username: username,
 				Error:    ErrorPasswordLength,
 			}
-			signup.Page(signup.PageProps{FormProps: formProps}).Render(ctx, w)
+			signup.Form(props).Render(ctx, w)
 			return
 		}
 
 		if password != confirmPassword {
-			formProps := signup.FormProps{
+			props := signup.FormProps{
 				Email:    email,
 				Username: username,
 				Error:    ErrorPasswordsMatch,
 			}
-			signup.Page(signup.PageProps{FormProps: formProps}).Render(ctx, w)
+			signup.Form(props).Render(ctx, w)
 			return
 		}
 
@@ -115,6 +126,8 @@ func (s *Server) SignUp() http.HandlerFunc {
 		}
 
 		oplog.Info("user signed up", "user_id", userID.String())
-		http.Redirect(w, r, "/", http.StatusFound)
+
+		w.Header().Set("HX-Redirect", "/")
+		w.WriteHeader(http.StatusOK)
 	}
 }
