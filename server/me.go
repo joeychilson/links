@@ -15,18 +15,38 @@ func (s *Server) MePage() http.HandlerFunc {
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
 
-		feed, err := s.queries.LikedFeed(ctx, database.LikedFeedParams{
-			UserID: user.ID,
-			Limit:  25,
-			Offset: 0,
-		})
-		if err != nil {
-			oplog.Error("failed to get liked feed", "error", err)
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
+		feedType := r.URL.Query().Get("feed")
+
+		var (
+			feed []database.FeedRow
+			err  error
+		)
+		if feedType == "voted" {
+			feed, err = s.queries.UserFeedVoted(ctx, database.UserFeedVotedParams{
+				UserID: user.ID,
+				Limit:  25,
+				Offset: 0,
+			})
+			if err != nil {
+				oplog.Error("failed to get user voted feed", "error", err)
+				http.Redirect(w, r, "/", http.StatusFound)
+				return
+			}
+		} else {
+			feed, err = s.queries.UserFeedLinks(ctx, database.UserFeedLinksParams{
+				UserID:   user.ID,
+				Username: user.Username,
+				Limit:    25,
+				Offset:   0,
+			})
+			if err != nil {
+				oplog.Error("failed to get user feed", "error", err)
+				http.Redirect(w, r, "/", http.StatusFound)
+				return
+			}
 		}
 
-		oplog.Info("me page loaded", "count", len(feed))
-		me.Page(me.Props{User: user, Feed: feed}).Render(ctx, w)
+		oplog.Info("me page loaded", "feed_type", feedType, "count", len(feed))
+		me.Page(me.Props{User: user, FeedType: feedType, Feed: feed}).Render(ctx, w)
 	}
 }

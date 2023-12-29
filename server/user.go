@@ -42,14 +42,14 @@ func (s *Server) UserPage() http.HandlerFunc {
 			userID = uuid.Nil
 		}
 
-		feed, err := s.queries.UserFeed(ctx, database.UserFeedParams{
+		feed, err := s.queries.UserFeedLinks(ctx, database.UserFeedLinksParams{
 			UserID:   userID,
 			Username: username,
 			Limit:    25,
 			Offset:   int32((page - 1) * 25),
 		})
 		if err != nil {
-			oplog.Error("failed to get user feed", "error", err)
+			oplog.Error("failed to get user links feed", "error", err)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
