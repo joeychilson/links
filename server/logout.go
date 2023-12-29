@@ -8,8 +8,9 @@ import (
 
 func (s *Server) Logout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		oplog := httplog.LogEntry(r.Context())
-		user := s.UserFromContext(r.Context())
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
 
 		if user == nil {
 			http.Redirect(w, r, "/", http.StatusSeeOther)

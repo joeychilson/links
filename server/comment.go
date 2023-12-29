@@ -10,8 +10,9 @@ import (
 
 func (s *Server) Comment() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		oplog := httplog.LogEntry(r.Context())
-		user := s.UserFromContext(r.Context())
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
 
 		linkID := r.FormValue("link_id")
 		content := r.FormValue("content")
@@ -40,7 +41,7 @@ func (s *Server) Comment() http.HandlerFunc {
 			userID = uuid.Nil
 		}
 
-		err = s.queries.CreateComment(r.Context(), database.CreateCommentParams{
+		err = s.queries.CreateComment(ctx, database.CreateCommentParams{
 			UserID:  userID,
 			LinkID:  linkUUID,
 			Content: content,
@@ -58,8 +59,9 @@ func (s *Server) Comment() http.HandlerFunc {
 
 func (s *Server) CommentVote() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		oplog := httplog.LogEntry(r.Context())
-		user := s.UserFromContext(r.Context())
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
 
 		commentID := r.URL.Query().Get("comment_id")
 		voteDir := r.URL.Query().Get("vote")
@@ -91,7 +93,7 @@ func (s *Server) CommentVote() http.HandlerFunc {
 			return
 		}
 
-		err = s.queries.CommentVote(r.Context(), database.CommentVoteParams{
+		err = s.queries.CommentVote(ctx, database.CommentVoteParams{
 			UserID:    user.ID,
 			CommentID: commentUUID,
 			Vote:      vote,

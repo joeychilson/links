@@ -11,10 +11,11 @@ import (
 
 func (s *Server) MePage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		oplog := httplog.LogEntry(r.Context())
-		user := s.UserFromContext(r.Context())
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
 
-		feed, err := s.queries.LikedFeed(r.Context(), database.LikedFeedParams{
+		feed, err := s.queries.LikedFeed(ctx, database.LikedFeedParams{
 			UserID: user.ID,
 			Limit:  25,
 			Offset: 0,
@@ -26,6 +27,6 @@ func (s *Server) MePage() http.HandlerFunc {
 		}
 
 		oplog.Info("me page loaded", "count", len(feed))
-		me.Page(me.Props{User: user, Feed: feed}).Render(r.Context(), w)
+		me.Page(me.Props{User: user, Feed: feed}).Render(ctx, w)
 	}
 }

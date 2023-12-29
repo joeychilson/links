@@ -14,8 +14,9 @@ import (
 
 func (s *Server) FeedPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		oplog := httplog.LogEntry(r.Context())
-		user := s.UserFromContext(r.Context())
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
 
 		pageStr := r.URL.Query().Get("page")
 		if pageStr == "" {
@@ -25,7 +26,7 @@ func (s *Server) FeedPage() http.HandlerFunc {
 		page, err := strconv.Atoi(pageStr)
 		if err != nil {
 			oplog.Error("failed to parse page number", "error", err)
-			feed.Page(feed.Props{User: user}).Render(r.Context(), w)
+			feed.Page(feed.Props{User: user}).Render(ctx, w)
 			return
 		}
 
@@ -36,50 +37,52 @@ func (s *Server) FeedPage() http.HandlerFunc {
 			userID = uuid.Nil
 		}
 
-		feedRows, err := s.queries.LinkFeed(r.Context(), database.LinkFeedParams{
+		feedRows, err := s.queries.LinkFeed(ctx, database.LinkFeedParams{
 			UserID: userID,
 			Limit:  25,
 			Offset: int32((page - 1) * 25),
 		})
 		if err != nil {
 			oplog.Error("failed to get link feed", "error", err)
-			feed.Page(feed.Props{User: user}).Render(r.Context(), w)
+			feed.Page(feed.Props{User: user}).Render(ctx, w)
 			return
 		}
 
 		oplog.Info("feed page loaded", "count", len(feedRows))
-		feed.Page(feed.Props{User: user, Feed: feedRows}).Render(r.Context(), w)
+		feed.Page(feed.Props{User: user, Feed: feedRows}).Render(ctx, w)
 	}
 }
 
 func (s *Server) NewPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user := s.UserFromContext(r.Context())
-		new.Page(new.PageProps{User: user}).Render(r.Context(), w)
+		ctx := r.Context()
+		user := s.UserFromContext(ctx)
+		new.Page(new.PageProps{User: user}).Render(ctx, w)
 	}
 }
 
 func (s *Server) New() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		oplog := httplog.LogEntry(r.Context())
-		user := s.UserFromContext(r.Context())
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
 
 		title := r.FormValue("title")
 		url := r.FormValue("url")
 
 		if title == "" || url == "" {
-			new.Page(new.PageProps{User: user}).Render(r.Context(), w)
+			new.Page(new.PageProps{User: user}).Render(ctx, w)
 			return
 		}
 
-		err := s.queries.CreateLink(r.Context(), database.CreateLinkParams{
+		err := s.queries.CreateLink(ctx, database.CreateLinkParams{
 			UserID: user.ID,
 			Title:  title,
 			Url:    url,
 		})
 		if err != nil {
 			oplog.Error("failed to create link", "error", err)
-			new.Page(new.PageProps{User: user}).Render(r.Context(), w)
+			new.Page(new.PageProps{User: user}).Render(ctx, w)
 			return
 		}
 

@@ -12,8 +12,9 @@ import (
 
 func (s *Server) Link() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		oplog := httplog.LogEntry(r.Context())
-		user := s.UserFromContext(r.Context())
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
 
 		linkID := r.URL.Query().Get("id")
 
@@ -36,7 +37,7 @@ func (s *Server) Link() http.HandlerFunc {
 			userID = uuid.Nil
 		}
 
-		linkRow, err := s.queries.Link(r.Context(), database.LinkParams{
+		linkRow, err := s.queries.Link(ctx, database.LinkParams{
 			UserID: userID,
 			LinkID: linkUUID,
 		})
@@ -46,7 +47,7 @@ func (s *Server) Link() http.HandlerFunc {
 			return
 		}
 
-		commentRows, err := s.queries.CommentFeed(r.Context(), database.CommentFeedParams{
+		commentRows, err := s.queries.CommentFeed(ctx, database.CommentFeedParams{
 			UserID: userID,
 			LinkID: linkUUID,
 			Limit:  100,
@@ -59,14 +60,15 @@ func (s *Server) Link() http.HandlerFunc {
 		}
 
 		oplog.Info("link page loaded", "link_id", linkID, "comments", len(commentRows), "vote", linkRow.UserVoted)
-		link.Page(link.Props{User: user, Link: linkRow, Comments: commentRows}).Render(r.Context(), w)
+		link.Page(link.Props{User: user, Link: linkRow, Comments: commentRows}).Render(ctx, w)
 	}
 }
 
 func (s *Server) LinkVote() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		oplog := httplog.LogEntry(r.Context())
-		user := s.UserFromContext(r.Context())
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
 
 		linkID := r.URL.Query().Get("link_id")
 		voteDir := r.URL.Query().Get("vote")
@@ -98,7 +100,7 @@ func (s *Server) LinkVote() http.HandlerFunc {
 			return
 		}
 
-		err = s.queries.LinkVote(r.Context(), database.LinkVoteParams{
+		err = s.queries.LinkVote(ctx, database.LinkVoteParams{
 			UserID: user.ID,
 			LinkID: linkUUID,
 			Vote:   vote,

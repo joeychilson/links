@@ -13,8 +13,9 @@ import (
 
 func (s *Server) UserPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		oplog := httplog.LogEntry(r.Context())
-		user := s.UserFromContext(r.Context())
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
 
 		username := r.URL.Query().Get("name")
 		if username == "" {
@@ -41,7 +42,7 @@ func (s *Server) UserPage() http.HandlerFunc {
 			userID = uuid.Nil
 		}
 
-		feed, err := s.queries.UserFeed(r.Context(), database.UserFeedParams{
+		feed, err := s.queries.UserFeed(ctx, database.UserFeedParams{
 			UserID:   userID,
 			Username: username,
 			Limit:    25,
@@ -54,6 +55,6 @@ func (s *Server) UserPage() http.HandlerFunc {
 		}
 
 		oplog.Info("user page loaded", "count", len(feed))
-		userpage.Page(userpage.Props{User: user, Feed: feed}).Render(r.Context(), w)
+		userpage.Page(userpage.Props{User: user, Feed: feed}).Render(ctx, w)
 	}
 }

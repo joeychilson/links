@@ -27,17 +27,18 @@ func (s *Server) SignUpPage() http.HandlerFunc {
 
 func (s *Server) SignUp() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		oplog := httplog.LogEntry(r.Context())
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
 
 		email := r.FormValue("email")
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 		confirmPassword := r.FormValue("confirm-password")
 
-		emailExists, err := s.queries.EmailExists(r.Context(), email)
+		emailExists, err := s.queries.EmailExists(ctx, email)
 		if err != nil {
 			oplog.Error("failed to check if email exists", "error", err)
-			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
+			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(ctx, w)
 			return
 		}
 
@@ -47,14 +48,14 @@ func (s *Server) SignUp() http.HandlerFunc {
 				Username: username,
 				Error:    ErrorEmailExists,
 			}
-			signup.Page(signup.PageProps{FormProps: formProps}).Render(r.Context(), w)
+			signup.Page(signup.PageProps{FormProps: formProps}).Render(ctx, w)
 			return
 		}
 
-		usernameExists, err := s.queries.UsernameExists(r.Context(), username)
+		usernameExists, err := s.queries.UsernameExists(ctx, username)
 		if err != nil {
 			oplog.Error("failed to check if username exists", "error", err)
-			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
+			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(ctx, w)
 			return
 		}
 
@@ -64,7 +65,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 				Username: username,
 				Error:    ErrorUsernameExists,
 			}
-			signup.Page(signup.PageProps{FormProps: formProps}).Render(r.Context(), w)
+			signup.Page(signup.PageProps{FormProps: formProps}).Render(ctx, w)
 			return
 		}
 
@@ -74,7 +75,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 				Username: username,
 				Error:    ErrorPasswordLength,
 			}
-			signup.Page(signup.PageProps{FormProps: formProps}).Render(r.Context(), w)
+			signup.Page(signup.PageProps{FormProps: formProps}).Render(ctx, w)
 			return
 		}
 
@@ -84,32 +85,32 @@ func (s *Server) SignUp() http.HandlerFunc {
 				Username: username,
 				Error:    ErrorPasswordsMatch,
 			}
-			signup.Page(signup.PageProps{FormProps: formProps}).Render(r.Context(), w)
+			signup.Page(signup.PageProps{FormProps: formProps}).Render(ctx, w)
 			return
 		}
 
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			oplog.Error("failed to hash password", "error", err)
-			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
+			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(ctx, w)
 			return
 		}
 
-		userID, err := s.queries.CreateUser(r.Context(), database.CreateUserParams{
+		userID, err := s.queries.CreateUser(ctx, database.CreateUserParams{
 			Email:    email,
 			Username: username,
 			Password: string(hashedPassword),
 		})
 		if err != nil {
 			oplog.Error("failed to create user", "error", err)
-			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
+			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(ctx, w)
 			return
 		}
 
 		err = s.sessionManager.Set(w, r, userID)
 		if err != nil {
 			oplog.Error("failed to set session", "error", err)
-			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(r.Context(), w)
+			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(ctx, w)
 			return
 		}
 
