@@ -8,7 +8,6 @@ import (
 	"github.com/go-chi/httplog/v2"
 
 	"github.com/joeychilson/links/pages/errors"
-	"github.com/joeychilson/links/static"
 )
 
 func (s *Server) Router() http.Handler {
@@ -18,9 +17,6 @@ func (s *Server) Router() http.Handler {
 	r.Use(httplog.RequestLogger(s.logger))
 	r.Use(middleware.Recoverer)
 	r.Use(s.UserFromSession)
-
-	// Static files
-	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
 
 	// Feed page
 	r.Route("/", func(r chi.Router) {
