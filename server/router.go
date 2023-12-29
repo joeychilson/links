@@ -33,17 +33,18 @@ func (s *Server) Router() http.Handler {
 	// Link
 	r.Route("/link", func(r chi.Router) {
 		r.Get("/", s.Link())
-		r.Route("/vote", func(r chi.Router) {
-			r.Use(s.RequireUser)
-			r.Get("/", s.LinkVote())
-		})
 	})
 
 	// Comment
 	r.Route("/comment", func(r chi.Router) {
 		r.Use(s.RequireUser)
 		r.Post("/", s.Comment())
-		r.Get("/vote", s.CommentVote())
+	})
+
+	// Vote
+	r.Route("/vote", func(r chi.Router) {
+		r.Use(s.RequireUser)
+		r.Get("/", s.Vote())
 	})
 
 	// User

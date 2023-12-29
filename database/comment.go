@@ -24,12 +24,67 @@ func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) er
 
 type CommentRow struct {
 	ID         uuid.UUID
+	LinkID     uuid.UUID
 	Username   string
 	Content    string
 	ReplyCount int64
 	VoteScore  int64
 	UserVoted  int32
 	CreatedAt  pgtype.Timestamptz
+}
+
+type CommentParams struct {
+	CommentID uuid.UUID
+	UserID    uuid.UUID
+}
+
+func (q *Queries) Comment(ctx context.Context, arg CommentParams) (CommentRow, error) {
+	query := `
+		SELECT 
+			c.id,
+			c.link_id,
+			u.username,
+			c.content,
+			(
+				SELECT COUNT(*)
+				FROM comments as rc
+				WHERE rc.parent_id = c.id
+			) as reply_count,
+			COALESCE(SUM(cv.vote), 0) as vote_score,
+			COALESCE(
+				(
+					SELECT cv.vote
+					FROM comment_votes as cv
+					WHERE cv.comment_id = c.id AND cv.user_id = $2
+				),
+				0
+			) as user_voted,
+			c.created_at
+		FROM 
+			comments c
+		JOIN 
+			users u ON c.user_id = u.id
+		LEFT JOIN
+			comment_votes cv ON c.id = cv.comment_id
+		WHERE 
+			c.id = $1
+		GROUP BY
+			c.id, u.username, c.link_id
+	`
+	var commentRow CommentRow
+	if err := q.db.QueryRow(ctx, query, arg.CommentID, arg.UserID).Scan(
+		&commentRow.ID,
+		&commentRow.LinkID,
+		&commentRow.Username,
+		&commentRow.Content,
+		&commentRow.ReplyCount,
+		&commentRow.VoteScore,
+		&commentRow.UserVoted,
+		&commentRow.CreatedAt,
+	); err != nil {
+		return CommentRow{}, err
+	}
+	return commentRow, nil
 }
 
 type CommentFeedParams struct {
@@ -43,6 +98,7 @@ func (q *Queries) CommentFeed(ctx context.Context, arg CommentFeedParams) ([]Com
 	query := `
         SELECT 
             c.id,
+            c.link_id,
             u.username,
             c.content,
             (
@@ -69,7 +125,7 @@ func (q *Queries) CommentFeed(ctx context.Context, arg CommentFeedParams) ([]Com
         WHERE 
             c.link_id = $1
         GROUP BY
-            c.id, u.username
+            c.id, u.username, c.link_id
 		ORDER BY 
 			vote_score DESC, c.created_at DESC
         LIMIT $2
@@ -85,6 +141,7 @@ func (q *Queries) CommentFeed(ctx context.Context, arg CommentFeedParams) ([]Com
 		var commentRow CommentRow
 		if err := rows.Scan(
 			&commentRow.ID,
+			&commentRow.LinkID,
 			&commentRow.Username,
 			&commentRow.Content,
 			&commentRow.ReplyCount,

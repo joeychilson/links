@@ -3,9 +3,9 @@ package server
 import (
 	"net/http"
 
+	"github.com/go-chi/httplog/v2"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/go-chi/httplog/v2"
 	"github.com/joeychilson/links/database"
 	"github.com/joeychilson/links/pages/signup"
 )

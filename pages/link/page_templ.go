@@ -81,7 +81,7 @@ func Page(props Props) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, row := range props.Comments {
-				templ_7745c5c3_Err = comment.Component(comment.Props{User: props.User, Comment: row, RedirectURL: fmt.Sprintf("/link?id=%s", props.Link.ID)}).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = comment.Component(comment.Props{User: props.User, Comment: row}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

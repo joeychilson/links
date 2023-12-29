@@ -15,10 +15,14 @@ type Props struct {
 }
 
 templ Component(props Props) {
-	<div class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg hover:bg-gray-50 transition-colors duration-300">
+	<div id={ fmt.Sprintf("link-%s", props.Link.ID) } class="mb-4 bg-white shadow overflow-hidden sm:rounded-lg hover:bg-gray-50 transition-colors duration-300">
 		<div class="flex items-center">
 			<div class="flex items-center justify-center px-4 py-2">
-				<a href={ templ.SafeURL(fmt.Sprintf("/link/vote?link_id=%s&vote=up&redirect_url=%s", props.Link.ID.String(), props.RedirectURL)) }>
+				<a
+ 					hx-get={ fmt.Sprintf("/vote?link_id=%s&vote=up&redirect=%s", props.Link.ID.String(), props.RedirectURL) }
+ 					hx-target={ fmt.Sprintf("#link-%s", props.Link.ID) }
+ 					hx-swap="outerHTML"
+				>
 					<button class="font-semibold rounded-md text-green-400 hover:text-green-500 focus:outline-none transition duration-300 ease-in-out">
 						if props.Link.UserVoted == 1 {
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">
@@ -31,7 +35,11 @@ templ Component(props Props) {
 						}
 					</button>
 				</a>
-				<a href={ templ.SafeURL(fmt.Sprintf("/link/vote?link_id=%s&vote=down&redirect_url=%s", props.Link.ID.String(), props.RedirectURL)) }>
+				<a
+ 					hx-get={ fmt.Sprintf("/vote?link_id=%s&vote=down&redirect=%s", props.Link.ID.String(), props.RedirectURL) }
+ 					hx-target={ fmt.Sprintf("#link-%s", props.Link.ID) }
+ 					hx-swap="outerHTML"
+				>
 					<button class="font-semibold rounded-md text-red-400 hover:text-red-500 focus:outline-none transition duration-300 ease-in-out">
 						if props.Link.UserVoted == -1 {
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8">

@@ -3,9 +3,9 @@ package link
 import (
 	"fmt"
 
-	"github.com/joeychilson/links/database"
 	"github.com/joeychilson/links/components/comment"
 	"github.com/joeychilson/links/components/link"
+	"github.com/joeychilson/links/database"
 	"github.com/joeychilson/links/pages/layout"
 	"github.com/joeychilson/links/pkg/session"
 )
@@ -42,7 +42,7 @@ templ Page(props Props) {
 			</div>
 		}
 		for _, row := range props.Comments {
-			@comment.Component(comment.Props{User: props.User, Comment: row, RedirectURL: fmt.Sprintf("/link?id=%s", props.Link.ID)})
+			@comment.Component(comment.Props{User: props.User, Comment: row})
 		}
 	}
 }
