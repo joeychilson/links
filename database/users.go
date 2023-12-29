@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -55,9 +54,9 @@ type User struct {
 	Username    string
 	Email       string
 	Password    string
-	ConfirmedAt time.Time
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ConfirmedAt pgtype.Timestamptz
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
 }
 
 func (q *Queries) UserByEmail(ctx context.Context, email string) (User, error) {

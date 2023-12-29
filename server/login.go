@@ -53,6 +53,6 @@ func (s *Server) Login() http.HandlerFunc {
 		}
 
 		oplog.Info("user logged in", "user_id", user.ID.String())
-		http.Redirect(w, r, "/", http.StatusFound)
+		s.Redirect(w, "/")
 	}
 }
