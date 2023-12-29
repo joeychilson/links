@@ -137,54 +137,44 @@ func buildCommentTree(comments []CommentRow, parentID uuid.UUID) []CommentRow {
 }
 
 type CommentParams struct {
-	CommentID uuid.UUID
 	UserID    uuid.UUID
+	CommentID uuid.UUID
 }
 
 func (q *Queries) Comment(ctx context.Context, arg CommentParams) (CommentRow, error) {
 	query := `
-		SELECT 
-			c.id,
-			c.link_id,
-			c.parent_id,
-			u.username,
-			c.content,
-			(
-				SELECT COUNT(*)
-				FROM comments as rc
-				WHERE rc.parent_id = c.id
-			) as reply_count,
-			COALESCE(SUM(cv.vote), 0) as vote_score,
-			COALESCE(
-				(
-					SELECT cv.vote
-					FROM comment_votes as cv
-					WHERE cv.comment_id = c.id AND cv.user_id = $2
-				),
-				0
-			) as user_voted,
-			c.created_at
-		FROM 
-			comments c
-		JOIN 
-			users u ON c.user_id = u.id
-		LEFT JOIN
-			comment_votes cv ON c.id = cv.comment_id
-		WHERE 
-			c.id = $1
-		GROUP BY
-			c.id, u.username, c.link_id
-	`
+        SELECT 
+            c.id,
+            c.link_id,
+            c.parent_id,
+            c.content,
+            c.created_at,
+            c.updated_at,
+            u.username,
+            (SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
+            (SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
+            COALESCE((SELECT cv.vote FROM comment_votes cv WHERE cv.comment_id = c.id AND cv.user_id = $1), 0) AS user_vote
+        FROM 
+            comments c
+        JOIN 
+            users u ON c.user_id = u.id
+        WHERE 
+            c.id = $2
+        GROUP BY
+            c.id, u.username, c.link_id
+    `
 	var commentRow CommentRow
-	if err := q.db.QueryRow(ctx, query, arg.CommentID, arg.UserID).Scan(
+	if err := q.db.QueryRow(ctx, query, arg.UserID, arg.CommentID).Scan(
 		&commentRow.ID,
 		&commentRow.LinkID,
 		&commentRow.ParentID,
-		&commentRow.Username,
 		&commentRow.Content,
+		&commentRow.CreatedAt,
+		&commentRow.UpdatedAt,
+		&commentRow.Username,
 		&commentRow.Replies,
 		&commentRow.Score,
-		&commentRow.CreatedAt,
+		&commentRow.UserVote,
 	); err != nil {
 		return CommentRow{}, err
 	}
