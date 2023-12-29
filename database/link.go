@@ -40,10 +40,29 @@ func (q *Queries) LinkVote(ctx context.Context, arg LinkVoteParams) error {
 	return err
 }
 
-func (q *Queries) ScoreLink(ctx context.Context, linkID uuid.UUID) (int64, error) {
-	query := "SELECT COALESCE(SUM(vote), 0) FROM link_votes WHERE link_id = $1"
-	row := q.db.QueryRow(ctx, query, linkID)
-	var score int64
-	err := row.Scan(&score)
-	return score, err
+type LinkScoreAndUserVoteParams struct {
+	UserID uuid.UUID
+	LinkID uuid.UUID
+}
+
+type LinkScoreAndUserVoteRow struct {
+	Score    int64
+	UserVote int32
+}
+
+func (q *Queries) LinkScoreAndUserVote(ctx context.Context, args LinkScoreAndUserVoteParams) (LinkScoreAndUserVoteRow, error) {
+	query := `
+		SELECT 
+			COALESCE(SUM(vote), 0) AS score,
+			COALESCE((SELECT vote FROM link_votes WHERE user_id = $1 AND link_id = $2), 0) AS user_vote
+		FROM 
+			link_votes
+		WHERE 
+			link_id = $2
+	`
+	var row LinkScoreAndUserVoteRow
+	if err := q.db.QueryRow(ctx, query, args.UserID, args.LinkID).Scan(&row.Score, &row.UserVote); err != nil {
+		return LinkScoreAndUserVoteRow{}, err
+	}
+	return row, nil
 }

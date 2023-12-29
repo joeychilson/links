@@ -64,7 +64,7 @@ func (s *Server) Vote() http.HandlerFunc {
 				return
 			}
 
-			commentRow, err := s.queries.Comment(ctx, database.CommentParams{
+			scoreVoteRow, err := s.queries.CommentScoreAndUserVote(ctx, database.CommentScoreAndUserVoteParams{
 				UserID:    user.ID,
 				CommentID: commentUUID,
 			})
@@ -75,8 +75,8 @@ func (s *Server) Vote() http.HandlerFunc {
 			}
 
 			oplog.Info("user voted on comment", "comment_id", commentUUID)
-			comment.VotingButtons(linkID, commentRow.ID.String(), commentRow.UserVote).Render(ctx, w)
-			comment.Score(commentRow.ID.String(), commentRow.Score).Render(ctx, w)
+			comment.VotingButtons(linkID, commentUUID.String(), scoreVoteRow.UserVote).Render(ctx, w)
+			comment.Score(commentUUID.String(), scoreVoteRow.Score).Render(ctx, w)
 			return
 		} else {
 			err = s.queries.LinkVote(ctx, database.LinkVoteParams{
@@ -90,7 +90,7 @@ func (s *Server) Vote() http.HandlerFunc {
 				return
 			}
 
-			linkRow, err := s.queries.Link(ctx, database.LinkParams{
+			scoreVoteRow, err := s.queries.LinkScoreAndUserVote(ctx, database.LinkScoreAndUserVoteParams{
 				UserID: user.ID,
 				LinkID: linkUUID,
 			})
@@ -101,8 +101,8 @@ func (s *Server) Vote() http.HandlerFunc {
 			}
 
 			oplog.Info("user voted on link", "link_id", linkID)
-			link.VotingButtons(linkRow.ID.String(), linkRow.UserVoted).Render(ctx, w)
-			link.Score(linkRow.ID.String(), linkRow.VoteScore).Render(ctx, w)
+			link.VotingButtons(linkUUID.String(), scoreVoteRow.UserVote).Render(ctx, w)
+			link.Score(linkUUID.String(), scoreVoteRow.Score).Render(ctx, w)
 			return
 		}
 	}

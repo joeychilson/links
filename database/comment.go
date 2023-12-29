@@ -202,3 +202,30 @@ func (q *Queries) CommentVote(ctx context.Context, arg CommentVoteParams) error 
 	_, err := q.db.Exec(ctx, query, arg.UserID, arg.CommentID, arg.Vote)
 	return err
 }
+
+type CommentScoreAndUserVoteParams struct {
+	UserID    uuid.UUID
+	CommentID uuid.UUID
+}
+
+type CommentScoreAndUserVoteRow struct {
+	Score    int64
+	UserVote int32
+}
+
+func (q *Queries) CommentScoreAndUserVote(ctx context.Context, args CommentScoreAndUserVoteParams) (CommentScoreAndUserVoteRow, error) {
+	query := `
+		SELECT 
+			COALESCE(SUM(vote), 0) AS score,
+			COALESCE((SELECT vote FROM comment_votes WHERE user_id = $1 AND comment_id = $2), 0) AS user_vote
+		FROM 
+			comment_votes
+		WHERE 
+			comment_id = $2
+	`
+	var row CommentScoreAndUserVoteRow
+	if err := q.db.QueryRow(ctx, query, args.UserID, args.CommentID).Scan(&row.Score, &row.UserVote); err != nil {
+		return CommentScoreAndUserVoteRow{}, err
+	}
+	return row, nil
+}
