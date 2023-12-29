@@ -10,6 +10,8 @@ import "context"
 import "io"
 import "bytes"
 
+import "fmt"
+
 type Props struct {
 	LinkID    string
 	CommentID string
@@ -28,7 +30,23 @@ func Component(props Props) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mb-4 bg-white border border-gray-300 shadow overflow-hidden sm:rounded-lg\"><div class=\"px-4 py-4\"><form hx-post=\"/comment\" hx-target=\"#comment-feed\" hx-swap=\"outerHTML\" style=\"margin-bottom: 0;\"><input type=\"hidden\" name=\"link_id\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("reply-%s", props.CommentID)))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap-oob=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("afterend:#reply-%s", props.CommentID)))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"mb-4 bg-white border border-gray-300 shadow overflow-hidden sm:rounded-lg\"><div class=\"px-4 py-4\"><form hx-post=\"/comment\" hx-target=\"#comment-feed\" hx-swap=\"outerHTML\" style=\"margin-bottom: 0;\"><input type=\"hidden\" name=\"link_id\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -53,7 +71,7 @@ func Component(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></form></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

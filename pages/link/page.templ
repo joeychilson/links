@@ -49,6 +49,7 @@ templ Comments(props CommentsProps) {
 	for _, row := range props.CommentFeed {
 		<div class={ indent(props.Depth) }>
 			@comment.Component(comment.Props{User: props.User, Comment: row})
+			<div id={ fmt.Sprintf("reply-%s", row.ID) }></div>
 			if len(row.Children) > 0 {
 				@Comments(CommentsProps{User: props.User, CommentFeed: row.Children, Depth: props.Depth + 1})
 			}

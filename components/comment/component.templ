@@ -82,8 +82,6 @@ templ Component(props Props) {
 				</div>
 				<a
  					hx-get={ fmt.Sprintf("/reply?link_id=%s&comment_id=%s", props.Comment.LinkID, props.Comment.ID) }
- 					hx-target={ fmt.Sprintf("#comment-%s", props.Comment.ID) }
- 					hx-swap="afterend"
 				>
 					<button class="text-sm text-gray-600 underline hover:text-gray-500">
 						Reply
