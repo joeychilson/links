@@ -2,35 +2,138 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type CreateCommentParams struct {
-	UserID  uuid.UUID
-	LinkID  uuid.UUID
-	Content string
+	UserID   uuid.UUID
+	LinkID   uuid.UUID
+	ParentID uuid.NullUUID
+	Content  string
 }
 
 func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) error {
 	query := `
-		INSERT INTO comments (user_id, link_id, content)
-		VALUES ($1, $2, $3)
+		INSERT INTO comments (user_id, link_id, parent_id, content)
+		VALUES ($1, $2, $3, $4)
 	`
-	_, err := q.db.Exec(ctx, query, arg.UserID, arg.LinkID, arg.Content)
+	_, err := q.db.Exec(ctx, query, arg.UserID, arg.LinkID, arg.ParentID, arg.Content)
 	return err
 }
 
 type CommentRow struct {
-	ID         uuid.UUID
-	LinkID     uuid.UUID
-	Username   string
-	Content    string
-	ReplyCount int64
-	VoteScore  int64
-	UserVoted  int32
-	CreatedAt  pgtype.Timestamptz
+	ID        uuid.UUID
+	LinkID    uuid.UUID
+	ParentID  uuid.UUID
+	Username  string
+	Content   string
+	Replies   int64
+	Score     int64
+	UserVote  int32
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Children  []CommentRow
+}
+
+type CommentFeedParams struct {
+	LinkID uuid.UUID
+	UserID uuid.UUID
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) CommentFeed(ctx context.Context, arg CommentFeedParams) ([]CommentRow, error) {
+	query := `
+		WITH RECURSIVE comment_tree AS (
+			SELECT 
+				c.id,
+				c.link_id,
+				c.parent_id,
+				c.content,
+				c.created_at,
+				c.updated_at,
+				u.username,
+				(SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
+				(SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
+				COALESCE(cv.vote, 0) AS user_vote
+			FROM 
+				comments c
+			JOIN 
+				users u ON c.user_id = u.id
+			LEFT JOIN 
+				comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
+			WHERE 
+				c.link_id = $1 AND c.parent_id IS NULL
+		
+			UNION ALL
+		
+			SELECT 
+				c.id,
+				c.link_id,
+				c.parent_id,
+				c.content,
+				c.created_at,
+				c.updated_at,
+				u.username,
+				(SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
+				(SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
+				COALESCE(cv.vote, 0) AS user_vote
+			FROM 
+				comments c
+			JOIN 
+				comment_tree ct ON c.parent_id = ct.id
+			JOIN 
+				users u ON c.user_id = u.id
+			LEFT JOIN 
+				comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
+		)
+		SELECT * FROM comment_tree
+		ORDER BY score DESC, created_at
+		LIMIT $3 OFFSET $4;
+	`
+	rows, err := q.db.Query(ctx, query, arg.LinkID, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var commentRows []CommentRow
+	for rows.Next() {
+		var commentRow CommentRow
+		if err := rows.Scan(
+			&commentRow.ID,
+			&commentRow.LinkID,
+			&commentRow.ParentID,
+			&commentRow.Content,
+			&commentRow.CreatedAt,
+			&commentRow.UpdatedAt,
+			&commentRow.Username,
+			&commentRow.Replies,
+			&commentRow.Score,
+			&commentRow.UserVote,
+		); err != nil {
+			return nil, err
+		}
+		commentRows = append(commentRows, commentRow)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return buildCommentTree(commentRows, uuid.Nil), nil
+}
+
+func buildCommentTree(comments []CommentRow, parentID uuid.UUID) []CommentRow {
+	var tree []CommentRow
+	for _, comment := range comments {
+		if comment.ParentID == parentID {
+			children := buildCommentTree(comments, comment.ID)
+			comment.Children = children
+			tree = append(tree, comment)
+		}
+	}
+	return tree
 }
 
 type CommentParams struct {
@@ -43,6 +146,7 @@ func (q *Queries) Comment(ctx context.Context, arg CommentParams) (CommentRow, e
 		SELECT 
 			c.id,
 			c.link_id,
+			c.parent_id,
 			u.username,
 			c.content,
 			(
@@ -75,85 +179,16 @@ func (q *Queries) Comment(ctx context.Context, arg CommentParams) (CommentRow, e
 	if err := q.db.QueryRow(ctx, query, arg.CommentID, arg.UserID).Scan(
 		&commentRow.ID,
 		&commentRow.LinkID,
+		&commentRow.ParentID,
 		&commentRow.Username,
 		&commentRow.Content,
-		&commentRow.ReplyCount,
-		&commentRow.VoteScore,
-		&commentRow.UserVoted,
+		&commentRow.Replies,
+		&commentRow.Score,
 		&commentRow.CreatedAt,
 	); err != nil {
 		return CommentRow{}, err
 	}
 	return commentRow, nil
-}
-
-type CommentFeedParams struct {
-	UserID uuid.UUID
-	LinkID uuid.UUID
-	Limit  int32
-	Offset int32
-}
-
-func (q *Queries) CommentFeed(ctx context.Context, arg CommentFeedParams) ([]CommentRow, error) {
-	query := `
-        SELECT 
-            c.id,
-            c.link_id,
-            u.username,
-            c.content,
-            (
-                SELECT COUNT(*)
-                FROM comments as rc
-                WHERE rc.parent_id = c.id
-            ) as reply_count,
-            COALESCE(SUM(cv.vote), 0) as vote_score,
-            COALESCE(
-                (
-                    SELECT cv.vote
-                    FROM comment_votes as cv
-                    WHERE cv.comment_id = c.id AND cv.user_id = $4
-                ),
-                0
-            ) as user_voted,
-            c.created_at
-        FROM 
-            comments c
-        JOIN 
-            users u ON c.user_id = u.id
-        LEFT JOIN
-            comment_votes cv ON c.id = cv.comment_id
-        WHERE 
-            c.link_id = $1
-        GROUP BY
-            c.id, u.username, c.link_id
-		ORDER BY 
-			vote_score DESC, c.created_at DESC
-        LIMIT $2
-        OFFSET $3
-    `
-	rows, err := q.db.Query(ctx, query, arg.LinkID, arg.Limit, arg.Offset, arg.UserID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var commentRows []CommentRow
-	for rows.Next() {
-		var commentRow CommentRow
-		if err := rows.Scan(
-			&commentRow.ID,
-			&commentRow.LinkID,
-			&commentRow.Username,
-			&commentRow.Content,
-			&commentRow.ReplyCount,
-			&commentRow.VoteScore,
-			&commentRow.UserVoted,
-			&commentRow.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		commentRows = append(commentRows, commentRow)
-	}
-	return commentRows, nil
 }
 
 type CommentVoteParams struct {

@@ -27,15 +27,15 @@ CREATE TABLE comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     link_id UUID NOT NULL REFERENCES links(id) ON DELETE CASCADE ON UPDATE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    parent_id UUID REFERENCES comments(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    parent_id UUID REFERENCES comments(id) ON DELETE SET NULL ON UPDATE CASCADE,
     content TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_comments_link_id ON comments(link_id);
-CREATE INDEX idx_comments_user_id ON comments(user_id);
 CREATE INDEX idx_comments_parent_id ON comments(parent_id);
+CREATE INDEX idx_comments_created_at ON comments(created_at);
 
 CREATE TABLE comment_votes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

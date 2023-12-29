@@ -15,15 +15,16 @@ import (
 
 	"github.com/joeychilson/links/components/comment"
 	"github.com/joeychilson/links/components/link"
+	"github.com/joeychilson/links/components/reply"
 	"github.com/joeychilson/links/database"
 	"github.com/joeychilson/links/pages/layout"
 	"github.com/joeychilson/links/pkg/session"
 )
 
 type Props struct {
-	User     *session.User
-	Link     database.FeedRow
-	Comments []database.CommentRow
+	User        *session.User
+	Link        database.FeedRow
+	CommentFeed []database.CommentRow
 }
 
 func Page(props Props) templ.Component {
@@ -53,7 +54,7 @@ func Page(props Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = CommentFeed(CommentFeedProps{User: props.User, LinkID: props.Link.ID.String(), Comments: props.Comments}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = CommentFeed(CommentFeedProps{User: props.User, LinkID: props.Link.ID.String(), CommentFeed: props.CommentFeed}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -74,9 +75,9 @@ func Page(props Props) templ.Component {
 }
 
 type CommentFeedProps struct {
-	User     *session.User
-	LinkID   string
-	Comments []database.CommentRow
+	User        *session.User
+	LinkID      string
+	CommentFeed []database.CommentRow
 }
 
 func CommentFeed(props CommentFeedProps) templ.Component {
@@ -97,33 +98,14 @@ func CommentFeed(props CommentFeedProps) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if props.User != nil {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mb-4 bg-white shadow overflow-hidden sm:rounded-lg\"><div class=\"px-4 py-4\"><form hx-post=\"/comment\" hx-target=\"#comment-feed\" hx-swap=\"outerHTML\" style=\"margin-bottom: 0;\"><input type=\"hidden\" name=\"link_id\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(props.LinkID))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <textarea id=\"content\" name=\"content\" rows=\"4\" class=\"w-full rounded-lg text-sm border-gray-200 border p-2 resize-none focus:ring-2 focus:ring-blue-300\" placeholder=\"Leave a comment...\"></textarea> <button type=\"submit\" class=\"mt-3 bg-blue-600 text-white rounded-md px-4 py-2 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Var4 := `Submit`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></form></div></div>")
+			templ_7745c5c3_Err = reply.Component(reply.Props{LinkID: props.LinkID}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		for _, row := range props.Comments {
-			templ_7745c5c3_Err = comment.Component(comment.Props{User: props.User, Comment: row}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		templ_7745c5c3_Err = Comments(CommentsProps{CommentFeed: props.CommentFeed}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 		if templ_7745c5c3_Err != nil {
@@ -134,4 +116,70 @@ func CommentFeed(props CommentFeedProps) templ.Component {
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+type CommentsProps struct {
+	User        *session.User
+	CommentFeed []database.CommentRow
+	Depth       int
+}
+
+func Comments(props CommentsProps) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		for _, row := range props.CommentFeed {
+			var templ_7745c5c3_Var5 = []any{indent(props.Depth)}
+			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ.CSSClasses(templ_7745c5c3_Var5).String()))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = comment.Component(comment.Props{User: props.User, Comment: row}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if len(row.Children) > 0 {
+				templ_7745c5c3_Err = Comments(CommentsProps{User: props.User, CommentFeed: row.Children, Depth: props.Depth + 1}).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func indent(depth int) string {
+	if depth == 0 {
+		return ""
+	}
+	return fmt.Sprintf("ml-%d", depth*2)
 }

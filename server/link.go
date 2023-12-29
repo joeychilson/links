@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/httplog/v2"
@@ -59,7 +60,11 @@ func (s *Server) Link() http.HandlerFunc {
 			return
 		}
 
+		for _, c := range commentFeed {
+			fmt.Println(c.UserVote)
+		}
+
 		oplog.Info("link page loaded", "link_id", linkID, "comments", len(commentFeed), "vote", linkRow.UserVoted)
-		link.Page(link.Props{User: user, Link: linkRow, Comments: commentFeed}).Render(ctx, w)
+		link.Page(link.Props{User: user, Link: linkRow, CommentFeed: commentFeed}).Render(ctx, w)
 	}
 }

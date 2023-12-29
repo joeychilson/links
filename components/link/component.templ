@@ -67,7 +67,7 @@ templ Component(props Props) {
 							{ props.Link.Username }
 						</a>
 						&middot; 
-						{ time.TimeAgo(props.Link.CreatedAt.Time.Unix()) }
+						{ time.TimeAgo(props.Link.CreatedAt.Unix()) }
 						&middot; 
 						{ fmt.Sprintf("%v score", props.Link.VoteScore) }
 						&middot; 
@@ -83,13 +83,13 @@ templ Component(props Props) {
 
 func borderClass(score int64) string {
 	if score == 0 {
-		return "border-b border-blue-600"
+		return "border-b border-blue-400"
 	}
 	if score > 0 {
-		return "border-b border-green-600"
+		return "border-b border-green-400"
 	}
 	if score < 0 {
-		return "border-b border-red-600"
+		return "border-b border-red-400"
 	}
 	return ""
 }

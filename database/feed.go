@@ -2,20 +2,20 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type FeedRow struct {
 	ID           uuid.UUID
 	Title        string
 	Url          string
-	CreatedAt    pgtype.Timestamptz
 	Username     string
 	CommentCount int64
 	VoteScore    int64
 	UserVoted    int32
+	CreatedAt    time.Time
 }
 
 type LinkFeedParams struct {

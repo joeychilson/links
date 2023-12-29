@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -47,6 +48,16 @@ func (q *Queries) DeleteUserToken(ctx context.Context, arg DeleteUserTokenParams
 
 	_, err := q.db.Exec(ctx, query, arg.Token, arg.Context)
 	return err
+}
+
+type User struct {
+	ID          uuid.UUID
+	Username    string
+	Email       string
+	Password    string
+	ConfirmedAt time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 func (q *Queries) UserByEmail(ctx context.Context, email string) (User, error) {

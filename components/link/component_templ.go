@@ -178,7 +178,7 @@ func Component(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var9 string = time.TimeAgo(props.Link.CreatedAt.Time.Unix())
+		var templ_7745c5c3_Var9 string = time.TimeAgo(props.Link.CreatedAt.Unix())
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -241,13 +241,13 @@ func Component(props Props) templ.Component {
 
 func borderClass(score int64) string {
 	if score == 0 {
-		return "border-b border-blue-600"
+		return "border-b border-blue-400"
 	}
 	if score > 0 {
-		return "border-b border-green-600"
+		return "border-b border-green-400"
 	}
 	if score < 0 {
-		return "border-b border-red-600"
+		return "border-b border-red-400"
 	}
 	return ""
 }

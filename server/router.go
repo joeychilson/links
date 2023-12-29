@@ -41,6 +41,12 @@ func (s *Server) Router() http.Handler {
 		r.Post("/", s.Comment())
 	})
 
+	// Reply
+	r.Route("/reply", func(r chi.Router) {
+		r.Use(s.RequireUser)
+		r.Get("/", s.CommentReply())
+	})
+
 	// Vote
 	r.Route("/vote", func(r chi.Router) {
 		r.Use(s.RequireUser)
