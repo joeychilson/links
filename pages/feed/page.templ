@@ -14,7 +14,7 @@ type Props struct {
 
 templ Page(props *Props) {
 	@app.Layout(&app.Props{Title: "Feed", Description: "The main feed of shared links", User: props.User}) {
-		<div class="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8">
+		<div id="feed" class="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8">
 			for _, row := range props.FeedRows {
 				@link.Component(&link.Props{User: props.User, LinkRow: row})
 			}
