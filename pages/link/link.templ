@@ -1,0 +1,19 @@
+package link
+
+import (
+	"github.com/joeychilson/links/db"
+	"github.com/joeychilson/links/layouts/app"
+	"github.com/joeychilson/links/pkg/session"
+)
+
+type Props struct {
+	User *session.User
+	Link db.Link
+}
+
+templ Page(props *Props) {
+	@app.Layout(&app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}) {
+		<h1>{ props.Link.Title } </h1>
+		<p>{ props.Link.Url } </p>
+	}
+}

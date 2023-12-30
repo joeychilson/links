@@ -33,6 +33,7 @@ type Link struct {
 	UserID    uuid.UUID
 	Title     string
 	Url       string
+	Slug      string
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
 }

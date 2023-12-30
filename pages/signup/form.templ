@@ -4,15 +4,6 @@ import (
 	"github.com/joeychilson/links/pkg/validate"
 )
 
-type FormError string
-
-const (
-	ErrorEmail           FormError = "email"
-	ErrorUsername        FormError = "username"
-	ErrorPassword        FormError = "password"
-	ErrorConfirmPassword FormError = "confirm-password"
-)
-
 type FormProps struct {
 	Email    string
 	Username string

@@ -49,6 +49,16 @@ func (s *Server) Router() http.Handler {
 	// Feed
 	r.Get("/", s.FeedPage())
 
+	// Link
+	r.Get("/{slug}", s.Link())
+
+	// Create link
+	r.Route("/create", func(r chi.Router) {
+		r.Use(s.RequireUser)
+		r.Get("/", s.CreateLinkPage())
+		r.Post("/", s.CreateLink())
+	})
+
 	// Login
 	r.Route("/login", func(r chi.Router) {
 		r.Get("/", s.LogInPage())
