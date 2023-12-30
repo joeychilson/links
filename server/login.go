@@ -34,7 +34,7 @@ func (s *Server) LogIn() http.HandlerFunc {
 		if err != nil {
 			oplog.Error("failed to get user by email", "error", err)
 			props := &login.Props{
-				Error: ErrorInternalServer,
+				Error: "Please provide a valid email and password.",
 			}
 			login.Page(props).Render(ctx, w)
 			return
@@ -44,7 +44,7 @@ func (s *Server) LogIn() http.HandlerFunc {
 		if err != nil {
 			if err == bcrypt.ErrMismatchedHashAndPassword {
 				props := &login.Props{
-					Error: "Invalid email or password.",
+					Error: "Please provide a valid email and password.",
 				}
 				login.Page(props).Render(ctx, w)
 				return
