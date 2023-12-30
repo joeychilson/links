@@ -4,6 +4,9 @@ INSERT INTO users (avatar, email, username, password) VALUES ($1, $2, $3, $4) RE
 -- name: UserByID :one
 SELECT id, avatar, username, email, confirmed_at, created_at, updated_at FROM users WHERE id = $1;
 
+-- name: UserIDAndPasswordByEmail :one
+SELECT id, password FROM users WHERE email = $1;
+
 -- name: EmailExists :one
 SELECT EXISTS(SELECT 1 FROM users WHERE email = $1);
 

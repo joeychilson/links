@@ -51,7 +51,14 @@ func (s *Server) Router() http.Handler {
 
 	// Login
 	r.Route("/login", func(r chi.Router) {
-		r.Get("/", s.LoginPage())
+		r.Get("/", s.LogInPage())
+		r.Post("/", s.LogIn())
+	})
+
+	// Logout
+	r.Route("/logout", func(r chi.Router) {
+		r.Use(s.RequireUser)
+		r.Post("/", s.LogOut())
 	})
 
 	// Signup

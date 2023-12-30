@@ -106,6 +106,22 @@ func (q *Queries) UserByID(ctx context.Context, id uuid.UUID) (UserByIDRow, erro
 	return i, err
 }
 
+const userIDAndPasswordByEmail = `-- name: UserIDAndPasswordByEmail :one
+SELECT id, password FROM users WHERE email = $1
+`
+
+type UserIDAndPasswordByEmailRow struct {
+	ID       uuid.UUID
+	Password string
+}
+
+func (q *Queries) UserIDAndPasswordByEmail(ctx context.Context, email string) (UserIDAndPasswordByEmailRow, error) {
+	row := q.db.QueryRow(ctx, userIDAndPasswordByEmail, email)
+	var i UserIDAndPasswordByEmailRow
+	err := row.Scan(&i.ID, &i.Password)
+	return i, err
+}
+
 const userIDByToken = `-- name: UserIDByToken :one
 SELECT user_id FROM user_tokens WHERE token = $1 AND context = $2
 `

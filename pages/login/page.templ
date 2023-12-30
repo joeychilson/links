@@ -6,7 +6,11 @@ import (
 	"github.com/joeychilson/links/layouts/app"
 )
 
-templ Page() {
+type Props struct {
+	Error string
+}
+
+templ Page(props *Props) {
 	@app.Layout(&app.Props{Title: "Log in", Description: "Log in to your account"}) {
 		<div class="flex h-full items-center py-16">
 			<div class="w-full max-w-md mx-auto p-6">
