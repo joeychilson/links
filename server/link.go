@@ -16,7 +16,9 @@ import (
 
 func (s *Server) CreateLinkPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		create.Page(&create.Props{FormProps: &create.FormProps{}}).Render(r.Context(), w)
+		ctx := r.Context()
+		user := s.UserFromContext(ctx)
+		create.Page(&create.Props{User: user, FormProps: &create.FormProps{}}).Render(ctx, w)
 	}
 }
 

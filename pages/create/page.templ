@@ -2,15 +2,17 @@ package create
 
 import (
 	"github.com/joeychilson/links/layouts/app"
+	"github.com/joeychilson/links/pkg/session"
 )
 
 type Props struct {
-	Error     string
+	User      *session.User
 	FormProps *FormProps
+	Error     string
 }
 
 templ Page(props *Props) {
-	@app.Layout(&app.Props{Title: "Create Link", Description: "Create a new link to be shared with others"}) {
+	@app.Layout(&app.Props{Title: "Create Link", Description: "Create a new link to be shared with others", User: props.User}) {
 		<div id="create-link-page" class="flex h-full items-center py-16">
 			<div class="w-full max-w-md mx-auto p-6">
 				if props.Error != "" {

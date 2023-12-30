@@ -12,11 +12,13 @@ import "bytes"
 
 import (
 	"github.com/joeychilson/links/layouts/app"
+	"github.com/joeychilson/links/pkg/session"
 )
 
 type Props struct {
-	Error     string
+	User      *session.User
 	FormProps *FormProps
+	Error     string
 }
 
 func Page(props *Props) templ.Component {
@@ -92,7 +94,7 @@ func Page(props *Props) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = app.Layout(&app.Props{Title: "Create Link", Description: "Create a new link to be shared with others"}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = app.Layout(&app.Props{Title: "Create Link", Description: "Create a new link to be shared with others", User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
