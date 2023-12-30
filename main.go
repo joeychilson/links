@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"log/slog"
+	"net/http"
 	"os"
 	"time"
 
@@ -57,7 +58,7 @@ func main() {
 	server := server.New(logger, queries, sessionManager)
 
 	slog.Info("Starting links application @ http://localhost:8080")
-	if err := server.ListenAndServe(":8080"); err != nil {
+	if err := http.ListenAndServe(":8080", server.Router()); err != nil {
 		slog.Error("failed to start server", "error", err)
 		os.Exit(1)
 	}
