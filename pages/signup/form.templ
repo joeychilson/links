@@ -1,0 +1,114 @@
+package signup
+
+import (
+	"github.com/joeychilson/links/pkg/validate"
+)
+
+type FormError string
+
+const (
+	ErrorEmail           FormError = "email"
+	ErrorUsername        FormError = "username"
+	ErrorPassword        FormError = "password"
+	ErrorConfirmPassword FormError = "confirm-password"
+)
+
+type FormProps struct {
+	Email    string
+	Username string
+	Error    validate.ValidationError
+}
+
+templ Form(props *FormProps) {
+	<form hx-post="/signup" hx-target="this" hx-swap="outerHTML">
+		<div class="grid gap-y-4">
+			<div>
+				<label for="email" class="block text-sm mb-2 dark:text-white">Email address</label>
+				<div class="relative">
+					<input
+ 						type="email"
+ 						id="email"
+ 						name="email"
+ 						value={ props.Email }
+ 						class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
+ 						required
+ 						aria-describedby="email-error"
+					/>
+					<div class={ "absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3", templ.KV("hidden", props.Error[validate.EmailValue] == "") }>
+						<svg class="h-5 w-5 text-red-500" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+							<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"></path>
+						</svg>
+					</div>
+				</div>
+				<p
+ 					id="email-error"
+ 					class={ "text-xs text-red-600 mt-2", templ.KV("hidden", props.Error[validate.EmailValue] == "") }
+				>
+					{ props.Error[validate.EmailValue].String() }
+				</p>
+			</div>
+			<div>
+				<label for="username" class="block text-sm mb-2 dark:text-white">Username</label>
+				<div class="relative">
+					<input
+ 						type="text"
+ 						id="username"
+ 						name="username"
+ 						value={ props.Username }
+ 						class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
+ 						required
+ 						aria-describedby="username-error"
+					/>
+					<div class={ "absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3", templ.KV("hidden", props.Error[validate.UsernameValue] == "") }>
+						<svg class="h-5 w-5 text-red-500" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+							<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"></path>
+						</svg>
+					</div>
+				</div>
+				<p
+ 					id="username-error"
+ 					class={ "text-xs text-red-600 mt-2", templ.KV("hidden", props.Error[validate.UsernameValue] == "") }
+				>
+					{ props.Error[validate.UsernameValue].String() }
+				</p>
+			</div>
+			<div>
+				<label for="password" class="block text-sm mb-2 dark:text-white">Password</label>
+				<div class="relative">
+					<input
+ 						type="password"
+ 						id="password"
+ 						name="password"
+ 						class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
+ 						required
+ 						aria-describedby="password-error"
+					/>
+					<div class={ "absolute inset-y-0 end-0 flex items-center pointer-events-none pe-3", templ.KV("hidden", props.Error[validate.PasswordValue] == "") }>
+						<svg class="h-5 w-5 text-red-500" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+							<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"></path>
+						</svg>
+					</div>
+				</div>
+				<p
+ 					id="password-error"
+ 					class={ "text-xs text-red-600 mt-2", templ.KV("hidden", props.Error[validate.PasswordValue]== "") }
+				>
+					{ props.Error[validate.PasswordValue].String() }
+				</p>
+			</div>
+			<div>
+				<label for="password-confirm" class="block text-sm mb-2 dark:text-white">Confirm Password</label>
+				<div class="relative">
+					<input
+ 						type="password"
+ 						id="password-confirm"
+ 						name="password-confirm"
+ 						class="py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
+ 						required
+					/>
+				</div>
+			</div>
+			<button type="submit" class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">Sign up</button>
+		</div>
+	</form>
+}

@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-    content: ["./components/**/*.templ", "./pages/**/*.templ", 'node_modules/preline/dist/*.js'],
+    content: ["./components/**/*.templ", "./layouts/**/*.templ", "./pages/**/*.templ", "node_modules/preline/dist/*.js"],
     safelist: [
         {
             pattern: /ml-+/,
@@ -9,8 +9,5 @@ export default {
     theme: {
         extend: {},
     },
-    plugins: [
-        require('@tailwindcss/forms'),
-        require('preline/plugin'),
-    ],
-}
+    plugins: [require("@tailwindcss/forms"), require("preline/plugin")],
+};

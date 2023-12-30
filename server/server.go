@@ -1,27 +1,35 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v2"
 
 	"github.com/joeychilson/links/db"
+	"github.com/joeychilson/links/pkg/session"
 	"github.com/joeychilson/links/static"
 )
 
+// ErrorInternalServer is the error message to display when something goes wrong on the server
+const ErrorInternalServer = "Sorry, something went wrong. Please try again later."
+
 // Server represents the server of the application
 type Server struct {
-	logger  *httplog.Logger
-	queries *db.Queries
+	logger         *httplog.Logger
+	queries        *db.Queries
+	sessionManager *session.Manager
 }
 
 // New returns a new server
-func New(logger *httplog.Logger, queries *db.Queries) *Server {
+func New(logger *httplog.Logger, queries *db.Queries, sessionManager *session.Manager) *Server {
 	return &Server{
-		logger:  logger,
-		queries: queries,
+		logger:         logger,
+		queries:        queries,
+		sessionManager: sessionManager,
 	}
 }
 
@@ -33,10 +41,25 @@ func (s *Server) Router() http.Handler {
 	// Middleware
 	r.Use(httplog.RequestLogger(s.logger))
 	r.Use(middleware.Recoverer)
+	r.Use(s.UserFromSession)
 
 	// Static files
 	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
 
+	// Feed
+	r.Get("/", s.FeedPage())
+
+	// Login
+	r.Route("/login", func(r chi.Router) {
+		r.Get("/", s.LoginPage())
+	})
+
+	// Signup
+	r.Route("/signup", func(r chi.Router) {
+		r.Use(s.RedirectIfLoggedIn)
+		r.Get("/", s.SignUpPage())
+		r.Post("/", s.SignUp())
+	})
 	return r
 }
 
@@ -48,4 +71,10 @@ func (s *Server) Redirect(w http.ResponseWriter, r *http.Request, path string) {
 	} else {
 		http.Redirect(w, r, path, http.StatusFound)
 	}
+}
+
+// RetargetPage is a helper function that makes retargeting to the whole page easier
+func (s *Server) RetargetPage(ctx context.Context, w http.ResponseWriter, page templ.Component) {
+	w.Header().Set("HX-Retarget", "#page")
+	page.Render(ctx, w)
 }

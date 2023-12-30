@@ -1,0 +1,16 @@
+package feed
+
+import (
+	"github.com/joeychilson/links/layouts/app"
+	"github.com/joeychilson/links/pkg/session"
+)
+
+type Props struct {
+	User *session.User
+}
+
+templ Page(props *Props) {
+	@app.Layout(&app.Props{Title: "Feed", Description: "The main feed of shared links", User: props.User}) {
+		<h1>Feed</h1>
+	}
+}

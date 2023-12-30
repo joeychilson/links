@@ -1,0 +1,35 @@
+package login
+
+import (
+	"fmt"
+
+	"github.com/joeychilson/links/layouts/app"
+)
+
+templ Page() {
+	@app.Layout(&app.Props{Title: "Log in", Description: "Log in to your account"}) {
+		<div class="flex h-full items-center py-16">
+			<div class="w-full max-w-md mx-auto p-6">
+				<div class="mt-7 bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-800 dark:border-gray-700">
+					<div class="p-4 sm:p-7">
+						<div class="text-center">
+							<h1 class="block text-2xl font-bold text-gray-800 dark:text-white">Log in</h1>
+							<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+								{ fmt.Sprintf("Don't have an account?") }
+								<a
+ 									class="text-blue-600 decoration-2 hover:underline font-medium dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+ 									href="/signup"
+								>
+									Sign up here
+								</a>
+							</p>
+						</div>
+						<div class="mt-5">
+							@Form()
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
