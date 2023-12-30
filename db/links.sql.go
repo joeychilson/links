@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createLink = `-- name: CreateLink :one
@@ -51,4 +52,105 @@ func (q *Queries) LinkBySlug(ctx context.Context, slug string) (Link, error) {
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const linkFeed = `-- name: LinkFeed :many
+SELECT 
+    l.id AS id,
+    l.title,
+    l.url,
+    l.slug,
+    l.created_at,
+    l.updated_at,
+    u.username,
+    COALESCE(c.comments, 0) AS comments,
+    COALESCE(ll.likes, 0) AS likes,
+    COALESCE(ul.liked, FALSE) AS liked
+FROM
+    links l
+JOIN
+    users u ON l.user_id = u.id
+LEFT JOIN
+    (SELECT
+        link_id,
+        COUNT(*) AS comments
+    FROM
+        comments
+    GROUP BY link_id
+    ) c ON l.id = c.link_id
+LEFT JOIN
+    (SELECT
+        link_id,
+        COUNT(*) AS likes
+    FROM 
+        link_likes
+    GROUP BY link_id
+    ) ll ON l.id = ll.link_id
+LEFT JOIN
+    (SELECT
+        link_id,
+        TRUE AS liked
+    FROM
+        link_likes
+    WHERE
+        user_id = $1::uuid
+    ) ul ON l.id = ul.link_id
+GROUP BY 
+    l.id, u.username, ul.liked, c.comments, ll.likes
+ORDER BY 
+    likes DESC, comments DESC, l.created_at DESC
+LIMIT
+    $2
+OFFSET
+    $3
+`
+
+type LinkFeedParams struct {
+	Column1 uuid.UUID
+	Limit   int32
+	Offset  int32
+}
+
+type LinkFeedRow struct {
+	ID        uuid.UUID
+	Title     string
+	Url       string
+	Slug      string
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	Username  string
+	Comments  int64
+	Likes     int64
+	Liked     bool
+}
+
+func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkFeedRow, error) {
+	rows, err := q.db.Query(ctx, linkFeed, arg.Column1, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []LinkFeedRow
+	for rows.Next() {
+		var i LinkFeedRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.Url,
+			&i.Slug,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Username,
+			&i.Comments,
+			&i.Likes,
+			&i.Liked,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

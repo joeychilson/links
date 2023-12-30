@@ -38,11 +38,10 @@ type Link struct {
 	UpdatedAt pgtype.Timestamptz
 }
 
-type LinkVote struct {
+type LinkLike struct {
 	ID        uuid.UUID
 	LinkID    uuid.UUID
 	UserID    uuid.UUID
-	Vote      int16
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
 }

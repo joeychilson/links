@@ -3,14 +3,21 @@ package feed
 import (
 	"github.com/joeychilson/links/layouts/app"
 	"github.com/joeychilson/links/pkg/session"
+	"github.com/joeychilson/links/db"
+	"github.com/joeychilson/links/components/link"
 )
 
 type Props struct {
-	User *session.User
+	User     *session.User
+	FeedRows []db.LinkFeedRow
 }
 
 templ Page(props *Props) {
 	@app.Layout(&app.Props{Title: "Feed", Description: "The main feed of shared links", User: props.User}) {
-		<h1>Feed</h1>
+		<div class="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8">
+			for _, row := range props.FeedRows {
+				@link.Component(&link.Props{User: props.User, LinkRow: row})
+			}
+		</div>
 	}
 }

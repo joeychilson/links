@@ -11,18 +11,17 @@ CREATE TABLE links (
 
 CREATE INDEX idx_links_user_id ON links(user_id);
 
-CREATE TABLE link_votes (
+CREATE TABLE link_likes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     link_id UUID NOT NULL REFERENCES links(id) ON DELETE CASCADE ON UPDATE CASCADE,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    vote SMALLINT NOT NULL CHECK (vote IN (-1, 1)),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (link_id, user_id)
 );
 
-CREATE INDEX idx_link_votes_link_id ON link_votes(link_id);
-CREATE INDEX idx_link_votes_user_id ON link_votes(user_id);
+CREATE INDEX idx_link_likes_link_id ON link_likes(link_id);
+CREATE INDEX idx_link_likes_user_id ON link_likes(user_id);
 
 CREATE TABLE comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
