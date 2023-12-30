@@ -12,6 +12,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createLike = `-- name: CreateLike :exec
+INSERT INTO link_likes (user_id, link_id) VALUES ($1, $2)
+`
+
+type CreateLikeParams struct {
+	UserID uuid.UUID
+	LinkID uuid.UUID
+}
+
+func (q *Queries) CreateLike(ctx context.Context, arg CreateLikeParams) error {
+	_, err := q.db.Exec(ctx, createLike, arg.UserID, arg.LinkID)
+	return err
+}
+
 const createLink = `-- name: CreateLink :one
 INSERT INTO links (user_id, title, url, slug) VALUES ($1, $2, $3, $4) RETURNING slug
 `
@@ -33,6 +47,20 @@ func (q *Queries) CreateLink(ctx context.Context, arg CreateLinkParams) (string,
 	var slug string
 	err := row.Scan(&slug)
 	return slug, err
+}
+
+const deleteLike = `-- name: DeleteLike :exec
+DELETE FROM link_likes WHERE user_id = $1 AND link_id = $2
+`
+
+type DeleteLikeParams struct {
+	UserID uuid.UUID
+	LinkID uuid.UUID
+}
+
+func (q *Queries) DeleteLike(ctx context.Context, arg DeleteLikeParams) error {
+	_, err := q.db.Exec(ctx, deleteLike, arg.UserID, arg.LinkID)
+	return err
 }
 
 const linkBySlug = `-- name: LinkBySlug :one
@@ -153,4 +181,46 @@ func (q *Queries) LinkFeed(ctx context.Context, arg LinkFeedParams) ([]LinkFeedR
 		return nil, err
 	}
 	return items, nil
+}
+
+const linkIDBySlug = `-- name: LinkIDBySlug :one
+SELECT id FROM links WHERE slug = $1
+`
+
+func (q *Queries) LinkIDBySlug(ctx context.Context, slug string) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, linkIDBySlug, slug)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const linkLikesAndLiked = `-- name: LinkLikesAndLiked :one
+SELECT 
+    COUNT(l.id) AS Likes,
+    EXISTS (
+        SELECT 1
+        FROM link_likes ul
+        WHERE ul.link_id = $1::uuid AND ul.user_id = $2::uuid
+    ) AS Liked
+FROM 
+    link_likes l
+WHERE 
+    l.link_id = $1::uuid
+`
+
+type LinkLikesAndLikedParams struct {
+	Column1 uuid.UUID
+	Column2 uuid.UUID
+}
+
+type LinkLikesAndLikedRow struct {
+	Likes int64
+	Liked bool
+}
+
+func (q *Queries) LinkLikesAndLiked(ctx context.Context, arg LinkLikesAndLikedParams) (LinkLikesAndLikedRow, error) {
+	row := q.db.QueryRow(ctx, linkLikesAndLiked, arg.Column1, arg.Column2)
+	var i LinkLikesAndLikedRow
+	err := row.Scan(&i.Likes, &i.Liked)
+	return i, err
 }

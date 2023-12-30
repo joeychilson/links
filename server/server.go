@@ -50,7 +50,17 @@ func (s *Server) Router() http.Handler {
 	r.Get("/", s.FeedPage())
 
 	// Link
-	r.Get("/{slug}", s.Link())
+	r.Route("/{slug}", func(r chi.Router) {
+		r.Get("/", s.LinkPage())
+		r.Route("/like", func(r chi.Router) {
+			r.Use(s.RequireUser)
+			r.Get("/", s.Like())
+		})
+		r.Route("/unlike", func(r chi.Router) {
+			r.Use(s.RequireUser)
+			r.Get("/", s.Unlike())
+		})
+	})
 
 	// Create link
 	r.Route("/create", func(r chi.Router) {
