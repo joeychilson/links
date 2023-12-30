@@ -38,7 +38,7 @@ func Component(props Props) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		var templ_7745c5c3_Var2 = []any{"mb-4 bg-white shadow overflow-hidden sm:rounded-lg hover:bg-gray-50 transition-colors duration-300", borderClass(props.Link.VoteScore)}
+		var templ_7745c5c3_Var2 = []any{"mb-4 flex flex-col bg-white border shadow-sm rounded-md hover:shadow-md transition"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -219,7 +219,7 @@ func VotingButtons(linkID string, userVoted int32) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"font-semibold rounded-md text-green-400 hover:text-green-500 focus:outline-none transition duration-300 ease-in-out\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"py-1 px-1 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-teal-800 disabled:opacity-50 disabled:pointer-events-none\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -242,7 +242,7 @@ func VotingButtons(linkID string, userVoted int32) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"font-semibold rounded-md text-red-400 hover:text-red-500 focus:outline-none transition duration-300 ease-in-out\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"py-1 px-1 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-red-800 disabled:opacity-50 disabled:pointer-events-none\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

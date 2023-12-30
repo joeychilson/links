@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/httplog/v2"
@@ -26,7 +27,13 @@ func (s *Server) ListenAndServe(addr string) error {
 	return http.ListenAndServe(addr, s.Router())
 }
 
-func (s *Server) Redirect(w http.ResponseWriter, path string) {
-	w.Header().Set("HX-Redirect", path)
-	w.WriteHeader(http.StatusOK)
+func (s *Server) Redirect(w http.ResponseWriter, r *http.Request, path string) {
+	fmt.Println(r)
+
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", path)
+		w.WriteHeader(http.StatusOK)
+	} else {
+		http.Redirect(w, r, path, http.StatusFound)
+	}
 }

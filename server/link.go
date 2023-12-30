@@ -19,14 +19,14 @@ func (s *Server) Link() http.HandlerFunc {
 		linkID := r.URL.Query().Get("id")
 
 		if linkID == "" {
-			s.Redirect(w, "/")
+			s.Redirect(w, r, "/")
 			return
 		}
 
 		linkUUID, err := uuid.Parse(linkID)
 		if err != nil {
 			oplog.Error("failed to parse link id", "error", err)
-			s.Redirect(w, "/")
+			s.Redirect(w, r, "/")
 			return
 		}
 
@@ -43,7 +43,7 @@ func (s *Server) Link() http.HandlerFunc {
 		})
 		if err != nil {
 			oplog.Error("failed to get link", "error", err)
-			s.Redirect(w, "/")
+			s.Redirect(w, r, "/")
 			return
 		}
 
@@ -55,7 +55,7 @@ func (s *Server) Link() http.HandlerFunc {
 		})
 		if err != nil {
 			oplog.Error("failed to get comment feed", "error", err)
-			s.Redirect(w, "/")
+			s.Redirect(w, r, "/")
 			return
 		}
 

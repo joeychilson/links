@@ -29,7 +29,7 @@ func (s *Server) MePage() http.HandlerFunc {
 			})
 			if err != nil {
 				oplog.Error("failed to get user voted feed", "error", err)
-				s.Redirect(w, "/")
+				s.Redirect(w, r, "/")
 				return
 			}
 		} else {
@@ -41,7 +41,7 @@ func (s *Server) MePage() http.HandlerFunc {
 			})
 			if err != nil {
 				oplog.Error("failed to get user feed", "error", err)
-				s.Redirect(w, "/")
+				s.Redirect(w, r, "/")
 				return
 			}
 		}

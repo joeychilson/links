@@ -126,6 +126,6 @@ func (s *Server) SignUp() http.HandlerFunc {
 		}
 
 		oplog.Info("user signed up", "user_id", userID.String())
-		s.Redirect(w, "/")
+		s.Redirect(w, r, "/")
 	}
 }

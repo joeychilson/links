@@ -24,14 +24,14 @@ func (s *Server) Vote() http.HandlerFunc {
 		redirect := r.URL.Query().Get("redirect")
 
 		if linkID == "" {
-			s.Redirect(w, redirect)
+			s.Redirect(w, r, redirect)
 			return
 		}
 
 		linkUUID, err := uuid.Parse(linkID)
 		if err != nil {
 			oplog.Error("failed to parse link id", "error", err)
-			s.Redirect(w, redirect)
+			s.Redirect(w, r, redirect)
 			return
 		}
 
@@ -41,7 +41,7 @@ func (s *Server) Vote() http.HandlerFunc {
 		} else if voteDir == "down" {
 			vote = -1
 		} else {
-			s.Redirect(w, redirect)
+			s.Redirect(w, r, redirect)
 			return
 		}
 
@@ -49,7 +49,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			commentUUID, err := uuid.Parse(commentID)
 			if err != nil {
 				oplog.Error("failed to parse comment id", "error", err)
-				s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
+				s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
 				return
 			}
 
@@ -60,7 +60,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			})
 			if err != nil {
 				oplog.Error("failed to vote on comment", "error", err)
-				s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
+				s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
 				return
 			}
 
@@ -70,7 +70,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			})
 			if err != nil {
 				oplog.Error("failed to get comment", "error", err)
-				s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
+				s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
 				return
 			}
 
@@ -86,7 +86,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			})
 			if err != nil {
 				oplog.Error("failed to vote on link", "error", err)
-				s.Redirect(w, redirect)
+				s.Redirect(w, r, redirect)
 				return
 			}
 
@@ -96,7 +96,7 @@ func (s *Server) Vote() http.HandlerFunc {
 			})
 			if err != nil {
 				oplog.Error("failed to get link", "error", err)
-				s.Redirect(w, redirect)
+				s.Redirect(w, r, redirect)
 				return
 			}
 

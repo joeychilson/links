@@ -209,5 +209,5 @@ func indent(depth int) string {
 	if depth == 0 {
 		return ""
 	}
-	return fmt.Sprintf("ml-%d", depth*2)
+	return fmt.Sprintf("ml-%d", depth+2)
 }

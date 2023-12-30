@@ -19,7 +19,7 @@ func (s *Server) UserPage() http.HandlerFunc {
 
 		username := r.URL.Query().Get("name")
 		if username == "" {
-			s.Redirect(w, "/")
+			s.Redirect(w, r, "/")
 			return
 		}
 
@@ -31,7 +31,7 @@ func (s *Server) UserPage() http.HandlerFunc {
 		page, err := strconv.Atoi(pageStr)
 		if err != nil {
 			oplog.Error("failed to parse page number", "error", err)
-			s.Redirect(w, "/")
+			s.Redirect(w, r, "/")
 			return
 		}
 
@@ -50,7 +50,7 @@ func (s *Server) UserPage() http.HandlerFunc {
 		})
 		if err != nil {
 			oplog.Error("failed to get user links feed", "error", err)
-			s.Redirect(w, "/")
+			s.Redirect(w, r, "/")
 			return
 		}
 

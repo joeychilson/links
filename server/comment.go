@@ -23,19 +23,19 @@ func (s *Server) Comment() http.HandlerFunc {
 		content := r.FormValue("content")
 
 		if linkID == "" {
-			s.Redirect(w, "/")
+			s.Redirect(w, r, "/")
 			return
 		}
 
 		linkUUID, err := uuid.Parse(linkID)
 		if err != nil {
 			oplog.Error("failed to parse link id", "error", err)
-			s.Redirect(w, "/")
+			s.Redirect(w, r, "/")
 			return
 		}
 
 		if content == "" {
-			s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
+			s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
 			return
 		}
 
@@ -43,7 +43,7 @@ func (s *Server) Comment() http.HandlerFunc {
 		if user != nil {
 			userID = user.ID
 		} else {
-			s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
+			s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
 			return
 		}
 
@@ -52,7 +52,7 @@ func (s *Server) Comment() http.HandlerFunc {
 			parentUUID.UUID, err = uuid.Parse(parentID)
 			if err != nil {
 				oplog.Error("failed to parse parent id", "error", err)
-				s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
+				s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
 				return
 			}
 			parentUUID.Valid = true
@@ -68,7 +68,7 @@ func (s *Server) Comment() http.HandlerFunc {
 		})
 		if err != nil {
 			oplog.Error("failed to create comment", "error", err)
-			s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
+			s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
 			return
 		}
 
@@ -79,11 +79,12 @@ func (s *Server) Comment() http.HandlerFunc {
 		})
 		if err != nil {
 			oplog.Error("failed to get comment feed", "error", err)
-			s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
+			s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
 			return
 		}
 
 		oplog.Info("user created comment", "link_id", linkID)
+		w.Header().Set("HX-Refresh", "true")
 		link.CommentFeed(link.CommentFeedProps{User: user, LinkID: linkID, CommentFeed: commentFeed}).Render(ctx, w)
 	}
 }
@@ -92,13 +93,13 @@ func (s *Server) CommentReply() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		linkID := r.URL.Query().Get("link_id")
 		if linkID == "" {
-			s.Redirect(w, "/")
+			s.Redirect(w, r, "/")
 			return
 		}
 
 		commentID := r.URL.Query().Get("comment_id")
 		if commentID == "" {
-			s.Redirect(w, fmt.Sprintf("/link?id=%s", linkID))
+			s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
 			return
 		}
 

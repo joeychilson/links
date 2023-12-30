@@ -34,7 +34,7 @@ func (s *Server) RedirectIfLoggedIn(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := s.UserFromContext(r.Context())
 		if user != nil {
-			http.Redirect(w, r, "/", http.StatusFound)
+			s.Redirect(w, r, "/")
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -45,7 +45,7 @@ func (s *Server) RequireUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := s.UserFromContext(r.Context())
 		if user == nil {
-			http.Redirect(w, r, "/login", http.StatusFound)
+			s.Redirect(w, r, "/login")
 			return
 		}
 		next.ServeHTTP(w, r)

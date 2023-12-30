@@ -13,18 +13,18 @@ func (s *Server) Logout() http.HandlerFunc {
 		user := s.UserFromContext(ctx)
 
 		if user == nil {
-			http.Redirect(w, r, "/", http.StatusFound)
+			s.Redirect(w, r, "/")
 			return
 		}
 
 		err := s.sessionManager.Delete(w, r)
 		if err != nil {
 			oplog.Error("failed to delete session", "error", err)
-			http.Redirect(w, r, "/", http.StatusFound)
+			s.Redirect(w, r, "/")
 			return
 		}
 
 		oplog.Info("user logged out", "user_id", user.ID.String())
-		http.Redirect(w, r, "/", http.StatusFound)
+		s.Redirect(w, r, "/")
 	}
 }
