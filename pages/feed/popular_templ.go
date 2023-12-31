@@ -68,7 +68,7 @@ func PopularFeed(props *PopularFeedProps) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = app.Layout(&app.Props{Title: "Feed", Description: "The most liked links", User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = app.Layout(&app.Props{Title: "Popular Feed", Description: "The most liked links", User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

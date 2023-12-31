@@ -73,6 +73,7 @@ func (s *Server) Router() http.Handler {
 
 	// Login
 	r.Route("/login", func(r chi.Router) {
+		r.Use(s.RedirectIfLoggedIn)
 		r.Get("/", s.LogInPage())
 		r.Post("/", s.LogIn())
 	})

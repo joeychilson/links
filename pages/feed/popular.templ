@@ -13,7 +13,7 @@ type PopularFeedProps struct {
 }
 
 templ PopularFeed(props *PopularFeedProps) {
-	@app.Layout(&app.Props{Title: "Feed", Description: "The most liked links", User: props.User}) {
+	@app.Layout(&app.Props{Title: "Popular Feed", Description: "The most liked links", User: props.User}) {
 		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
 			@Nav(&NavProps{Feed: Popular})
 			<div id="feed">
