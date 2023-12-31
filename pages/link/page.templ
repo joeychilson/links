@@ -1,0 +1,61 @@
+package link
+
+import (
+	"github.com/joeychilson/links/components/comment"
+	"github.com/joeychilson/links/components/link"
+	"github.com/joeychilson/links/db"
+	"github.com/joeychilson/links/layouts/app"
+	"github.com/joeychilson/links/pkg/session"
+)
+
+type Props struct {
+	User        *session.User
+	Link        db.LinkBySlugRow
+	CommentRows []db.CommentRow
+}
+
+templ Page(props *Props) {
+	@app.Layout(&app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}) {
+		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
+			@link.Component(&link.Props{User: props.User, LinkRow: link.LinkRow(props.Link)})
+			@comment.Textbox(&comment.TextboxProps{LinkSlug: props.Link.Slug})
+			@Nav(&NavProps{Feed: Popular})
+			<div id="feed">
+				@Feed(&FeedProps{CommentRows: props.CommentRows})
+			</div>
+		</div>
+	}
+}
+
+type FeedType string
+
+const (
+	Popular       FeedType = "popular"
+	Latest        FeedType = "latest"
+	Controversial FeedType = "controversial"
+)
+
+type NavProps struct {
+	Feed FeedType
+}
+
+templ Nav(props *NavProps) {
+	<nav id="feed-nav" class="flex mt-4 space-x-2">
+		<a href="/" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Popular, props.Feed) }>
+			Popular
+		</a>
+		<a href="/controversial" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Controversial, props.Feed) }>
+			Controversial
+		</a>
+		<a href="/latest" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Latest, props.Feed) }>
+			Latest
+		</a>
+	</nav>
+}
+
+func activeClass(feedType FeedType, currentFeed FeedType) string {
+	if feedType == currentFeed {
+		return "bg-blue-600 text-white"
+	}
+	return "bg-transparent text-gray-500 hover:text-blue-600 dark:hover:text-gray-400"
+}

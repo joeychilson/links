@@ -1,65 +1,14 @@
-package link
+package comment
 
-import (
-	"fmt"
+import "fmt"
 
-	"github.com/joeychilson/links/components/comment"
-	"github.com/joeychilson/links/components/link"
-	"github.com/joeychilson/links/db"
-	"github.com/joeychilson/links/layouts/app"
-	"github.com/joeychilson/links/pkg/session"
-)
-
-type Props struct {
-	User        *session.User
-	Link        db.LinkBySlugRow
-	CommentRows []db.CommentRow
-}
-
-templ Page(props *Props) {
-	@app.Layout(&app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}) {
-		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
-			@link.Component(&link.Props{User: props.User, LinkRow: link.LinkRow(props.Link)})
-			@CommentTextbox(&CommentTextboxProps{LinkSlug: props.Link.Slug})
-			<div id="feed">
-				@Feed(&FeedProps{CommentRows: props.CommentRows})
-			</div>
-		</div>
-	}
-}
-
-type FeedProps struct {
-	User        *session.User
-	CommentRows []db.CommentRow
-	IsReply     bool
-}
-
-templ Feed(props *FeedProps) {
-	for _, row := range props.CommentRows {
-		<div class={ indent(props.IsReply) }>
-			@comment.Component(&comment.Props{User: props.User, CommentRow: row})
-			<div id={ fmt.Sprintf("reply-%s", row.ID) }></div>
-			if len(row.Children) > 0 {
-				@Feed(&FeedProps{User: props.User, CommentRows: row.Children, IsReply: true})
-			}
-		</div>
-	}
-}
-
-func indent(isReply bool) string {
-	if isReply {
-		return "ml-2"
-	}
-	return ""
-}
-
-type CommentTextboxProps struct {
+type TextboxProps struct {
 	LinkSlug string
 	Content  string
 	Error    string
 }
 
-templ CommentTextbox(props *CommentTextboxProps) {
+templ Textbox(props *TextboxProps) {
 	<div id="comment-textbox" hx-swap-oob="true">
 		<div class="relative mt-4">
 			<form hx-post={ fmt.Sprintf("/%s/comment", props.LinkSlug) } style="margin-bottom: 0;">

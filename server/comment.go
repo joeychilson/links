@@ -11,7 +11,6 @@ import (
 	"github.com/joeychilson/links/components/comment"
 	"github.com/joeychilson/links/components/reply"
 	"github.com/joeychilson/links/db"
-	"github.com/joeychilson/links/pages/link"
 )
 
 func (s *Server) Comment() http.HandlerFunc {
@@ -30,8 +29,8 @@ func (s *Server) Comment() http.HandlerFunc {
 		}
 
 		if content == "" {
-			props := &link.CommentTextboxProps{LinkSlug: slug, Error: "Please enter a comment"}
-			link.CommentTextbox(props).Render(ctx, w)
+			props := &comment.TextboxProps{LinkSlug: slug, Error: "Please enter a comment"}
+			comment.Textbox(props).Render(ctx, w)
 			return
 		}
 
@@ -42,8 +41,8 @@ func (s *Server) Comment() http.HandlerFunc {
 		})
 		if err != nil {
 			oplog.Error("error creating comment", err)
-			props := &link.CommentTextboxProps{LinkSlug: slug, Content: content, Error: "Sorry, something went wrong"}
-			link.CommentTextbox(props).Render(ctx, w)
+			props := &comment.TextboxProps{LinkSlug: slug, Content: content, Error: "Sorry, something went wrong"}
+			comment.Textbox(props).Render(ctx, w)
 			return
 		}
 

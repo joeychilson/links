@@ -22,7 +22,7 @@ templ Component(props *Props) {
 	>
 		<div class="flex flex-col justify-between">
 			<div class="flex py-2">
-				<div class="px-4">
+				<div class="px-3">
 					@VotingButtons(&VotingButtonsProps{
 						Slug:      props.CommentRow.LinkSlug,
 						CommentID: props.CommentRow.ID,
@@ -33,7 +33,7 @@ templ Component(props *Props) {
 				<div class="flex-1 overflow-auto">
 					<p class="text-sm text-gray-500 dark:text-gray-200">
 						Posted By
-						<a href={ templ.SafeURL(fmt.Sprintf("/user?name=%s", props.CommentRow.Username)) } class="text-blue-600 hover:underline dark:hover:text-gray-400">
+						<a href={ templ.SafeURL(fmt.Sprintf("/user?name=%s", props.CommentRow.Username)) } class="text-blue-600 hover:underline">
 							{ props.CommentRow.Username }
 						</a>
 						&middot; 
@@ -46,7 +46,7 @@ templ Component(props *Props) {
 					</p>
 				</div>
 			</div>
-			<div class="px-4 py-2">
+			<div class="p-2 text-right">
 				<a
  					hx-get={ fmt.Sprintf("/%s/comment/%s", props.CommentRow.LinkSlug, props.CommentRow.ID) }
 				>
@@ -69,7 +69,7 @@ type VotingButtonsProps struct {
 templ VotingButtons(props *VotingButtonsProps) {
 	<div class="flex flex-col items-center">
 		<div hx-get={ fmt.Sprintf("/%s/comment/%s/upvote", props.Slug, props.CommentID) } hx-target={ fmt.Sprintf("#comment-%s", props.CommentID) } hx-swap="outerHTML">
-			<button class="inline-flex text-sm font-semibold rounded-lg border border-transparent text-teal-800 disabled:opacity-50 disabled:pointer-events-none">
+			<button class="text-green-500 disabled:opacity-50 disabled:pointer-events-none">
 				if props.UserVote == 1 {
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
 						<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 18.75 7.5-7.5 7.5 7.5"></path>
@@ -82,11 +82,11 @@ templ VotingButtons(props *VotingButtonsProps) {
 				}
 			</button>
 		</div>
-		<span class="text-white">
+		<span class="text-gray-800 dark:text-white">
 			{ strconv.Itoa(int(props.Score)) }
 		</span>
 		<div hx-get={ fmt.Sprintf("/%s/comment/%s/downvote", props.Slug, props.CommentID) } hx-target={ fmt.Sprintf("#comment-%s", props.CommentID) } hx-swap="outerHTML">
-			<button class="inline-flex items-center text-sm font-semibold rounded-lg border border-transparent text-red-800 disabled:opacity-50 disabled:pointer-events-none">
+			<button class="text-red-500 disabled:opacity-50 disabled:pointer-events-none">
 				if  props.UserVote == -1 {
 					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
 						<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5"></path>
