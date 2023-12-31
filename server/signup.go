@@ -13,7 +13,7 @@ import (
 
 func (s *Server) SignUpPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		signup.Page(&signup.Props{FormProps: &signup.FormProps{}}).Render(r.Context(), w)
+		signup.Page(signup.Props{FormProps: signup.FormProps{}}).Render(r.Context(), w)
 	}
 }
 
@@ -30,16 +30,16 @@ func (s *Server) SignUp() http.HandlerFunc {
 		emailExists, err := s.queries.EmailExists(ctx, email)
 		if err != nil {
 			oplog.Error("error checking if email exists", "error", err)
-			props := &signup.Props{
+			props := signup.Props{
 				Error:     ErrorInternalServer,
-				FormProps: &signup.FormProps{},
+				FormProps: signup.FormProps{},
 			}
 			s.RetargetPage(ctx, w, signup.Page(props))
 			return
 		}
 
 		if emailExists {
-			props := &signup.FormProps{
+			props := signup.FormProps{
 				Email:    email,
 				Username: username,
 				Error:    validate.ValidationError{validate.EmailValue: validate.EmailExistsError},
@@ -50,7 +50,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 
 		validationError := validate.Email(email)
 		if validationError != nil {
-			props := &signup.FormProps{
+			props := signup.FormProps{
 				Email:    email,
 				Username: username,
 				Error:    validationError,
@@ -62,16 +62,16 @@ func (s *Server) SignUp() http.HandlerFunc {
 		usernameExists, err := s.queries.UsernameExists(ctx, username)
 		if err != nil {
 			oplog.Error("error checking if username exists", "error", err)
-			props := &signup.Props{
+			props := signup.Props{
 				Error:     ErrorInternalServer,
-				FormProps: &signup.FormProps{},
+				FormProps: signup.FormProps{},
 			}
 			s.RetargetPage(ctx, w, signup.Page(props))
 			return
 		}
 
 		if usernameExists {
-			props := &signup.FormProps{
+			props := signup.FormProps{
 				Email:    email,
 				Username: username,
 				Error:    validate.ValidationError{validate.UsernameValue: validate.UsernameExistsError},
@@ -82,7 +82,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 
 		validationError = validate.Username(username)
 		if validationError != nil {
-			props := &signup.FormProps{
+			props := signup.FormProps{
 				Email:    email,
 				Username: username,
 				Error:    validationError,
@@ -93,7 +93,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 
 		validationError = validate.Password(password)
 		if validationError != nil {
-			props := &signup.FormProps{
+			props := signup.FormProps{
 				Email:    email,
 				Username: username,
 				Error:    validationError,
@@ -103,7 +103,7 @@ func (s *Server) SignUp() http.HandlerFunc {
 		}
 
 		if password != passwordConfirm {
-			props := &signup.FormProps{
+			props := signup.FormProps{
 				Email:    email,
 				Username: username,
 				Error:    validate.ValidationError{validate.PasswordValue: validate.PasswordMatchError},
@@ -115,9 +115,9 @@ func (s *Server) SignUp() http.HandlerFunc {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
 			oplog.Error("error hashing password", "error", err)
-			props := &signup.Props{
+			props := signup.Props{
 				Error:     ErrorInternalServer,
-				FormProps: &signup.FormProps{},
+				FormProps: signup.FormProps{},
 			}
 			s.RetargetPage(ctx, w, signup.Page(props))
 			return
@@ -130,9 +130,9 @@ func (s *Server) SignUp() http.HandlerFunc {
 		})
 		if err != nil {
 			oplog.Error("error creating user", "error", err)
-			props := &signup.Props{
+			props := signup.Props{
 				Error:     ErrorInternalServer,
-				FormProps: &signup.FormProps{},
+				FormProps: signup.FormProps{},
 			}
 			s.RetargetPage(ctx, w, signup.Page(props))
 			return
@@ -141,9 +141,9 @@ func (s *Server) SignUp() http.HandlerFunc {
 		err = s.sessionManager.Set(w, r, userID)
 		if err != nil {
 			oplog.Error("failed to set session", "error", err)
-			props := &signup.Props{
+			props := signup.Props{
 				Error:     ErrorInternalServer,
-				FormProps: &signup.FormProps{},
+				FormProps: signup.FormProps{},
 			}
 			s.RetargetPage(ctx, w, signup.Page(props))
 			return

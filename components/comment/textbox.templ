@@ -8,7 +8,7 @@ type TextboxProps struct {
 	Error    string
 }
 
-templ Textbox(props *TextboxProps) {
+templ Textbox(props TextboxProps) {
 	<div id="comment-textbox" hx-swap-oob="true">
 		<div class="relative mt-4">
 			<form hx-post={ fmt.Sprintf("/%s/comment", props.LinkSlug) } style="margin-bottom: 0;">

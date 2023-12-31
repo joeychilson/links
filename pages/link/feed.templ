@@ -14,13 +14,13 @@ type FeedProps struct {
 	IsReply     bool
 }
 
-templ Feed(props *FeedProps) {
+templ Feed(props FeedProps) {
 	for _, row := range props.CommentRows {
 		<div class={ indent(props.IsReply) }>
-			@comment.Component(&comment.Props{User: props.User, CommentRow: row})
+			@comment.Component(comment.Props{User: props.User, CommentRow: row})
 			<div id={ fmt.Sprintf("reply-%s", row.ID) }></div>
 			if len(row.Children) > 0 {
-				@Feed(&FeedProps{User: props.User, CommentRows: row.Children, IsReply: true})
+				@Feed(FeedProps{User: props.User, CommentRows: row.Children, IsReply: true})
 			}
 		</div>
 	}

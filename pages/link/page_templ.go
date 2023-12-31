@@ -24,7 +24,7 @@ type Props struct {
 	CommentRows []db.CommentRow
 }
 
-func Page(props *Props) templ.Component {
+func Page(props Props) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -47,15 +47,15 @@ func Page(props *Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = link.Component(&link.Props{User: props.User, LinkRow: link.LinkRow(props.Link)}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = link.Component(link.Props{User: props.User, LinkRow: link.LinkRow(props.Link)}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = comment.Textbox(&comment.TextboxProps{LinkSlug: props.Link.Slug}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = comment.Textbox(comment.TextboxProps{LinkSlug: props.Link.Slug}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = Nav(&NavProps{Feed: Popular}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Nav(NavProps{Feed: Popular}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -63,7 +63,7 @@ func Page(props *Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = Feed(&FeedProps{CommentRows: props.CommentRows}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Feed(FeedProps{CommentRows: props.CommentRows}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -76,7 +76,7 @@ func Page(props *Props) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = app.Layout(&app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = app.Layout(app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -99,7 +99,7 @@ type NavProps struct {
 	Feed FeedType
 }
 
-func Nav(props *NavProps) templ.Component {
+func Nav(props NavProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {

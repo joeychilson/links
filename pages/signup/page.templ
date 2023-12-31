@@ -6,11 +6,11 @@ import (
 
 type Props struct {
 	Error     string
-	FormProps *FormProps
+	FormProps FormProps
 }
 
-templ Page(props *Props) {
-	@app.Layout(&app.Props{Title: "Sign up", Description: "Sign up for an account with Links"}) {
+templ Page(props Props) {
+	@app.Layout(app.Props{Title: "Sign up", Description: "Sign up for an account with Links"}) {
 		<div id="signup-page" class="flex h-full items-center py-16">
 			<div class="w-full max-w-md mx-auto p-6">
 				if props.Error != "" {

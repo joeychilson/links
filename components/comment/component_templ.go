@@ -25,7 +25,7 @@ type Props struct {
 	CommentRow db.CommentRow
 }
 
-func Component(props *Props) templ.Component {
+func Component(props Props) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -50,7 +50,7 @@ func Component(props *Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = VotingButtons(&VotingButtonsProps{
+		templ_7745c5c3_Err = VotingButtons(VotingButtonsProps{
 			Slug:      props.CommentRow.LinkSlug,
 			CommentID: props.CommentRow.ID,
 			UserVote:  props.CommentRow.UserVote,
@@ -166,7 +166,7 @@ type VotingButtonsProps struct {
 	Score     int64
 }
 
-func VotingButtons(props *VotingButtonsProps) templ.Component {
+func VotingButtons(props VotingButtonsProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {

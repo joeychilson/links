@@ -27,8 +27,8 @@ func (s *Server) LinkPage() http.HandlerFunc {
 		}
 
 		dbLink, err := s.queries.LinkBySlug(ctx, db.LinkBySlugParams{
-			Column1: userID,
-			Slug:    slug,
+			UserID: userID,
+			Slug:   slug,
 		})
 		if err != nil {
 			oplog.Error("error getting link", err)
@@ -48,7 +48,7 @@ func (s *Server) LinkPage() http.HandlerFunc {
 			return
 		}
 
-		linkpage.Page(&linkpage.Props{User: user, Link: dbLink, CommentRows: commentRows}).Render(ctx, w)
+		linkpage.Page(linkpage.Props{User: user, Link: dbLink, CommentRows: commentRows}).Render(ctx, w)
 	}
 }
 
@@ -77,8 +77,8 @@ func (s *Server) Like() http.HandlerFunc {
 		}
 
 		linkRow, err := s.queries.LinkBySlug(ctx, db.LinkBySlugParams{
-			Column1: user.ID,
-			Slug:    slug,
+			UserID: user.ID,
+			Slug:   slug,
 		})
 		if err != nil {
 			oplog.Error("error getting link", err)
@@ -87,7 +87,7 @@ func (s *Server) Like() http.HandlerFunc {
 		}
 
 		oplog.Info("like created", "slug", slug)
-		link.Component(&link.Props{User: user, LinkRow: link.LinkRow(linkRow)}).Render(ctx, w)
+		link.Component(link.Props{User: user, LinkRow: link.LinkRow(linkRow)}).Render(ctx, w)
 	}
 }
 
@@ -116,8 +116,8 @@ func (s *Server) Unlike() http.HandlerFunc {
 		}
 
 		linkRow, err := s.queries.LinkBySlug(ctx, db.LinkBySlugParams{
-			Column1: user.ID,
-			Slug:    slug,
+			UserID: user.ID,
+			Slug:   slug,
 		})
 		if err != nil {
 			oplog.Error("error getting link", err)
@@ -126,6 +126,6 @@ func (s *Server) Unlike() http.HandlerFunc {
 		}
 
 		oplog.Info("like deleted", "slug", slug)
-		link.Component(&link.Props{User: user, LinkRow: link.LinkRow(linkRow)}).Render(ctx, w)
+		link.Component(link.Props{User: user, LinkRow: link.LinkRow(linkRow)}).Render(ctx, w)
 	}
 }

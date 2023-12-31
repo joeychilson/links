@@ -24,7 +24,7 @@ type FeedProps struct {
 	IsReply     bool
 }
 
-func Feed(props *FeedProps) templ.Component {
+func Feed(props FeedProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -55,7 +55,7 @@ func Feed(props *FeedProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = comment.Component(&comment.Props{User: props.User, CommentRow: row}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = comment.Component(comment.Props{User: props.User, CommentRow: row}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -72,7 +72,7 @@ func Feed(props *FeedProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if len(row.Children) > 0 {
-				templ_7745c5c3_Err = Feed(&FeedProps{User: props.User, CommentRows: row.Children, IsReply: true}).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = Feed(FeedProps{User: props.User, CommentRows: row.Children, IsReply: true}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

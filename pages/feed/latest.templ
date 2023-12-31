@@ -12,13 +12,13 @@ type LatestFeedProps struct {
 	FeedRows []db.LatestFeedRow
 }
 
-templ LatestFeed(props *LatestFeedProps) {
-	@app.Layout(&app.Props{Title: "Latest Feed", Description: "The latest links", User: props.User}) {
+templ LatestFeed(props LatestFeedProps) {
+	@app.Layout(app.Props{Title: "Latest Feed", Description: "The latest links", User: props.User}) {
 		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
-			@Nav(&NavProps{Feed: Latest})
+			@Nav(NavProps{Feed: Latest})
 			<div id="feed">
 				for _, row := range props.FeedRows {
-					@link.Component(&link.Props{User: props.User, LinkRow: link.LinkRow(row)})
+					@link.Component(link.Props{User: props.User, LinkRow: link.LinkRow(row)})
 				}
 			</div>
 		</div>

@@ -29,7 +29,7 @@ func (s *Server) Comment() http.HandlerFunc {
 		}
 
 		if content == "" {
-			props := &comment.TextboxProps{LinkSlug: slug, Error: "Please enter a comment"}
+			props := comment.TextboxProps{LinkSlug: slug, Error: "Please enter a comment"}
 			comment.Textbox(props).Render(ctx, w)
 			return
 		}
@@ -41,7 +41,7 @@ func (s *Server) Comment() http.HandlerFunc {
 		})
 		if err != nil {
 			oplog.Error("error creating comment", err)
-			props := &comment.TextboxProps{LinkSlug: slug, Content: content, Error: "Sorry, something went wrong"}
+			props := comment.TextboxProps{LinkSlug: slug, Content: content, Error: "Sorry, something went wrong"}
 			comment.Textbox(props).Render(ctx, w)
 			return
 		}
@@ -55,7 +55,7 @@ func (s *Server) ReplyTextbox() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		linkSlug := chi.URLParam(r, "slug")
 		commentID := chi.URLParam(r, "commentID")
-		reply.Component(&reply.Props{LinkSlug: linkSlug, CommentID: commentID}).Render(r.Context(), w)
+		reply.Component(reply.Props{LinkSlug: linkSlug, CommentID: commentID}).Render(r.Context(), w)
 	}
 }
 
@@ -83,7 +83,7 @@ func (s *Server) Reply() http.HandlerFunc {
 		}
 
 		if content == "" {
-			props := &reply.Props{LinkSlug: linkSlug, CommentID: commentID, Error: "Please enter a reply"}
+			props := reply.Props{LinkSlug: linkSlug, CommentID: commentID, Error: "Please enter a reply"}
 			reply.Component(props).Render(ctx, w)
 			return
 		}
@@ -96,7 +96,7 @@ func (s *Server) Reply() http.HandlerFunc {
 		})
 		if err != nil {
 			oplog.Error("error creating reply", err)
-			props := &reply.Props{LinkSlug: linkSlug, CommentID: commentID, Error: "Sorry, something went wrong"}
+			props := reply.Props{LinkSlug: linkSlug, CommentID: commentID, Error: "Sorry, something went wrong"}
 			reply.Component(props).Render(ctx, w)
 			return
 		}
@@ -143,7 +143,7 @@ func (s *Server) Upvote() http.HandlerFunc {
 		}
 
 		oplog.Info("upvoted", "comment_id", commentID)
-		comment.Component(&comment.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
+		comment.Component(comment.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
 	}
 }
 
@@ -184,6 +184,6 @@ func (s *Server) Downvote() http.HandlerFunc {
 		}
 
 		oplog.Info("downvoted", "comment_id", commentID)
-		comment.Component(&comment.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
+		comment.Component(comment.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
 	}
 }

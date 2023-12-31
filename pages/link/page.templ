@@ -14,14 +14,14 @@ type Props struct {
 	CommentRows []db.CommentRow
 }
 
-templ Page(props *Props) {
-	@app.Layout(&app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}) {
+templ Page(props Props) {
+	@app.Layout(app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}) {
 		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
-			@link.Component(&link.Props{User: props.User, LinkRow: link.LinkRow(props.Link)})
-			@comment.Textbox(&comment.TextboxProps{LinkSlug: props.Link.Slug})
-			@Nav(&NavProps{Feed: Popular})
+			@link.Component(link.Props{User: props.User, LinkRow: link.LinkRow(props.Link)})
+			@comment.Textbox(comment.TextboxProps{LinkSlug: props.Link.Slug})
+			@Nav(NavProps{Feed: Popular})
 			<div id="feed">
-				@Feed(&FeedProps{CommentRows: props.CommentRows})
+				@Feed(FeedProps{CommentRows: props.CommentRows})
 			</div>
 		</div>
 	}
@@ -39,7 +39,7 @@ type NavProps struct {
 	Feed FeedType
 }
 
-templ Nav(props *NavProps) {
+templ Nav(props NavProps) {
 	<nav id="feed-nav" class="flex mt-4 space-x-2">
 		<a href="/" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Popular, props.Feed) }>
 			Popular

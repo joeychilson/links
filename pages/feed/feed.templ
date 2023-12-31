@@ -12,7 +12,7 @@ type NavProps struct {
 	Feed FeedType
 }
 
-templ Nav(props *NavProps) {
+templ Nav(props NavProps) {
 	<nav id="feed-nav" class="flex mt-4 space-x-2">
 		<a href="/" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Popular, props.Feed) }>
 			Popular

@@ -10,7 +10,7 @@ import (
 
 func (s *Server) LogInPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		login.Page(&login.Props{}).Render(r.Context(), w)
+		login.Page(login.Props{}).Render(r.Context(), w)
 	}
 }
 
@@ -23,7 +23,7 @@ func (s *Server) LogIn() http.HandlerFunc {
 		password := r.FormValue("password")
 
 		if email == "" || password == "" {
-			props := &login.Props{
+			props := login.Props{
 				Error: "Please enter your email and password.",
 			}
 			login.Page(props).Render(ctx, w)
@@ -33,7 +33,7 @@ func (s *Server) LogIn() http.HandlerFunc {
 		userIDPasswordRow, err := s.queries.UserIDAndPasswordByEmail(ctx, email)
 		if err != nil {
 			oplog.Error("failed to get user by email", "error", err)
-			props := &login.Props{
+			props := login.Props{
 				Error: "Please provide a valid email and password.",
 			}
 			login.Page(props).Render(ctx, w)
@@ -43,7 +43,7 @@ func (s *Server) LogIn() http.HandlerFunc {
 		err = bcrypt.CompareHashAndPassword([]byte(userIDPasswordRow.Password), []byte(password))
 		if err != nil {
 			if err == bcrypt.ErrMismatchedHashAndPassword {
-				props := &login.Props{
+				props := login.Props{
 					Error: "Please provide a valid email and password.",
 				}
 				login.Page(props).Render(ctx, w)
@@ -56,7 +56,7 @@ func (s *Server) LogIn() http.HandlerFunc {
 		err = s.sessionManager.Set(w, r, userIDPasswordRow.ID)
 		if err != nil {
 			oplog.Error("failed to set session", "error", err)
-			props := &login.Props{
+			props := login.Props{
 				Error: ErrorInternalServer,
 			}
 			login.Page(props).Render(ctx, w)

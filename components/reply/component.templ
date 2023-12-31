@@ -10,7 +10,7 @@ type Props struct {
 	Error     string
 }
 
-templ Component(props *Props) {
+templ Component(props Props) {
 	<div id={ fmt.Sprintf("reply-%s", props.CommentID) } hx-swap-oob={ fmt.Sprintf("afterend:#reply-%s", props.CommentID) }>
 		<div class="relative mt-4">
 			<form hx-post={ fmt.Sprintf("/%s/comment/%s", props.LinkSlug, props.CommentID) } hx-target={ fmt.Sprintf("#comment-%s", props.CommentID) } hx-swap="innerHTML" style="margin-bottom: 0;">

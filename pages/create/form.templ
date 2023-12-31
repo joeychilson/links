@@ -10,7 +10,7 @@ type FormProps struct {
 	Error validate.ValidationError
 }
 
-templ Form(props *FormProps) {
+templ Form(props FormProps) {
 	<form hx-post="/create" hx-target="this" hx-swap="outerHTML">
 		<div class="grid gap-y-4">
 			<div>

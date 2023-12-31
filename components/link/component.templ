@@ -29,7 +29,7 @@ type Props struct {
 	LinkRow LinkRow
 }
 
-templ Component(props *Props) {
+templ Component(props Props) {
 	<div
  		id={ fmt.Sprintf("link-%s", props.LinkRow.Slug) }
  		class="flex flex-col mt-4 bg-white border shadow-sm rounded-xl hover:shadow-md transition dark:bg-slate-800 dark:border-gray-700 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"

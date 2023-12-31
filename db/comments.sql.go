@@ -7,30 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const comment = `-- name: Comment :one
-SELECT 
-    c.id,
-    l.slug AS link_slug,
-    c.parent_id,
-    c.content,
-    c.created_at,
-    c.updated_at,
-    u.username,
-    (SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
-    (SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
-    COALESCE(cv.vote, 0) AS user_vote
-FROM 
-    comments c
-JOIN 
-    users u ON c.user_id = u.id
-LEFT JOIN 
-    comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
-LEFT JOIN 
-    links l ON c.link_id = l.id
-WHERE 
-    c.id = $1
-`
-
 type CommentParams struct {
 	ID     uuid.UUID
 	UserID uuid.UUID
@@ -51,7 +27,30 @@ type CommentRow struct {
 }
 
 func (q *Queries) Comment(ctx context.Context, arg CommentParams) (CommentRow, error) {
-	row := q.db.QueryRow(ctx, comment, arg.ID, arg.UserID)
+	query := `
+		SELECT 
+			c.id,
+			l.slug AS link_slug,
+			c.parent_id,
+			c.content,
+			c.created_at,
+			c.updated_at,
+			u.username,
+			(SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
+			(SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
+			COALESCE(cv.vote, 0) AS user_vote
+		FROM 
+			comments c
+		JOIN 
+			users u ON c.user_id = u.id
+		LEFT JOIN 
+			comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
+		LEFT JOIN 
+			links l ON c.link_id = l.id
+		WHERE 
+			c.id = $1
+	`
+	row := q.db.QueryRow(ctx, query, arg.ID, arg.UserID)
 	var i CommentRow
 	err := row.Scan(
 		&i.ID,
@@ -68,59 +67,6 @@ func (q *Queries) Comment(ctx context.Context, arg CommentParams) (CommentRow, e
 	return i, err
 }
 
-const commentFeed = `-- name: CommentFeed :many
-WITH RECURSIVE comment_tree AS (
-    SELECT 
-        c.id,
-        l.slug AS link_slug,
-        c.parent_id,
-        c.content,
-        c.created_at,
-        c.updated_at,
-        u.username,
-        (SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
-        (SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
-        COALESCE(cv.vote, 0) AS user_vote
-    FROM 
-        comments c
-    JOIN 
-        users u ON c.user_id = u.id
-    LEFT JOIN 
-        comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
-    LEFT JOIN 
-        links l ON c.link_id = l.id
-    WHERE 
-        l.slug = $1 AND c.parent_id IS NULL
-
-    UNION ALL
-
-    SELECT 
-        c.id,
-        l.slug AS link_slug,
-        c.parent_id,
-        c.content,
-        c.created_at,
-        c.updated_at,
-        u.username,
-        (SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
-        (SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
-        COALESCE(cv.vote, 0) AS user_vote
-    FROM 
-        comments c
-    JOIN 
-        comment_tree ct ON c.parent_id = ct.id
-    JOIN 
-        users u ON c.user_id = u.id
-    LEFT JOIN 
-        comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
-    LEFT JOIN 
-        links l ON c.link_id = l.id
-)
-SELECT id, link_slug, parent_id, content, created_at, updated_at, username, replies, score, user_vote FROM comment_tree
-ORDER BY score DESC, created_at DESC
-LIMIT $3 OFFSET $4
-`
-
 type CommentFeedParams struct {
 	Slug   string
 	UserID uuid.UUID
@@ -129,7 +75,59 @@ type CommentFeedParams struct {
 }
 
 func (q *Queries) CommentFeed(ctx context.Context, arg CommentFeedParams) ([]CommentRow, error) {
-	rows, err := q.db.Query(ctx, commentFeed,
+	query := `
+		WITH RECURSIVE comment_tree AS (
+			SELECT 
+				c.id,
+				l.slug AS link_slug,
+				c.parent_id,
+				c.content,
+				c.created_at,
+				c.updated_at,
+				u.username,
+				(SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
+				(SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
+				COALESCE(cv.vote, 0) AS user_vote
+			FROM 
+				comments c
+			JOIN 
+				users u ON c.user_id = u.id
+			LEFT JOIN 
+				comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
+			LEFT JOIN 
+				links l ON c.link_id = l.id
+			WHERE 
+				l.slug = $1 AND c.parent_id IS NULL
+		
+			UNION ALL
+		
+			SELECT 
+				c.id,
+				l.slug AS link_slug,
+				c.parent_id,
+				c.content,
+				c.created_at,
+				c.updated_at,
+				u.username,
+				(SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
+				(SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
+				COALESCE(cv.vote, 0) AS user_vote
+			FROM 
+				comments c
+			JOIN 
+				comment_tree ct ON c.parent_id = ct.id
+			JOIN 
+				users u ON c.user_id = u.id
+			LEFT JOIN 
+				comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
+			LEFT JOIN 
+				links l ON c.link_id = l.id
+		)
+		SELECT id, link_slug, parent_id, content, created_at, updated_at, username, replies, score, user_vote FROM comment_tree
+		ORDER BY score DESC, created_at DESC
+		LIMIT $3 OFFSET $4
+	`
+	rows, err := q.db.Query(ctx, query,
 		arg.Slug,
 		arg.UserID,
 		arg.Limit,
@@ -176,10 +174,6 @@ func buildCommentTree(comments []CommentRow, parentID uuid.UUID) []CommentRow {
 	return tree
 }
 
-const createComment = `-- name: CreateComment :one
-INSERT INTO comments (user_id, link_id, content) VALUES ($1, $2, $3);
-`
-
 type CreateCommentParams struct {
 	UserID  uuid.UUID
 	LinkID  uuid.UUID
@@ -187,17 +181,14 @@ type CreateCommentParams struct {
 }
 
 func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) error {
-	_, err := q.db.Exec(ctx, createComment,
+	query := "INSERT INTO comments (user_id, link_id, content) VALUES ($1, $2, $3);"
+	_, err := q.db.Exec(ctx, query,
 		arg.UserID,
 		arg.LinkID,
 		arg.Content,
 	)
 	return err
 }
-
-const createReply = `-- name: CreateReply :one
-INSERT INTO comments (user_id, link_id, parent_id, content) VALUES ($1, $2, $3, $4);
-`
 
 type CreateReplyParams struct {
 	UserID   uuid.UUID
@@ -207,7 +198,8 @@ type CreateReplyParams struct {
 }
 
 func (q *Queries) CreateReply(ctx context.Context, arg CreateReplyParams) error {
-	_, err := q.db.Exec(ctx, createReply,
+	query := "INSERT INTO comments (user_id, link_id, parent_id, content) VALUES ($1, $2, $3, $4);"
+	_, err := q.db.Exec(ctx, query,
 		arg.UserID,
 		arg.LinkID,
 		arg.ParentID,
@@ -216,18 +208,6 @@ func (q *Queries) CreateReply(ctx context.Context, arg CreateReplyParams) error 
 	return err
 }
 
-const vote = `-- name: Upvote :exec
-WITH existing_vote AS (
-	SELECT vote FROM comment_votes WHERE user_id = $1 AND comment_id = $2 FOR UPDATE
-), deleted AS (
-	DELETE FROM comment_votes WHERE user_id = $1 AND comment_id = $2 AND vote = $3
-), updated AS (
-	UPDATE comment_votes SET vote = $3 WHERE user_id = $1 AND comment_id = $2 AND vote != $3
-)
-INSERT INTO comment_votes (user_id, comment_id, vote)
-SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM existing_vote);
-`
-
 type VoteParams struct {
 	UserID    uuid.UUID
 	CommentID uuid.UUID
@@ -235,6 +215,17 @@ type VoteParams struct {
 }
 
 func (q *Queries) Vote(ctx context.Context, arg VoteParams) error {
-	_, err := q.db.Exec(ctx, vote, arg.UserID, arg.CommentID, arg.Vote)
+	query := `
+		WITH existing_vote AS (
+			SELECT vote FROM comment_votes WHERE user_id = $1 AND comment_id = $2 FOR UPDATE
+		), deleted AS (
+			DELETE FROM comment_votes WHERE user_id = $1 AND comment_id = $2 AND vote = $3
+		), updated AS (
+			UPDATE comment_votes SET vote = $3 WHERE user_id = $1 AND comment_id = $2 AND vote != $3
+		)
+		INSERT INTO comment_votes (user_id, comment_id, vote)
+		SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM existing_vote);
+	`
+	_, err := q.db.Exec(ctx, query, arg.UserID, arg.CommentID, arg.Vote)
 	return err
 }

@@ -12,9 +12,9 @@ type Props struct {
 	User        *session.User
 }
 
-templ Layout(props *Props) {
-	@base.Layout(&base.Props{Title: props.Title, Description: props.Description}) {
-		@header.Component(&header.Props{User: props.User})
+templ Layout(props Props) {
+	@base.Layout(base.Props{Title: props.Title, Description: props.Description}) {
+		@header.Component(header.Props{User: props.User})
 		<main id="content">
 			{ children... }
 		</main>

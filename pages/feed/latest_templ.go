@@ -22,7 +22,7 @@ type LatestFeedProps struct {
 	FeedRows []db.LatestFeedRow
 }
 
-func LatestFeed(props *LatestFeedProps) templ.Component {
+func LatestFeed(props LatestFeedProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -45,7 +45,7 @@ func LatestFeed(props *LatestFeedProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = Nav(&NavProps{Feed: Latest}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Nav(NavProps{Feed: Latest}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -54,7 +54,7 @@ func LatestFeed(props *LatestFeedProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			for _, row := range props.FeedRows {
-				templ_7745c5c3_Err = link.Component(&link.Props{User: props.User, LinkRow: link.LinkRow(row)}).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = link.Component(link.Props{User: props.User, LinkRow: link.LinkRow(row)}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -68,7 +68,7 @@ func LatestFeed(props *LatestFeedProps) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = app.Layout(&app.Props{Title: "Latest Feed", Description: "The latest links", User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = app.Layout(app.Props{Title: "Latest Feed", Description: "The latest links", User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

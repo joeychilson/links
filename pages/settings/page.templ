@@ -9,8 +9,8 @@ type Props struct {
 	User *session.User
 }
 
-templ Page(props *Props) {
-	@app.Layout(&app.Props{Title: "Settings", Description: "The settings page for user", User: props.User}) {
+templ Page(props Props) {
+	@app.Layout(app.Props{Title: "Settings", Description: "The settings page for user", User: props.User}) {
 		<!-- Card Section -->
 		<div class="max-w-4xl px-4 sm:px-6 lg:px-8 mx-auto">
 			<!-- Card -->

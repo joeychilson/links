@@ -15,7 +15,7 @@ type Props struct {
 	CommentRow db.CommentRow
 }
 
-templ Component(props *Props) {
+templ Component(props Props) {
 	<div
  		id={ fmt.Sprintf("comment-%s", props.CommentRow.ID) }
  		class="mt-4 bg-white border shadow-sm rounded-xl hover:shadow-md transition relative dark:bg-slate-800 dark:border-gray-700"
@@ -23,7 +23,7 @@ templ Component(props *Props) {
 		<div class="flex flex-col justify-between">
 			<div class="flex py-2">
 				<div class="px-3">
-					@VotingButtons(&VotingButtonsProps{
+					@VotingButtons(VotingButtonsProps{
 						Slug:      props.CommentRow.LinkSlug,
 						CommentID: props.CommentRow.ID,
 						UserVote:  props.CommentRow.UserVote,
@@ -66,7 +66,7 @@ type VotingButtonsProps struct {
 	Score     int64
 }
 
-templ VotingButtons(props *VotingButtonsProps) {
+templ VotingButtons(props VotingButtonsProps) {
 	<div class="flex flex-col items-center">
 		<div hx-get={ fmt.Sprintf("/%s/comment/%s/upvote", props.Slug, props.CommentID) } hx-target={ fmt.Sprintf("#comment-%s", props.CommentID) } hx-swap="outerHTML">
 			<button class="text-green-500 disabled:opacity-50 disabled:pointer-events-none">

@@ -16,7 +16,7 @@ func (s *Server) CreateLinkPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		user := s.UserFromContext(ctx)
-		create.Page(&create.Props{User: user, FormProps: &create.FormProps{}}).Render(ctx, w)
+		create.Page(create.Props{User: user, FormProps: create.FormProps{}}).Render(ctx, w)
 	}
 }
 
@@ -31,7 +31,7 @@ func (s *Server) CreateLink() http.HandlerFunc {
 
 		validationError := validate.Title(title)
 		if validationError != nil {
-			props := &create.FormProps{
+			props := create.FormProps{
 				Title: title,
 				Link:  link,
 				Error: validationError,
@@ -42,7 +42,7 @@ func (s *Server) CreateLink() http.HandlerFunc {
 
 		validationError = validate.Link(link)
 		if validationError != nil {
-			props := &create.FormProps{
+			props := create.FormProps{
 				Title: title,
 				Link:  link,
 				Error: validationError,
@@ -59,9 +59,9 @@ func (s *Server) CreateLink() http.HandlerFunc {
 		})
 		if err != nil {
 			oplog.Error("error creating link", err)
-			props := &create.Props{
+			props := create.Props{
 				Error:     ErrorInternalServer,
-				FormProps: &create.FormProps{},
+				FormProps: create.FormProps{},
 			}
 			s.RetargetPage(ctx, w, create.Page(props))
 			return

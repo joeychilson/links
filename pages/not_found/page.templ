@@ -6,7 +6,7 @@ import (
 )
 
 templ Page(user *session.User) {
-	@app.Layout(&app.Props{Title: "Page Not Found", Description: "Page Not Found", User: user}) {
+	@app.Layout(app.Props{Title: "Page Not Found", Description: "Page Not Found", User: user}) {
 		<div class="flex h-full items-center py-16">
 			<div class="max-w-[50rem] flex flex-col mx-auto w-full h-full">
 				<div class="text-center py-10 px-4 sm:px-6 lg:px-8">
