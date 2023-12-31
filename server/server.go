@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/httplog/v2"
 
 	"github.com/joeychilson/links/db"
+	notfound "github.com/joeychilson/links/pages/not_found"
 	"github.com/joeychilson/links/pkg/session"
 	"github.com/joeychilson/links/static"
 )
@@ -89,6 +90,12 @@ func (s *Server) Router() http.Handler {
 		r.Use(s.RedirectIfLoggedIn)
 		r.Get("/", s.SignUpPage())
 		r.Post("/", s.SignUp())
+	})
+
+	// Not Found
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		user := s.UserFromContext(r.Context())
+		notfound.Page(user).Render(r.Context(), w)
 	})
 	return r
 }
