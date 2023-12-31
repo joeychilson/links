@@ -1,0 +1,84 @@
+package link
+
+import (
+	"fmt"
+
+	"github.com/joeychilson/links/components/comment"
+	"github.com/joeychilson/links/components/link"
+	"github.com/joeychilson/links/db"
+	"github.com/joeychilson/links/layouts/app"
+	"github.com/joeychilson/links/pkg/session"
+)
+
+type Props struct {
+	User        *session.User
+	Link        db.LinkBySlugRow
+	CommentRows []db.CommentRow
+}
+
+templ Page(props *Props) {
+	@app.Layout(&app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}) {
+		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
+			@link.Component(&link.Props{User: props.User, LinkRow: link.LinkRow(props.Link)})
+			@CommentTextbox(&CommentTextboxProps{LinkSlug: props.Link.Slug})
+			<div id="feed">
+				@Feed(&FeedProps{CommentRows: props.CommentRows})
+			</div>
+		</div>
+	}
+}
+
+type FeedProps struct {
+	User        *session.User
+	CommentRows []db.CommentRow
+	IsReply     bool
+}
+
+templ Feed(props *FeedProps) {
+	for _, row := range props.CommentRows {
+		<div class={ indent(props.IsReply) }>
+			@comment.Component(&comment.Props{User: props.User, CommentRow: row})
+			<div id={ fmt.Sprintf("reply-%s", row.ID) }></div>
+			if len(row.Children) > 0 {
+				@Feed(&FeedProps{User: props.User, CommentRows: row.Children, IsReply: true})
+			}
+		</div>
+	}
+}
+
+func indent(isReply bool) string {
+	if isReply {
+		return "ml-2"
+	}
+	return ""
+}
+
+type CommentTextboxProps struct {
+	LinkSlug string
+	Content  string
+	Error    string
+}
+
+templ CommentTextbox(props *CommentTextboxProps) {
+	<div id="comment-textbox" hx-swap-oob="true">
+		<div class="relative mt-4">
+			<form hx-post={ fmt.Sprintf("/%s/comment", props.LinkSlug) } style="margin-bottom: 0;">
+				<textarea id="content" name="content" class="p-4 pb-12 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600" rows="4" placeholder="Write a comment...">{ props.Content }</textarea>
+				<div class="absolute bottom-px inset-x-px m-2 rounded-b-md bg-white dark:bg-slate-800">
+					<div class="flex justify-end items-center">
+						<div class="flex items-center gap-x-1">
+							<button type="submit" class="inline-flex flex-shrink-0 justify-center items-center h-8 w-8 rounded-lg text-white bg-blue-600 hover:bg-blue-500 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
+								<svg class="flex-shrink-0 h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+									<path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"></path>
+								</svg>
+							</button>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+		if props.Error != "" {
+			<p id="comment-textbox-error" class="text-sm text-red-600 mt-2">{ props.Error }</p>
+		}
+	</div>
+}

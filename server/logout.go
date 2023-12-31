@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/httplog/v2"
 )
 
-func (s *Server) Logout() http.HandlerFunc {
+func (s *Server) LogOut() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		oplog := httplog.LogEntry(ctx)

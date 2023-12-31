@@ -1,6 +1,6 @@
 module github.com/joeychilson/links
 
-go 1.21.5
+go 1.21
 
 require (
 	github.com/a-h/templ v0.2.501
@@ -11,6 +11,7 @@ require (
 	github.com/gorilla/securecookie v1.1.2
 	github.com/jackc/pgx/v5 v5.5.1
 	github.com/joho/godotenv v1.5.1
+	github.com/rs/xid v1.5.0
 	golang.org/x/crypto v0.16.0
 )
 

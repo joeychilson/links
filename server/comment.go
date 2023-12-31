@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v2"
 	"github.com/google/uuid"
 
+	"github.com/joeychilson/links/components/comment"
 	"github.com/joeychilson/links/components/reply"
-	"github.com/joeychilson/links/database"
+	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/pages/link"
 )
 
@@ -17,92 +19,172 @@ func (s *Server) Comment() http.HandlerFunc {
 		ctx := r.Context()
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
-
-		linkID := r.FormValue("link_id")
-		parentID := r.FormValue("parent_id")
+		slug := chi.URLParam(r, "slug")
 		content := r.FormValue("content")
 
-		if linkID == "" {
-			s.Redirect(w, r, "/")
-			return
-		}
-
-		linkUUID, err := uuid.Parse(linkID)
+		linkID, err := s.queries.LinkIDBySlug(ctx, slug)
 		if err != nil {
-			oplog.Error("failed to parse link id", "error", err)
-			s.Redirect(w, r, "/")
+			oplog.Error("error getting link id", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
 			return
 		}
 
 		if content == "" {
-			s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
+			props := &link.CommentTextboxProps{LinkSlug: slug, Error: "Please enter a comment"}
+			link.CommentTextbox(props).Render(ctx, w)
 			return
 		}
 
-		var userID uuid.UUID
-		if user != nil {
-			userID = user.ID
-		} else {
-			s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
-			return
-		}
-
-		var parentUUID uuid.NullUUID
-		if parentID != "" {
-			parentUUID.UUID, err = uuid.Parse(parentID)
-			if err != nil {
-				oplog.Error("failed to parse parent id", "error", err)
-				s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
-				return
-			}
-			parentUUID.Valid = true
-		} else {
-			parentUUID.Valid = false
-		}
-
-		err = s.queries.CreateComment(ctx, database.CreateCommentParams{
-			UserID:   userID,
-			LinkID:   linkUUID,
-			ParentID: parentUUID,
-			Content:  content,
+		err = s.queries.CreateComment(ctx, db.CreateCommentParams{
+			UserID:  user.ID,
+			LinkID:  linkID,
+			Content: content,
 		})
 		if err != nil {
-			oplog.Error("failed to create comment", "error", err)
-			s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
+			oplog.Error("error creating comment", err)
+			props := &link.CommentTextboxProps{LinkSlug: slug, Content: content, Error: "Sorry, something went wrong"}
+			link.CommentTextbox(props).Render(ctx, w)
 			return
 		}
 
-		commentFeed, err := s.queries.CommentFeed(ctx, database.CommentFeedParams{
-			LinkID: linkUUID,
-			Limit:  100,
-			Offset: 0,
-		})
-		if err != nil {
-			oplog.Error("failed to get comment feed", "error", err)
-			s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
-			return
-		}
-
-		oplog.Info("user created comment", "link_id", linkID)
-		w.Header().Set("HX-Refresh", "true")
-		link.CommentFeed(link.CommentFeedProps{User: user, LinkID: linkID, CommentFeed: commentFeed}).Render(ctx, w)
+		oplog.Info("comment created", "slug", slug)
+		s.RefreshPage(w, r)
 	}
 }
 
-func (s *Server) CommentReply() http.HandlerFunc {
+func (s *Server) ReplyTextbox() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		linkID := r.URL.Query().Get("link_id")
-		if linkID == "" {
-			s.Redirect(w, r, "/")
+		linkSlug := chi.URLParam(r, "slug")
+		commentID := chi.URLParam(r, "commentID")
+		reply.Component(&reply.Props{LinkSlug: linkSlug, CommentID: commentID}).Render(r.Context(), w)
+	}
+}
+
+func (s *Server) Reply() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		linkSlug := chi.URLParam(r, "slug")
+		commentID := chi.URLParam(r, "commentID")
+		content := r.FormValue("content")
+
+		linkID, err := s.queries.LinkIDBySlug(ctx, linkSlug)
+		if err != nil {
+			oplog.Error("error getting link id", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", linkSlug))
 			return
 		}
 
-		commentID := r.URL.Query().Get("comment_id")
-		if commentID == "" {
-			s.Redirect(w, r, fmt.Sprintf("/link?id=%s", linkID))
+		commentUUID, err := uuid.Parse(commentID)
+		if err != nil {
+			oplog.Error("failed to parse parent id", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", linkSlug))
 			return
 		}
 
-		reply.Component(reply.Props{LinkID: linkID, CommentID: commentID}).Render(r.Context(), w)
+		if content == "" {
+			props := &reply.Props{LinkSlug: linkSlug, CommentID: commentID, Error: "Please enter a reply"}
+			reply.Component(props).Render(ctx, w)
+			return
+		}
+
+		err = s.queries.CreateReply(ctx, db.CreateReplyParams{
+			UserID:   user.ID,
+			LinkID:   linkID,
+			ParentID: commentUUID,
+			Content:  content,
+		})
+		if err != nil {
+			oplog.Error("error creating reply", err)
+			props := &reply.Props{LinkSlug: linkSlug, CommentID: commentID, Error: "Sorry, something went wrong"}
+			reply.Component(props).Render(ctx, w)
+			return
+		}
+
+		oplog.Info("reply created", "slug", linkSlug)
+		s.RefreshPage(w, r)
+	}
+}
+
+func (s *Server) Upvote() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+		commentID := chi.URLParam(r, "commentID")
+
+		commentUUID, err := uuid.Parse(commentID)
+		if err != nil {
+			oplog.Error("failed to parse comment id", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		err = s.queries.Vote(ctx, db.VoteParams{
+			UserID:    user.ID,
+			CommentID: commentUUID,
+			Vote:      1,
+		})
+		if err != nil {
+			oplog.Error("failed to vote on comment", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		commentRow, err := s.queries.Comment(ctx, db.CommentParams{
+			ID:     commentUUID,
+			UserID: user.ID,
+		})
+		if err != nil {
+			oplog.Error("failed to get comment", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		oplog.Info("upvoted", "comment_id", commentID)
+		comment.Component(&comment.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
+	}
+}
+
+func (s *Server) Downvote() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+		commentID := chi.URLParam(r, "commentID")
+
+		commentUUID, err := uuid.Parse(commentID)
+		if err != nil {
+			oplog.Error("failed to parse comment id", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		err = s.queries.Vote(ctx, db.VoteParams{
+			UserID:    user.ID,
+			CommentID: commentUUID,
+			Vote:      -1,
+		})
+		if err != nil {
+			oplog.Error("failed to vote on comment", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		commentRow, err := s.queries.Comment(ctx, db.CommentParams{
+			ID:     commentUUID,
+			UserID: user.ID,
+		})
+		if err != nil {
+			oplog.Error("failed to get comment", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		oplog.Info("downvoted", "comment_id", commentID)
+		comment.Component(&comment.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
 	}
 }

@@ -1,0 +1,26 @@
+package feed
+
+import (
+	"github.com/joeychilson/links/components/link"
+	"github.com/joeychilson/links/db"
+	"github.com/joeychilson/links/layouts/app"
+	"github.com/joeychilson/links/pkg/session"
+)
+
+type ControversialFeedProps struct {
+	User     *session.User
+	FeedRows []db.ControversialFeedRow
+}
+
+templ ControversialFeed(props *ControversialFeedProps) {
+	@app.Layout(&app.Props{Title: "Controversial Feed", Description: "The most liked links", User: props.User}) {
+		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
+			@Nav(&NavProps{Feed: Controversial})
+			<div id="feed">
+				for _, row := range props.FeedRows {
+					@link.Component(&link.Props{User: props.User, LinkRow: link.LinkRow(row)})
+				}
+			</div>
+		</div>
+	}
+}

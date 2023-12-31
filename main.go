@@ -13,7 +13,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 
-	"github.com/joeychilson/links/database"
+	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/pkg/session"
 	"github.com/joeychilson/links/server"
 )
@@ -21,6 +21,8 @@ import (
 func main() {
 	_ = godotenv.Load()
 	ctx := context.Background()
+
+	databaseURL := os.Getenv("DATABASE_URL")
 
 	logger := httplog.NewLogger("links", httplog.Options{
 		LogLevel:         slog.LevelDebug,
@@ -32,9 +34,7 @@ func main() {
 		QuietDownPeriod:  10 * time.Second,
 	})
 
-	databaseURL := os.Getenv("DATABASE_URL")
-
-	err := database.Migrate(databaseURL)
+	err := db.Migrate(databaseURL)
 	if err != nil {
 		slog.Error("failed to migrate database", "error", err)
 		os.Exit(1)
@@ -47,7 +47,7 @@ func main() {
 	}
 	defer dbpool.Close()
 
-	queries := database.New(dbpool)
+	queries := db.New(dbpool)
 
 	encryptionKey, _ := base64.StdEncoding.DecodeString(os.Getenv("SECURE_COOKIE_ENCRYPTION_KEY"))
 	validationKey, _ := base64.StdEncoding.DecodeString(os.Getenv("SECURE_COOKIE_VALIDATION_KEY"))

@@ -7,9 +7,18 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
 
-	"github.com/joeychilson/links/database"
+	"github.com/joeychilson/links/db"
 )
 
+// User represents a user in a session.
+type User struct {
+	ID       uuid.UUID
+	Avatar   string
+	Email    string
+	Username string
+}
+
+// ContextKey is the key used to store the session in the request context.
 type ContextKey string
 
 const (
@@ -17,18 +26,14 @@ const (
 	SessionKey ContextKey = "session"
 )
 
+// Manager represents a session manager.
 type Manager struct {
 	cookie  *securecookie.SecureCookie
-	queries *database.Queries
+	queries *db.Queries
 }
 
-type User struct {
-	ID       uuid.UUID
-	Email    string
-	Username string
-}
-
-func NewManager(cookie *securecookie.SecureCookie, queries *database.Queries) *Manager {
+// NewManager returns a new session manager.
+func NewManager(cookie *securecookie.SecureCookie, queries *db.Queries) *Manager {
 	return &Manager{
 		cookie:  cookie,
 		queries: queries,
@@ -36,7 +41,7 @@ func NewManager(cookie *securecookie.SecureCookie, queries *database.Queries) *M
 }
 
 func (m *Manager) Set(w http.ResponseWriter, r *http.Request, userID uuid.UUID) error {
-	token, err := m.queries.CreateUserToken(r.Context(), database.CreateUserTokenParams{
+	token, err := m.queries.CreateUserToken(r.Context(), db.CreateUserTokenParams{
 		UserID:  userID,
 		Token:   base64.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32)),
 		Context: CookieName,
@@ -76,7 +81,7 @@ func (m *Manager) GetUser(r *http.Request) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	userID, err := m.queries.UserIDFromToken(r.Context(), database.UserIDFromTokenParams{
+	userID, err := m.queries.UserIDByToken(r.Context(), db.UserIDByTokenParams{
 		Token:   cookie,
 		Context: CookieName,
 	})
@@ -99,7 +104,7 @@ func (m *Manager) Delete(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	err = m.queries.DeleteUserToken(r.Context(), database.DeleteUserTokenParams{
+	err = m.queries.DeleteUserToken(r.Context(), db.DeleteUserTokenParams{
 		Token:   cookie,
 		Context: CookieName,
 	})

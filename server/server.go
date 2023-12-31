@@ -1,27 +1,32 @@
 package server
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v2"
 
-	"github.com/joeychilson/links/database"
-	"github.com/joeychilson/links/pages/errors"
+	"github.com/joeychilson/links/db"
+	notfound "github.com/joeychilson/links/pages/not_found"
 	"github.com/joeychilson/links/pkg/session"
 	"github.com/joeychilson/links/static"
 )
 
+// ErrorInternalServer is the error message to display when something goes wrong on the server
+const ErrorInternalServer = "Sorry, something went wrong. Please try again later."
+
 // Server represents the server of the application
 type Server struct {
 	logger         *httplog.Logger
-	queries        *database.Queries
+	queries        *db.Queries
 	sessionManager *session.Manager
 }
 
 // New returns a new server
-func New(logger *httplog.Logger, queries *database.Queries, sessionManager *session.Manager) *Server {
+func New(logger *httplog.Logger, queries *db.Queries, sessionManager *session.Manager) *Server {
 	return &Server{
 		logger:         logger,
 		queries:        queries,
@@ -42,72 +47,72 @@ func (s *Server) Router() http.Handler {
 	// Static files
 	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
 
-	// Feed page
-	r.Route("/", func(r chi.Router) {
-		r.Get("/", s.FeedPage())
-	})
-
-	// New post page
-	r.Route("/new", func(r chi.Router) {
-		r.Use(s.RequireUser)
-		r.Get("/", s.NewPage())
-		r.Post("/", s.New())
-	})
+	// Feeds
+	r.Get("/", s.PopularFeed())
+	r.Get("/latest", s.LatestFeed())
+	r.Get("/controversial", s.ControversialFeed())
 
 	// Link
-	r.Route("/link", func(r chi.Router) {
-		r.Get("/", s.Link())
+	r.Route("/{slug}", func(r chi.Router) {
+		r.Get("/", s.LinkPage())
+		r.Route("/like", func(r chi.Router) {
+			r.Use(s.RequireUser)
+			r.Get("/", s.Like())
+		})
+		r.Route("/unlike", func(r chi.Router) {
+			r.Use(s.RequireUser)
+			r.Get("/", s.Unlike())
+		})
+		r.Route("/comment", func(r chi.Router) {
+			r.Use(s.RequireUser)
+			r.Post("/", s.Comment())
+			r.Route("/{commentID}", func(r chi.Router) {
+				r.Use(s.RequireUser)
+				r.Get("/", s.ReplyTextbox())
+				r.Post("/", s.Reply())
+				r.Get("/upvote", s.Upvote())
+				r.Get("/downvote", s.Downvote())
+			})
+		})
 	})
 
-	// Comment
-	r.Route("/comment", func(r chi.Router) {
+	// Create link
+	r.Route("/create", func(r chi.Router) {
 		r.Use(s.RequireUser)
-		r.Post("/", s.Comment())
+		r.Get("/", s.CreateLinkPage())
+		r.Post("/", s.CreateLink())
 	})
 
-	// Reply
-	r.Route("/reply", func(r chi.Router) {
-		r.Use(s.RequireUser)
-		r.Get("/", s.CommentReply())
-	})
-
-	// Vote
-	r.Route("/vote", func(r chi.Router) {
-		r.Use(s.RequireUser)
-		r.Get("/", s.Vote())
-	})
-
-	// User
-	r.Route("/user", func(r chi.Router) {
-		r.Get("/", s.UserPage())
-	})
-
-	// Me page
-	r.Route("/me", func(r chi.Router) {
-		r.Use(s.RequireUser)
-		r.Get("/", s.MePage())
-	})
-
-	// Login page
+	// Login
 	r.Route("/login", func(r chi.Router) {
 		r.Use(s.RedirectIfLoggedIn)
-		r.Get("/", s.LoginPage())
-		r.Post("/", s.Login())
+		r.Get("/", s.LogInPage())
+		r.Post("/", s.LogIn())
 	})
 
 	// Logout
-	r.Post("/logout", s.Logout())
+	r.Route("/logout", func(r chi.Router) {
+		r.Use(s.RequireUser)
+		r.Post("/", s.LogOut())
+	})
 
-	// Sign up page
+	// Signup
 	r.Route("/signup", func(r chi.Router) {
 		r.Use(s.RedirectIfLoggedIn)
 		r.Get("/", s.SignUpPage())
 		r.Post("/", s.SignUp())
 	})
 
+	// Settings
+	r.Route("/settings", func(r chi.Router) {
+		r.Use(s.RequireUser)
+		r.Get("/", s.SettingsPage())
+	})
+
+	// Not Found
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		user := s.UserFromContext(r.Context())
-		errors.NotFound(user).Render(r.Context(), w)
+		notfound.Page(user).Render(r.Context(), w)
 	})
 	return r
 }
@@ -120,4 +125,16 @@ func (s *Server) Redirect(w http.ResponseWriter, r *http.Request, path string) {
 	} else {
 		http.Redirect(w, r, path, http.StatusFound)
 	}
+}
+
+// RefreshPage is a helper function that makes refreshing the whole page easier
+func (s *Server) RefreshPage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("HX-Refresh", "true")
+	w.WriteHeader(http.StatusOK)
+}
+
+// RetargetPage is a helper function that makes retargeting to the whole page easier
+func (s *Server) RetargetPage(ctx context.Context, w http.ResponseWriter, page templ.Component) {
+	w.Header().Set("HX-Retarget", "#page")
+	page.Render(ctx, w)
 }

@@ -1,0 +1,44 @@
+package create
+
+import (
+	"github.com/joeychilson/links/layouts/app"
+	"github.com/joeychilson/links/pkg/session"
+)
+
+type Props struct {
+	User      *session.User
+	FormProps *FormProps
+	Error     string
+}
+
+templ Page(props *Props) {
+	@app.Layout(&app.Props{Title: "Create Link", Description: "Create a new link to be shared with others", User: props.User}) {
+		<div id="create-link-page" class="flex h-full items-center py-16">
+			<div class="w-full max-w-md mx-auto p-6">
+				if props.Error != "" {
+					<div id="error-alert" class="bg-red-500 text-sm text-white rounded-xl shadow-lg" role="alert">
+						<div class="flex p-4">
+							{ props.Error }
+							<div class="ms-auto">
+								<button type="button" data-hs-remove-element="#error-alert" class="inline-flex flex-shrink-0 justify-center items-center h-5 w-5 rounded-lg text-white hover:text-white opacity-50 hover:opacity-100 focus:outline-none focus:opacity-100">
+									<span class="sr-only">Close</span>
+									<svg class="flex-shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+								</button>
+							</div>
+						</div>
+					</div>
+				}
+				<div class="mt-7 bg-white border border-gray-200 rounded-xl shadow-sm dark:bg-gray-800 dark:border-gray-700">
+					<div class="p-4 sm:p-7">
+						<div class="text-center">
+							<h1 class="block text-2xl font-bold text-gray-800 dark:text-white">Create a New Link</h1>
+						</div>
+						<div class="mt-5">
+							@Form(props.FormProps)
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

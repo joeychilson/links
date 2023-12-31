@@ -6,23 +6,14 @@ import (
 	"github.com/go-chi/httplog/v2"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/joeychilson/links/database"
+	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/pages/signup"
-)
-
-var (
-	ErrorInternalServer = "Sorry, something went wrong. Please try again later."
-	ErrorEmailExists    = map[string]string{"email": "Sorry, this email is already in use"}
-	ErrorUsernameExists = map[string]string{"username": "Sorry, this username is already in use"}
-	ErrorUsernameLength = map[string]string{"username": "Username must be at least 4 characters"}
-	ErrorPasswordLength = map[string]string{"password": "Password must be at least 8 characters"}
-	ErrorPasswordSymbol = map[string]string{"password": "Password must contain at least one symbol"}
-	ErrorPasswordsMatch = map[string]string{"confirm-password": "Passwords do not match"}
+	"github.com/joeychilson/links/pkg/validate"
 )
 
 func (s *Server) SignUpPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		signup.Page(signup.PageProps{}).Render(r.Context(), w)
+		signup.Page(&signup.Props{FormProps: &signup.FormProps{}}).Render(r.Context(), w)
 	}
 }
 
@@ -34,20 +25,35 @@ func (s *Server) SignUp() http.HandlerFunc {
 		email := r.FormValue("email")
 		username := r.FormValue("username")
 		password := r.FormValue("password")
-		confirmPassword := r.FormValue("confirm-password")
+		passwordConfirm := r.FormValue("password-confirm")
 
 		emailExists, err := s.queries.EmailExists(ctx, email)
 		if err != nil {
-			oplog.Error("failed to check if email exists", "error", err)
-			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(ctx, w)
+			oplog.Error("error checking if email exists", "error", err)
+			props := &signup.Props{
+				Error:     ErrorInternalServer,
+				FormProps: &signup.FormProps{},
+			}
+			s.RetargetPage(ctx, w, signup.Page(props))
 			return
 		}
 
 		if emailExists {
-			props := signup.FormProps{
+			props := &signup.FormProps{
 				Email:    email,
 				Username: username,
-				Error:    ErrorEmailExists,
+				Error:    validate.ValidationError{validate.EmailValue: validate.EmailExistsError},
+			}
+			signup.Form(props).Render(ctx, w)
+			return
+		}
+
+		validationError := validate.Email(email)
+		if validationError != nil {
+			props := &signup.FormProps{
+				Email:    email,
+				Username: username,
+				Error:    validationError,
 			}
 			signup.Form(props).Render(ctx, w)
 			return
@@ -55,46 +61,52 @@ func (s *Server) SignUp() http.HandlerFunc {
 
 		usernameExists, err := s.queries.UsernameExists(ctx, username)
 		if err != nil {
-			oplog.Error("failed to check if username exists", "error", err)
-			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(ctx, w)
+			oplog.Error("error checking if username exists", "error", err)
+			props := &signup.Props{
+				Error:     ErrorInternalServer,
+				FormProps: &signup.FormProps{},
+			}
+			s.RetargetPage(ctx, w, signup.Page(props))
 			return
 		}
 
 		if usernameExists {
-			props := signup.FormProps{
+			props := &signup.FormProps{
 				Email:    email,
 				Username: username,
-				Error:    ErrorUsernameExists,
+				Error:    validate.ValidationError{validate.UsernameValue: validate.UsernameExistsError},
 			}
 			signup.Form(props).Render(ctx, w)
 			return
 		}
 
-		if len(username) < 4 {
-			props := signup.FormProps{
+		validationError = validate.Username(username)
+		if validationError != nil {
+			props := &signup.FormProps{
 				Email:    email,
 				Username: username,
-				Error:    ErrorUsernameLength,
+				Error:    validationError,
 			}
 			signup.Form(props).Render(ctx, w)
 			return
 		}
 
-		if len(password) < 8 {
-			props := signup.FormProps{
+		validationError = validate.Password(password)
+		if validationError != nil {
+			props := &signup.FormProps{
 				Email:    email,
 				Username: username,
-				Error:    ErrorPasswordLength,
+				Error:    validationError,
 			}
 			signup.Form(props).Render(ctx, w)
 			return
 		}
 
-		if password != confirmPassword {
-			props := signup.FormProps{
+		if password != passwordConfirm {
+			props := &signup.FormProps{
 				Email:    email,
 				Username: username,
-				Error:    ErrorPasswordsMatch,
+				Error:    validate.ValidationError{validate.PasswordValue: validate.PasswordMatchError},
 			}
 			signup.Form(props).Render(ctx, w)
 			return
@@ -102,26 +114,38 @@ func (s *Server) SignUp() http.HandlerFunc {
 
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 		if err != nil {
-			oplog.Error("failed to hash password", "error", err)
-			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(ctx, w)
+			oplog.Error("error hashing password", "error", err)
+			props := &signup.Props{
+				Error:     ErrorInternalServer,
+				FormProps: &signup.FormProps{},
+			}
+			s.RetargetPage(ctx, w, signup.Page(props))
 			return
 		}
 
-		userID, err := s.queries.CreateUser(ctx, database.CreateUserParams{
+		userID, err := s.queries.CreateUser(ctx, db.CreateUserParams{
 			Email:    email,
 			Username: username,
 			Password: string(hashedPassword),
 		})
 		if err != nil {
-			oplog.Error("failed to create user", "error", err)
-			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(ctx, w)
+			oplog.Error("error creating user", "error", err)
+			props := &signup.Props{
+				Error:     ErrorInternalServer,
+				FormProps: &signup.FormProps{},
+			}
+			s.RetargetPage(ctx, w, signup.Page(props))
 			return
 		}
 
 		err = s.sessionManager.Set(w, r, userID)
 		if err != nil {
 			oplog.Error("failed to set session", "error", err)
-			signup.Page(signup.PageProps{Error: ErrorInternalServer}).Render(ctx, w)
+			props := &signup.Props{
+				Error:     ErrorInternalServer,
+				FormProps: &signup.FormProps{},
+			}
+			s.RetargetPage(ctx, w, signup.Page(props))
 			return
 		}
 

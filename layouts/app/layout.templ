@@ -1,0 +1,22 @@
+package app
+
+import (
+	"github.com/joeychilson/links/components/header"
+	"github.com/joeychilson/links/layouts/base"
+	"github.com/joeychilson/links/pkg/session"
+)
+
+type Props struct {
+	Title       string
+	Description string
+	User        *session.User
+}
+
+templ Layout(props *Props) {
+	@base.Layout(&base.Props{Title: props.Title, Description: props.Description}) {
+		@header.Component(&header.Props{User: props.User})
+		<main id="content">
+			{ children... }
+		</main>
+	}
+}
