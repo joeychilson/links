@@ -63,7 +63,6 @@ func (s *Server) Router() http.Handler {
 			r.Use(s.RequireUser)
 			r.Get("/", s.Unlike())
 		})
-
 		r.Route("/comment", func(r chi.Router) {
 			r.Use(s.RequireUser)
 			r.Post("/", s.Comment())
@@ -71,6 +70,8 @@ func (s *Server) Router() http.Handler {
 				r.Use(s.RequireUser)
 				r.Get("/", s.ReplyTextbox())
 				r.Post("/", s.Reply())
+				r.Get("/upvote", s.Upvote())
+				r.Get("/downvote", s.Downvote())
 			})
 		})
 	})

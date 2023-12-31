@@ -215,3 +215,26 @@ func (q *Queries) CreateReply(ctx context.Context, arg CreateReplyParams) error 
 	)
 	return err
 }
+
+const vote = `-- name: Upvote :exec
+WITH existing_vote AS (
+	SELECT vote FROM comment_votes WHERE user_id = $1 AND comment_id = $2 FOR UPDATE
+), deleted AS (
+	DELETE FROM comment_votes WHERE user_id = $1 AND comment_id = $2 AND vote = $3
+), updated AS (
+	UPDATE comment_votes SET vote = $3 WHERE user_id = $1 AND comment_id = $2 AND vote != $3
+)
+INSERT INTO comment_votes (user_id, comment_id, vote)
+SELECT $1, $2, $3 WHERE NOT EXISTS (SELECT 1 FROM existing_vote);
+`
+
+type VoteParams struct {
+	UserID    uuid.UUID
+	CommentID uuid.UUID
+	Vote      int32
+}
+
+func (q *Queries) Vote(ctx context.Context, arg VoteParams) error {
+	_, err := q.db.Exec(ctx, vote, arg.UserID, arg.CommentID, arg.Vote)
+	return err
+}

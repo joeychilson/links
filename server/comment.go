@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/httplog/v2"
 	"github.com/google/uuid"
 
+	"github.com/joeychilson/links/components/comment"
 	"github.com/joeychilson/links/components/reply"
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/pages/link"
@@ -103,5 +104,87 @@ func (s *Server) Reply() http.HandlerFunc {
 
 		oplog.Info("reply created", "slug", linkSlug)
 		s.RefreshPage(w, r)
+	}
+}
+
+func (s *Server) Upvote() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+		commentID := chi.URLParam(r, "commentID")
+
+		commentUUID, err := uuid.Parse(commentID)
+		if err != nil {
+			oplog.Error("failed to parse comment id", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		err = s.queries.Vote(ctx, db.VoteParams{
+			UserID:    user.ID,
+			CommentID: commentUUID,
+			Vote:      1,
+		})
+		if err != nil {
+			oplog.Error("failed to vote on comment", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		commentRow, err := s.queries.Comment(ctx, db.CommentParams{
+			ID:     commentUUID,
+			UserID: user.ID,
+		})
+		if err != nil {
+			oplog.Error("failed to get comment", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		oplog.Info("upvoted", "comment_id", commentID)
+		comment.Component(&comment.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
+	}
+}
+
+func (s *Server) Downvote() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+		commentID := chi.URLParam(r, "commentID")
+
+		commentUUID, err := uuid.Parse(commentID)
+		if err != nil {
+			oplog.Error("failed to parse comment id", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		err = s.queries.Vote(ctx, db.VoteParams{
+			UserID:    user.ID,
+			CommentID: commentUUID,
+			Vote:      -1,
+		})
+		if err != nil {
+			oplog.Error("failed to vote on comment", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		commentRow, err := s.queries.Comment(ctx, db.CommentParams{
+			ID:     commentUUID,
+			UserID: user.ID,
+		})
+		if err != nil {
+			oplog.Error("failed to get comment", "error", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		oplog.Info("downvoted", "comment_id", commentID)
+		comment.Component(&comment.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
 	}
 }
