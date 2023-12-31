@@ -22,7 +22,7 @@ templ Component(props *Props) {
 		<div class="flex flex-col justify-between">
 			<div class="flex py-2">
 				<div class="px-4">
-					@LikeButton(props.CommentRow.LinkID.String(), props.CommentRow.UserVote)
+					@LikeButton(props.CommentRow.LinkSlug, props.CommentRow.UserVote)
 				</div>
 				<div class="flex-1 overflow-auto">
 					<p class="text-sm text-gray-500 dark:text-gray-200">
@@ -31,10 +31,10 @@ templ Component(props *Props) {
 							{ props.CommentRow.Username }
 						</a>
 						&middot; 
-						{ time.TimeAgo(props.CommentRow.CreatedAt.Time.Unix()) }
+						{ time.TimeAgo(props.CommentRow.CreatedAt.Unix()) }
 						&middot; 
 						<span class="px-1 py-1">
-							{ strconv.Itoa(int(props.CommentRow.Score.(int64))) } likes
+							{ strconv.Itoa(int(props.CommentRow.Score)) } likes
 						</span>
 						&middot; 
 						{ fmt.Sprintf("%v replies", props.CommentRow.Replies) }
@@ -46,7 +46,7 @@ templ Component(props *Props) {
 			</div>
 			<div class="px-4 py-2">
 				<a
- 					hx-get={ fmt.Sprintf("/reply?link_id=%s&comment_id=%s", props.CommentRow.LinkID, props.CommentRow.ID) }
+ 					hx-get={ fmt.Sprintf("/%s/comment/%s", props.CommentRow.LinkSlug, props.CommentRow.ID) }
 				>
 					<button class="text-sm text-gray-600 underline hover:text-gray-500 dark:text-gray-200">
 						Reply

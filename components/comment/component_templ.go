@@ -49,7 +49,7 @@ func Component(props *Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = LikeButton(props.CommentRow.LinkID.String(), props.CommentRow.UserVote).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = LikeButton(props.CommentRow.LinkSlug, props.CommentRow.UserVote).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -93,7 +93,7 @@ func Component(props *Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 string = time.TimeAgo(props.CommentRow.CreatedAt.Time.Unix())
+		var templ_7745c5c3_Var6 string = time.TimeAgo(props.CommentRow.CreatedAt.Unix())
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -111,7 +111,7 @@ func Component(props *Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 string = strconv.Itoa(int(props.CommentRow.Score.(int64)))
+		var templ_7745c5c3_Var8 string = strconv.Itoa(int(props.CommentRow.Score))
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -156,7 +156,7 @@ func Component(props *Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/reply?link_id=%s&comment_id=%s", props.CommentRow.LinkID, props.CommentRow.ID)))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/%s/comment/%s", props.CommentRow.LinkSlug, props.CommentRow.ID)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
