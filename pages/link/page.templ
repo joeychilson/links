@@ -9,16 +9,16 @@ import (
 )
 
 type Props struct {
-	User        *session.User
-	Link        db.LinkBySlugRow
+	User        session.User
+	LinkRow     db.LinkRow
 	CommentRows []db.CommentRow
 }
 
 templ Page(props Props) {
-	@app.Layout(app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}) {
+	@app.Layout(app.Props{Title: props.LinkRow.Title, Description: props.LinkRow.Title, User: props.User}) {
 		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
-			@link.Component(link.Props{User: props.User, LinkRow: link.LinkRow(props.Link)})
-			@comment.Textbox(comment.TextboxProps{LinkSlug: props.Link.Slug})
+			@link.Component(link.Props{User: props.User, LinkRow: props.LinkRow})
+			@comment.Textbox(comment.TextboxProps{LinkSlug: props.LinkRow.Slug})
 			@Nav(NavProps{Feed: Popular})
 			<div id="feed">
 				@Feed(FeedProps{CommentRows: props.CommentRows})

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/httplog/v2"
-	"github.com/google/uuid"
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/pages/feed"
 )
@@ -15,15 +14,8 @@ func (s *Server) PopularFeed() http.HandlerFunc {
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
 
-		var userID uuid.UUID
-		if user != nil {
-			userID = user.ID
-		} else {
-			userID = uuid.Nil
-		}
-
-		feedRows, err := s.queries.PopularFeed(ctx, db.PopularFeedParams{
-			UserID: userID,
+		linkRows, err := s.queries.PopularFeed(ctx, db.PopularFeedParams{
+			UserID: user.ID,
 			Offset: 0,
 			Limit:  100,
 		})
@@ -33,8 +25,8 @@ func (s *Server) PopularFeed() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("got popular link feed", "count", len(feedRows))
-		feed.PopularFeed(feed.PopularFeedProps{User: user, FeedRows: feedRows}).Render(ctx, w)
+		oplog.Info("got popular link feed", "count", len(linkRows))
+		feed.PopularFeed(feed.PopularFeedProps{User: user, LinkRows: linkRows}).Render(ctx, w)
 	}
 }
 
@@ -44,15 +36,8 @@ func (s *Server) LatestFeed() http.HandlerFunc {
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
 
-		var userID uuid.UUID
-		if user != nil {
-			userID = user.ID
-		} else {
-			userID = uuid.Nil
-		}
-
-		feedRows, err := s.queries.LatestFeed(ctx, db.LatestFeedParams{
-			UserID: userID,
+		linkRows, err := s.queries.LatestFeed(ctx, db.LatestFeedParams{
+			UserID: user.ID,
 			Offset: 0,
 			Limit:  100,
 		})
@@ -62,8 +47,8 @@ func (s *Server) LatestFeed() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("got latest link feed", "count", len(feedRows))
-		feed.LatestFeed(feed.LatestFeedProps{User: user, FeedRows: feedRows}).Render(ctx, w)
+		oplog.Info("got latest link feed", "count", len(linkRows))
+		feed.LatestFeed(feed.LatestFeedProps{User: user, LinkRows: linkRows}).Render(ctx, w)
 	}
 }
 
@@ -73,15 +58,8 @@ func (s *Server) ControversialFeed() http.HandlerFunc {
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
 
-		var userID uuid.UUID
-		if user != nil {
-			userID = user.ID
-		} else {
-			userID = uuid.Nil
-		}
-
-		feedRows, err := s.queries.ControversialFeed(ctx, db.ControversialFeedParams{
-			UserID: userID,
+		linkRows, err := s.queries.ControversialFeed(ctx, db.ControversialFeedParams{
+			UserID: user.ID,
 			Offset: 0,
 			Limit:  100,
 		})
@@ -91,7 +69,7 @@ func (s *Server) ControversialFeed() http.HandlerFunc {
 			return
 		}
 
-		oplog.Info("got latest link feed", "count", len(feedRows))
-		feed.ControversialFeed(feed.ControversialFeedProps{User: user, FeedRows: feedRows}).Render(ctx, w)
+		oplog.Info("got latest link feed", "count", len(linkRows))
+		feed.ControversialFeed(feed.ControversialFeedProps{User: user, LinkRows: linkRows}).Render(ctx, w)
 	}
 }

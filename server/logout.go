@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/httplog/v2"
+	"github.com/google/uuid"
 )
 
 func (s *Server) LogOut() http.HandlerFunc {
@@ -12,7 +13,7 @@ func (s *Server) LogOut() http.HandlerFunc {
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
 
-		if user == nil {
+		if user.ID == uuid.Nil {
 			s.Redirect(w, r, "/")
 			return
 		}

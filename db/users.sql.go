@@ -2,9 +2,9 @@ package db
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type CreateUserParams struct {
@@ -65,9 +65,9 @@ type UserByIDRow struct {
 	Avatar      string
 	Username    string
 	Email       string
-	ConfirmedAt time.Time
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ConfirmedAt pgtype.Timestamptz
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
 }
 
 func (q *Queries) UserByID(ctx context.Context, id uuid.UUID) (UserByIDRow, error) {

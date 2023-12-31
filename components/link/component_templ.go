@@ -14,29 +14,14 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/google/uuid"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/pkg/session"
 	"github.com/joeychilson/links/pkg/time"
 )
 
-type LinkRow struct {
-	ID        uuid.UUID
-	Title     string
-	Url       string
-	Slug      string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	Username  string
-	Comments  int64
-	Likes     int64
-	Liked     bool
-}
-
 type Props struct {
-	User    *session.User
-	LinkRow LinkRow
+	User    session.User
+	LinkRow db.LinkRow
 }
 
 func Component(props Props) templ.Component {
@@ -126,7 +111,7 @@ func Component(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 string = time.TimeAgo(props.LinkRow.CreatedAt.Time.Unix())
+		var templ_7745c5c3_Var8 string = time.TimeAgo(props.LinkRow.CreatedAt.Unix())
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

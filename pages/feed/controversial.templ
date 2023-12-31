@@ -8,8 +8,8 @@ import (
 )
 
 type ControversialFeedProps struct {
-	User     *session.User
-	FeedRows []db.ControversialFeedRow
+	User     session.User
+	LinkRows []db.LinkRow
 }
 
 templ ControversialFeed(props ControversialFeedProps) {
@@ -17,8 +17,8 @@ templ ControversialFeed(props ControversialFeedProps) {
 		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
 			@Nav(NavProps{Feed: Controversial})
 			<div id="feed">
-				for _, row := range props.FeedRows {
-					@link.Component(link.Props{User: props.User, LinkRow: link.LinkRow(row)})
+				for _, row := range props.LinkRows {
+					@link.Component(link.Props{User: props.User, LinkRow: row})
 				}
 			</div>
 		</div>

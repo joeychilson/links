@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type ControversialFeedParams struct {
@@ -13,20 +12,7 @@ type ControversialFeedParams struct {
 	Offset int32
 }
 
-type ControversialFeedRow struct {
-	ID        uuid.UUID
-	Title     string
-	Url       string
-	Slug      string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	Username  string
-	Comments  int64
-	Likes     int64
-	Liked     bool
-}
-
-func (q *Queries) ControversialFeed(ctx context.Context, arg ControversialFeedParams) ([]ControversialFeedRow, error) {
+func (q *Queries) ControversialFeed(ctx context.Context, arg ControversialFeedParams) ([]LinkRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -82,9 +68,9 @@ func (q *Queries) ControversialFeed(ctx context.Context, arg ControversialFeedPa
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ControversialFeedRow
+	var items []LinkRow
 	for rows.Next() {
-		var i ControversialFeedRow
+		var i LinkRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -113,20 +99,7 @@ type LatestFeedParams struct {
 	Offset int32
 }
 
-type LatestFeedRow struct {
-	ID        uuid.UUID
-	Title     string
-	Url       string
-	Slug      string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	Username  string
-	Comments  int64
-	Likes     int64
-	Liked     bool
-}
-
-func (q *Queries) LatestFeed(ctx context.Context, arg LatestFeedParams) ([]LatestFeedRow, error) {
+func (q *Queries) LatestFeed(ctx context.Context, arg LatestFeedParams) ([]LinkRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -182,9 +155,9 @@ func (q *Queries) LatestFeed(ctx context.Context, arg LatestFeedParams) ([]Lates
 		return nil, err
 	}
 	defer rows.Close()
-	var items []LatestFeedRow
+	var items []LinkRow
 	for rows.Next() {
-		var i LatestFeedRow
+		var i LinkRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
@@ -213,20 +186,7 @@ type PopularFeedParams struct {
 	Offset int32
 }
 
-type PopularFeedRow struct {
-	ID        uuid.UUID
-	Title     string
-	Url       string
-	Slug      string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	Username  string
-	Comments  int64
-	Likes     int64
-	Liked     bool
-}
-
-func (q *Queries) PopularFeed(ctx context.Context, arg PopularFeedParams) ([]PopularFeedRow, error) {
+func (q *Queries) PopularFeed(ctx context.Context, arg PopularFeedParams) ([]LinkRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -282,9 +242,9 @@ func (q *Queries) PopularFeed(ctx context.Context, arg PopularFeedParams) ([]Pop
 		return nil, err
 	}
 	defer rows.Close()
-	var items []PopularFeedRow
+	var items []LinkRow
 	for rows.Next() {
-		var i PopularFeedRow
+		var i LinkRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,

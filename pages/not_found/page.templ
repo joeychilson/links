@@ -5,7 +5,7 @@ import (
 	"github.com/joeychilson/links/pkg/session"
 )
 
-templ Page(user *session.User) {
+templ Page(user session.User) {
 	@app.Layout(app.Props{Title: "Page Not Found", Description: "Page Not Found", User: user}) {
 		<div class="flex h-full items-center py-16">
 			<div class="max-w-[50rem] flex flex-col mx-auto w-full h-full">

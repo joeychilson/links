@@ -16,7 +16,7 @@ import (
 )
 
 type Props struct {
-	User      *session.User
+	User      session.User
 	FormProps FormProps
 	Error     string
 }

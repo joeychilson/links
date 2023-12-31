@@ -19,8 +19,8 @@ import (
 )
 
 type Props struct {
-	User        *session.User
-	Link        db.LinkBySlugRow
+	User        session.User
+	LinkRow     db.LinkRow
 	CommentRows []db.CommentRow
 }
 
@@ -47,11 +47,11 @@ func Page(props Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = link.Component(link.Props{User: props.User, LinkRow: link.LinkRow(props.Link)}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = link.Component(link.Props{User: props.User, LinkRow: props.LinkRow}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = comment.Textbox(comment.TextboxProps{LinkSlug: props.Link.Slug}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = comment.Textbox(comment.TextboxProps{LinkSlug: props.LinkRow.Slug}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -76,7 +76,7 @@ func Page(props Props) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = app.Layout(app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = app.Layout(app.Props{Title: props.LinkRow.Title, Description: props.LinkRow.Title, User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

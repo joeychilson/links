@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v2"
-	"github.com/google/uuid"
 
 	"github.com/joeychilson/links/components/link"
 	"github.com/joeychilson/links/db"
@@ -19,15 +18,8 @@ func (s *Server) LinkPage() http.HandlerFunc {
 		user := s.UserFromContext(ctx)
 		slug := chi.URLParam(r, "slug")
 
-		var userID uuid.UUID
-		if user != nil {
-			userID = user.ID
-		} else {
-			userID = uuid.Nil
-		}
-
-		dbLink, err := s.queries.LinkBySlug(ctx, db.LinkBySlugParams{
-			UserID: userID,
+		linkRow, err := s.queries.LinkBySlug(ctx, db.LinkBySlugParams{
+			UserID: user.ID,
 			Slug:   slug,
 		})
 		if err != nil {
@@ -37,8 +29,8 @@ func (s *Server) LinkPage() http.HandlerFunc {
 		}
 
 		commentRows, err := s.queries.CommentFeed(ctx, db.CommentFeedParams{
-			Slug:   dbLink.Slug,
-			UserID: userID,
+			Slug:   linkRow.Slug,
+			UserID: user.ID,
 			Offset: 0,
 			Limit:  100,
 		})
@@ -48,7 +40,7 @@ func (s *Server) LinkPage() http.HandlerFunc {
 			return
 		}
 
-		linkpage.Page(linkpage.Props{User: user, Link: dbLink, CommentRows: commentRows}).Render(ctx, w)
+		linkpage.Page(linkpage.Props{User: user, LinkRow: linkRow, CommentRows: commentRows}).Render(ctx, w)
 	}
 }
 
@@ -87,7 +79,7 @@ func (s *Server) Like() http.HandlerFunc {
 		}
 
 		oplog.Info("like created", "slug", slug)
-		link.Component(link.Props{User: user, LinkRow: link.LinkRow(linkRow)}).Render(ctx, w)
+		link.Component(link.Props{User: user, LinkRow: linkRow}).Render(ctx, w)
 	}
 }
 
@@ -126,6 +118,6 @@ func (s *Server) Unlike() http.HandlerFunc {
 		}
 
 		oplog.Info("like deleted", "slug", slug)
-		link.Component(link.Props{User: user, LinkRow: link.LinkRow(linkRow)}).Render(ctx, w)
+		link.Component(link.Props{User: user, LinkRow: linkRow}).Render(ctx, w)
 	}
 }

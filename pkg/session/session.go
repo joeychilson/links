@@ -40,6 +40,7 @@ func NewManager(cookie *securecookie.SecureCookie, queries *db.Queries) *Manager
 	}
 }
 
+// Set sets a session for the given user.
 func (m *Manager) Set(w http.ResponseWriter, r *http.Request, userID uuid.UUID) error {
 	token, err := m.queries.CreateUserToken(r.Context(), db.CreateUserTokenParams{
 		UserID:  userID,
@@ -63,6 +64,7 @@ func (m *Manager) Set(w http.ResponseWriter, r *http.Request, userID uuid.UUID) 
 	return nil
 }
 
+// Get gets the session for the given request.
 func (m *Manager) Get(r *http.Request) (string, error) {
 	var value string
 	cookie, err := r.Cookie(CookieName)
@@ -76,29 +78,32 @@ func (m *Manager) Get(r *http.Request) (string, error) {
 	return value, nil
 }
 
-func (m *Manager) GetUser(r *http.Request) (*User, error) {
+// GetUser gets the user for the given request.
+func (m *Manager) GetUser(r *http.Request) (User, error) {
+	ctx := r.Context()
 	cookie, err := m.Get(r)
 	if err != nil {
-		return nil, err
+		return User{ID: uuid.Nil}, err
 	}
-	userID, err := m.queries.UserIDByToken(r.Context(), db.UserIDByTokenParams{
+	userID, err := m.queries.UserIDByToken(ctx, db.UserIDByTokenParams{
 		Token:   cookie,
 		Context: CookieName,
 	})
 	if err != nil {
-		return nil, err
+		return User{ID: uuid.Nil}, err
 	}
-	userRow, err := m.queries.UserByID(r.Context(), userID)
+	userRow, err := m.queries.UserByID(ctx, userID)
 	if err != nil {
-		return nil, err
+		return User{ID: uuid.Nil}, err
 	}
-	return &User{
+	return User{
 		ID:       userRow.ID,
 		Email:    userRow.Email,
 		Username: userRow.Username,
 	}, nil
 }
 
+// Delete deletes the session for the given request.
 func (m *Manager) Delete(w http.ResponseWriter, r *http.Request) error {
 	cookie, err := m.Get(r)
 	if err != nil {

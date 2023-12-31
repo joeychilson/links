@@ -18,8 +18,8 @@ import (
 )
 
 type PopularFeedProps struct {
-	User     *session.User
-	FeedRows []db.PopularFeedRow
+	User     session.User
+	LinkRows []db.LinkRow
 }
 
 func PopularFeed(props PopularFeedProps) templ.Component {
@@ -53,8 +53,8 @@ func PopularFeed(props PopularFeedProps) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, row := range props.FeedRows {
-				templ_7745c5c3_Err = link.Component(link.Props{User: props.User, LinkRow: link.LinkRow(row)}).Render(ctx, templ_7745c5c3_Buffer)
+			for _, row := range props.LinkRows {
+				templ_7745c5c3_Err = link.Component(link.Props{User: props.User, LinkRow: row}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

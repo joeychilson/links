@@ -2,9 +2,9 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type CreateLikeParams struct {
@@ -49,25 +49,25 @@ func (q *Queries) DeleteLike(ctx context.Context, arg DeleteLikeParams) error {
 	return err
 }
 
-type LinkBySlugParams struct {
-	UserID uuid.UUID
-	Slug   string
-}
-
-type LinkBySlugRow struct {
+type LinkRow struct {
 	ID        uuid.UUID
 	Title     string
 	Url       string
 	Slug      string
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	Username  string
 	Comments  int64
 	Likes     int64
 	Liked     bool
 }
 
-func (q *Queries) LinkBySlug(ctx context.Context, arg LinkBySlugParams) (LinkBySlugRow, error) {
+type LinkBySlugParams struct {
+	UserID uuid.UUID
+	Slug   string
+}
+
+func (q *Queries) LinkBySlug(ctx context.Context, arg LinkBySlugParams) (LinkRow, error) {
 	query := `
 		SELECT 
 			l.id AS id,
@@ -113,7 +113,7 @@ func (q *Queries) LinkBySlug(ctx context.Context, arg LinkBySlugParams) (LinkByS
 			l.slug = $2
 	`
 	row := q.db.QueryRow(ctx, query, arg.UserID, arg.Slug)
-	var i LinkBySlugRow
+	var i LinkRow
 	err := row.Scan(
 		&i.ID,
 		&i.Title,

@@ -19,7 +19,7 @@ import (
 type Props struct {
 	Title       string
 	Description string
-	User        *session.User
+	User        session.User
 }
 
 func Layout(props Props) templ.Component {

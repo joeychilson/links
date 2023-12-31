@@ -11,11 +11,13 @@ import "io"
 import "bytes"
 
 import (
+	"github.com/google/uuid"
+
 	"github.com/joeychilson/links/pkg/session"
 )
 
 type Props struct {
-	User *session.User
+	User session.User
 }
 
 func Component(props Props) templ.Component {
@@ -53,7 +55,7 @@ func Component(props Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if props.User != nil {
+		if props.User.ID != uuid.Nil {
 			templ_7745c5c3_Err = UserMenu(props.User).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -75,7 +77,7 @@ func Component(props Props) templ.Component {
 	})
 }
 
-func UserMenu(user *session.User) templ.Component {
+func UserMenu(user session.User) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {

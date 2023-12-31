@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// TimeAgo returns a human readable time since the given time.
 func TimeAgo(postTime int64) string {
 	now := time.Now()
 	postTimeUTC := time.Unix(postTime, 0)

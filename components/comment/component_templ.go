@@ -21,7 +21,7 @@ import (
 )
 
 type Props struct {
-	User       *session.User
+	User       session.User
 	CommentRow db.CommentRow
 }
 
