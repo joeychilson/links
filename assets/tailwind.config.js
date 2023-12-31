@@ -6,6 +6,7 @@ export default {
             pattern: /ml-+/,
         },
     ],
+    darkMode: 'class',
     theme: {
         extend: {},
     },

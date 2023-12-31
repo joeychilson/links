@@ -92,6 +92,12 @@ func (s *Server) Router() http.Handler {
 		r.Post("/", s.SignUp())
 	})
 
+	// Settings
+	r.Route("/settings", func(r chi.Router) {
+		r.Use(s.RequireUser)
+		r.Get("/", s.SettingsPage())
+	})
+
 	// Not Found
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		user := s.UserFromContext(r.Context())
