@@ -57,11 +57,11 @@ func Page(props *Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"comment-feed\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"feed\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = CommentFeed(&CommentFeedProps{CommentRows: props.CommentRows}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = Feed(&FeedProps{CommentRows: props.CommentRows}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -85,13 +85,13 @@ func Page(props *Props) templ.Component {
 	})
 }
 
-type CommentFeedProps struct {
+type FeedProps struct {
 	User        *session.User
 	CommentRows []db.CommentRow
 	IsReply     bool
 }
 
-func CommentFeed(props *CommentFeedProps) templ.Component {
+func Feed(props *FeedProps) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -139,7 +139,7 @@ func CommentFeed(props *CommentFeedProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if len(row.Children) > 0 {
-				templ_7745c5c3_Err = CommentFeed(&CommentFeedProps{User: props.User, CommentRows: row.Children, IsReply: true}).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = Feed(&FeedProps{User: props.User, CommentRows: row.Children, IsReply: true}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -190,7 +190,7 @@ func CommentTextbox(props *CommentTextboxProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-target=\"#comment-feed\" hx-swap=\"beforebegin\" style=\"margin-bottom: 0;\"><textarea id=\"content\" name=\"content\" class=\"p-4 pb-12 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600\" rows=\"4\" placeholder=\"Write a comment...\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" style=\"margin-bottom: 0;\"><textarea id=\"content\" name=\"content\" class=\"p-4 pb-12 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600\" rows=\"4\" placeholder=\"Write a comment...\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

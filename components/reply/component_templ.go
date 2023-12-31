@@ -14,6 +14,7 @@ import "fmt"
 
 type Props struct {
 	LinkSlug  string
+	ParentID  string
 	CommentID string
 	Content   string
 	Error     string
@@ -64,7 +65,7 @@ func Component(props *Props) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"afterend\" style=\"margin-bottom: 0;\"><textarea id=\"content\" name=\"content\" class=\"p-4 pb-12 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600\" rows=\"4\" placeholder=\"Write a comment...\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-swap=\"innerHTML\" style=\"margin-bottom: 0;\"><textarea id=\"content\" name=\"content\" class=\"p-4 pb-12 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600\" rows=\"4\" placeholder=\"Write a comment...\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

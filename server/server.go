@@ -126,6 +126,12 @@ func (s *Server) Redirect(w http.ResponseWriter, r *http.Request, path string) {
 	}
 }
 
+// RefreshPage is a helper function that makes refreshing the whole page easier
+func (s *Server) RefreshPage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("HX-Refresh", "true")
+	w.WriteHeader(http.StatusOK)
+}
+
 // RetargetPage is a helper function that makes retargeting to the whole page easier
 func (s *Server) RetargetPage(ctx context.Context, w http.ResponseWriter, page templ.Component) {
 	w.Header().Set("HX-Retarget", "#page")

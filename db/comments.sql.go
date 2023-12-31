@@ -177,7 +177,7 @@ func buildCommentTree(comments []CommentRow, parentID uuid.UUID) []CommentRow {
 }
 
 const createComment = `-- name: CreateComment :one
-INSERT INTO comments (user_id, link_id, content) VALUES ($1, $2, $3) RETURNING id
+INSERT INTO comments (user_id, link_id, content) VALUES ($1, $2, $3);
 `
 
 type CreateCommentParams struct {
@@ -186,15 +186,17 @@ type CreateCommentParams struct {
 	Content string
 }
 
-func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (uuid.UUID, error) {
-	row := q.db.QueryRow(ctx, createComment, arg.UserID, arg.LinkID, arg.Content)
-	var id uuid.UUID
-	err := row.Scan(&id)
-	return id, err
+func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) error {
+	_, err := q.db.Exec(ctx, createComment,
+		arg.UserID,
+		arg.LinkID,
+		arg.Content,
+	)
+	return err
 }
 
 const createReply = `-- name: CreateReply :one
-INSERT INTO comments (user_id, link_id, parent_id, content) VALUES ($1, $2, $3, $4) RETURNING id
+INSERT INTO comments (user_id, link_id, parent_id, content) VALUES ($1, $2, $3, $4);
 `
 
 type CreateReplyParams struct {
@@ -204,14 +206,12 @@ type CreateReplyParams struct {
 	Content  string
 }
 
-func (q *Queries) CreateReply(ctx context.Context, arg CreateReplyParams) (uuid.UUID, error) {
-	row := q.db.QueryRow(ctx, createReply,
+func (q *Queries) CreateReply(ctx context.Context, arg CreateReplyParams) error {
+	_, err := q.db.Exec(ctx, createReply,
 		arg.UserID,
 		arg.LinkID,
 		arg.ParentID,
 		arg.Content,
 	)
-	var id uuid.UUID
-	err := row.Scan(&id)
-	return id, err
+	return err
 }

@@ -4,6 +4,7 @@ import "fmt"
 
 type Props struct {
 	LinkSlug  string
+	ParentID  string
 	CommentID string
 	Content   string
 	Error     string
@@ -12,7 +13,7 @@ type Props struct {
 templ Component(props *Props) {
 	<div id={ fmt.Sprintf("reply-%s", props.CommentID) } hx-swap-oob={ fmt.Sprintf("afterend:#reply-%s", props.CommentID) }>
 		<div class="relative mt-4">
-			<form hx-post={ fmt.Sprintf("/%s/comment/%s", props.LinkSlug, props.CommentID) } hx-target={ fmt.Sprintf("#comment-%s", props.CommentID) } hx-swap="afterend" style="margin-bottom: 0;">
+			<form hx-post={ fmt.Sprintf("/%s/comment/%s", props.LinkSlug, props.CommentID) } hx-target={ fmt.Sprintf("#comment-%s", props.CommentID) } hx-swap="innerHTML" style="margin-bottom: 0;">
 				<textarea id="content" name="content" class="p-4 pb-12 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600" rows="4" placeholder="Write a comment...">{ props.Content }</textarea>
 				<div class="absolute bottom-px inset-x-px m-2 rounded-b-md bg-white dark:bg-slate-800">
 					<div class="flex justify-end items-center">

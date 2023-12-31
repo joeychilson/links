@@ -8,7 +8,6 @@ import (
 	"github.com/go-chi/httplog/v2"
 	"github.com/google/uuid"
 
-	"github.com/joeychilson/links/components/comment"
 	"github.com/joeychilson/links/components/reply"
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/pages/link"
@@ -35,7 +34,7 @@ func (s *Server) Comment() http.HandlerFunc {
 			return
 		}
 
-		commentID, err := s.queries.CreateComment(ctx, db.CreateCommentParams{
+		err = s.queries.CreateComment(ctx, db.CreateCommentParams{
 			UserID:  user.ID,
 			LinkID:  linkID,
 			Content: content,
@@ -47,20 +46,8 @@ func (s *Server) Comment() http.HandlerFunc {
 			return
 		}
 
-		commentRow, err := s.queries.Comment(ctx, db.CommentParams{
-			ID:     commentID,
-			UserID: user.ID,
-		})
-		if err != nil {
-			oplog.Error("error getting comment", err)
-			props := &link.CommentTextboxProps{LinkSlug: slug, Content: content, Error: "Sorry, something went wrong"}
-			link.CommentTextbox(props).Render(ctx, w)
-			return
-		}
-
 		oplog.Info("comment created", "slug", slug)
-		link.CommentTextbox(&link.CommentTextboxProps{LinkSlug: slug, Content: ""}).Render(ctx, w)
-		comment.Component(&comment.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
+		s.RefreshPage(w, r)
 	}
 }
 
@@ -101,7 +88,7 @@ func (s *Server) Reply() http.HandlerFunc {
 			return
 		}
 
-		replyID, err := s.queries.CreateReply(ctx, db.CreateReplyParams{
+		err = s.queries.CreateReply(ctx, db.CreateReplyParams{
 			UserID:   user.ID,
 			LinkID:   linkID,
 			ParentID: commentUUID,
@@ -114,18 +101,7 @@ func (s *Server) Reply() http.HandlerFunc {
 			return
 		}
 
-		commentRow, err := s.queries.Comment(ctx, db.CommentParams{
-			ID:     replyID,
-			UserID: user.ID,
-		})
-		if err != nil {
-			oplog.Error("error getting comment", err)
-			props := &reply.Props{LinkSlug: linkSlug, CommentID: commentID, Error: "Sorry, something went wrong"}
-			reply.Component(props).Render(ctx, w)
-			return
-		}
-
 		oplog.Info("reply created", "slug", linkSlug)
-		comment.Component(&comment.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
+		s.RefreshPage(w, r)
 	}
 }
