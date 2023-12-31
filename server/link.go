@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v2"
+	"github.com/google/uuid"
 	"github.com/rs/xid"
 
 	"github.com/joeychilson/links/components/link"
@@ -27,8 +28,15 @@ func (s *Server) LinkPage() http.HandlerFunc {
 			return
 		}
 
+		var userID uuid.UUID
+		if user != nil {
+			userID = user.ID
+		} else {
+			userID = uuid.Nil
+		}
+
 		dbLink, err := s.queries.LinkBySlug(ctx, db.LinkBySlugParams{
-			Column1: user.ID,
+			Column1: userID,
 			Slug:    slug,
 		})
 		if err != nil {
