@@ -4,17 +4,32 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/joeychilson/links/db"
+	"github.com/google/uuid"
+
 	"github.com/joeychilson/links/pkg/session"
 	"github.com/joeychilson/links/pkg/time"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type LinkRow struct {
+	ID        uuid.UUID
+	Title     string
+	Url       string
+	Slug      string
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	Username  string
+	Comments  int64
+	Likes     int64
+	Liked     bool
+}
 
 type Props struct {
 	User    *session.User
-	LinkRow db.LinkFeedRow
+	LinkRow LinkRow
 }
 
-templ Component(props *Props) {
+templ Component[T LinkRow](props *Props) {
 	<div
  		id={ fmt.Sprintf("link-%s", props.LinkRow.Slug) }
  		class="flex flex-col mt-4 bg-white border shadow-sm rounded-xl hover:shadow-md transition dark:bg-slate-900 dark:border-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"

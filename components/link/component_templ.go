@@ -14,17 +14,32 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/joeychilson/links/db"
+	"github.com/google/uuid"
+
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/joeychilson/links/pkg/session"
 	"github.com/joeychilson/links/pkg/time"
 )
 
-type Props struct {
-	User    *session.User
-	LinkRow db.LinkFeedRow
+type LinkRow struct {
+	ID        uuid.UUID
+	Title     string
+	Url       string
+	Slug      string
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	Username  string
+	Comments  int64
+	Likes     int64
+	Liked     bool
 }
 
-func Component(props *Props) templ.Component {
+type Props struct {
+	User    *session.User
+	LinkRow LinkRow
+}
+
+func Component[T LinkRow](props *Props) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {

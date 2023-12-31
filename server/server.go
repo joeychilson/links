@@ -46,8 +46,10 @@ func (s *Server) Router() http.Handler {
 	// Static files
 	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
 
-	// Feed
-	r.Get("/", s.FeedPage())
+	// Feeds
+	r.Get("/", s.PopularFeed())
+	r.Get("/latest", s.LatestFeed())
+	r.Get("/controversial", s.ControversialFeed())
 
 	// Link
 	r.Route("/{slug}", func(r chi.Router) {
