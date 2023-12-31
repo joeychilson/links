@@ -27,7 +27,10 @@ func (s *Server) LinkPage() http.HandlerFunc {
 			return
 		}
 
-		dbLink, err := s.queries.LinkBySlug(ctx, slug)
+		dbLink, err := s.queries.LinkBySlug(ctx, db.LinkBySlugParams{
+			Column1: user.ID,
+			Slug:    slug,
+		})
 		if err != nil {
 			oplog.Error("error getting link", err)
 			s.Redirect(w, r, "/")

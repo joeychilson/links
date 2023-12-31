@@ -64,20 +64,82 @@ func (q *Queries) DeleteLike(ctx context.Context, arg DeleteLikeParams) error {
 }
 
 const linkBySlug = `-- name: LinkBySlug :one
-SELECT id, user_id, title, url, slug, created_at, updated_at FROM links WHERE slug = $1
+SELECT 
+    l.id AS id,
+    l.title,
+    l.url,
+    l.slug,
+    l.created_at,
+    l.updated_at,
+    u.username,
+    COALESCE(c.comments, 0) AS comments,
+    COALESCE(ll.likes, 0) AS likes,
+    COALESCE(ul.liked, FALSE) AS liked
+FROM
+    links l
+JOIN
+    users u ON l.user_id = u.id
+LEFT JOIN
+    (SELECT
+        link_id,
+        COUNT(*) AS comments
+    FROM
+        comments
+    GROUP BY link_id
+    ) c ON l.id = c.link_id
+LEFT JOIN
+    (SELECT
+        link_id,
+        COUNT(*) AS likes
+    FROM 
+        link_likes
+    GROUP BY link_id
+    ) ll ON l.id = ll.link_id
+LEFT JOIN
+    (SELECT
+        link_id,
+        TRUE AS liked
+    FROM
+        link_likes
+    WHERE
+        user_id = $1::uuid
+    ) ul ON l.id = ul.link_id
+WHERE
+    l.slug = $2
 `
 
-func (q *Queries) LinkBySlug(ctx context.Context, slug string) (Link, error) {
-	row := q.db.QueryRow(ctx, linkBySlug, slug)
-	var i Link
+type LinkBySlugParams struct {
+	Column1 uuid.UUID
+	Slug    string
+}
+
+type LinkBySlugRow struct {
+	ID        uuid.UUID
+	Title     string
+	Url       string
+	Slug      string
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	Username  string
+	Comments  int64
+	Likes     int64
+	Liked     bool
+}
+
+func (q *Queries) LinkBySlug(ctx context.Context, arg LinkBySlugParams) (LinkBySlugRow, error) {
+	row := q.db.QueryRow(ctx, linkBySlug, arg.Column1, arg.Slug)
+	var i LinkBySlugRow
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
 		&i.Title,
 		&i.Url,
 		&i.Slug,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Username,
+		&i.Comments,
+		&i.Likes,
+		&i.Liked,
 	)
 	return i, err
 }

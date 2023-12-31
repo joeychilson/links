@@ -4,16 +4,33 @@ import (
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/layouts/app"
 	"github.com/joeychilson/links/pkg/session"
+	"github.com/joeychilson/links/components/link"
 )
 
 type Props struct {
 	User *session.User
-	Link db.Link
+	Link db.LinkBySlugRow
 }
 
 templ Page(props *Props) {
 	@app.Layout(&app.Props{Title: props.Link.Title, Description: props.Link.Title, User: props.User}) {
-		<h1>{ props.Link.Title } </h1>
-		<p>{ props.Link.Url } </p>
+		<div class="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8">
+			@link.Component(&link.Props{User: props.User, LinkRow: linkRow(props.Link)})
+		</div>
+	}
+}
+
+func linkRow(link db.LinkBySlugRow) db.LinkFeedRow {
+	return db.LinkFeedRow{
+		ID:        link.ID,
+		Title:     link.Title,
+		Url:       link.Url,
+		Slug:      link.Slug,
+		CreatedAt: link.CreatedAt,
+		UpdatedAt: link.UpdatedAt,
+		Username:  link.Username,
+		Comments:  link.Comments,
+		Likes:     link.Likes,
+		Liked:     link.Liked,
 	}
 }

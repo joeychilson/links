@@ -11,6 +11,7 @@ import "io"
 import "bytes"
 
 import (
+	"github.com/joeychilson/links/components/link"
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/layouts/app"
 	"github.com/joeychilson/links/pkg/session"
@@ -18,7 +19,7 @@ import (
 
 type Props struct {
 	User *session.User
-	Link db.Link
+	Link db.LinkBySlugRow
 }
 
 func Page(props *Props) templ.Component {
@@ -40,25 +41,15 @@ func Page(props *Props) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"max-w-6xl mx-auto px-2 sm:px-6 lg:px-8\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 string = props.Link.Title
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			templ_7745c5c3_Err = link.Component(&link.Props{User: props.User, LinkRow: linkRow(props.Link)}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1><p>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string = props.Link.Url
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -76,4 +67,19 @@ func Page(props *Props) templ.Component {
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func linkRow(link db.LinkBySlugRow) db.LinkFeedRow {
+	return db.LinkFeedRow{
+		ID:        link.ID,
+		Title:     link.Title,
+		Url:       link.Url,
+		Slug:      link.Slug,
+		CreatedAt: link.CreatedAt,
+		UpdatedAt: link.UpdatedAt,
+		Username:  link.Username,
+		Comments:  link.Comments,
+		Likes:     link.Likes,
+		Liked:     link.Liked,
+	}
 }
