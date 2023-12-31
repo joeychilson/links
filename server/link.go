@@ -7,13 +7,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v2"
 	"github.com/google/uuid"
-	"github.com/rs/xid"
 
+	commentcomp "github.com/joeychilson/links/components/comment"
 	"github.com/joeychilson/links/components/link"
 	"github.com/joeychilson/links/db"
-	"github.com/joeychilson/links/pages/create"
 	linkpage "github.com/joeychilson/links/pages/link"
-	"github.com/joeychilson/links/pkg/validate"
 )
 
 func (s *Server) LinkPage() http.HandlerFunc {
@@ -21,12 +19,7 @@ func (s *Server) LinkPage() http.HandlerFunc {
 		ctx := r.Context()
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
-
 		slug := chi.URLParam(r, "slug")
-		if slug == "" {
-			s.Redirect(w, r, "/")
-			return
-		}
 
 		var userID uuid.UUID
 		if user != nil {
@@ -45,67 +38,19 @@ func (s *Server) LinkPage() http.HandlerFunc {
 			return
 		}
 
-		linkpage.Page(&linkpage.Props{User: user, Link: dbLink}).Render(ctx, w)
-	}
-}
-
-func (s *Server) CreateLinkPage() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		user := s.UserFromContext(ctx)
-		create.Page(&create.Props{User: user, FormProps: &create.FormProps{}}).Render(ctx, w)
-	}
-}
-
-func (s *Server) CreateLink() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		oplog := httplog.LogEntry(ctx)
-		user := s.UserFromContext(ctx)
-
-		title := r.FormValue("title")
-		link := r.FormValue("link")
-
-		validationError := validate.Title(title)
-		if validationError != nil {
-			props := &create.FormProps{
-				Title: title,
-				Link:  link,
-				Error: validationError,
-			}
-			create.Form(props).Render(ctx, w)
-			return
-		}
-
-		validationError = validate.Link(link)
-		if validationError != nil {
-			props := &create.FormProps{
-				Title: title,
-				Link:  link,
-				Error: validationError,
-			}
-			create.Form(props).Render(ctx, w)
-			return
-		}
-
-		slug, err := s.queries.CreateLink(ctx, db.CreateLinkParams{
-			UserID: user.ID,
-			Title:  title,
-			Url:    link,
-			Slug:   xid.New().String(),
+		commentFeed, err := s.queries.CommentFeed(ctx, db.CommentFeedParams{
+			LinkID: dbLink.ID,
+			UserID: userID,
+			Offset: 0,
+			Limit:  100,
 		})
 		if err != nil {
-			oplog.Error("error creating link", err)
-			props := &create.Props{
-				Error:     ErrorInternalServer,
-				FormProps: &create.FormProps{},
-			}
-			s.RetargetPage(ctx, w, create.Page(props))
+			oplog.Error("error getting comment feed", err)
+			s.Redirect(w, r, "/")
 			return
 		}
 
-		oplog.Info("link created", "slug", slug)
-		s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+		linkpage.Page(&linkpage.Props{User: user, Link: dbLink, CommentFeed: commentFeed}).Render(ctx, w)
 	}
 }
 
@@ -114,12 +59,7 @@ func (s *Server) Like() http.HandlerFunc {
 		ctx := r.Context()
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
-
 		slug := chi.URLParam(r, "slug")
-		if slug == "" {
-			s.Redirect(w, r, "/")
-			return
-		}
 
 		linkID, err := s.queries.LinkIDBySlug(ctx, slug)
 		if err != nil {
@@ -138,19 +78,18 @@ func (s *Server) Like() http.HandlerFunc {
 			return
 		}
 
-		likesAndLiked, err := s.queries.LinkLikesAndLiked(ctx, db.LinkLikesAndLikedParams{
-			Column1: linkID,
-			Column2: user.ID,
+		linkRow, err := s.queries.LinkBySlug(ctx, db.LinkBySlugParams{
+			Column1: user.ID,
+			Slug:    slug,
 		})
 		if err != nil {
-			oplog.Error("error getting likes and liked", err)
+			oplog.Error("error getting link", err)
 			s.Redirect(w, r, "/")
 			return
 		}
 
 		oplog.Info("like created", "slug", slug)
-		link.LikeButton(slug, likesAndLiked.Liked).Render(ctx, w)
-		link.Likes(slug, likesAndLiked.Likes).Render(ctx, w)
+		link.Component(&link.Props{User: user, LinkRow: link.LinkRow(linkRow)}).Render(ctx, w)
 	}
 }
 
@@ -159,12 +98,7 @@ func (s *Server) Unlike() http.HandlerFunc {
 		ctx := r.Context()
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
-
 		slug := chi.URLParam(r, "slug")
-		if slug == "" {
-			s.Redirect(w, r, "/")
-			return
-		}
 
 		linkID, err := s.queries.LinkIDBySlug(ctx, slug)
 		if err != nil {
@@ -183,18 +117,69 @@ func (s *Server) Unlike() http.HandlerFunc {
 			return
 		}
 
-		likesAndLiked, err := s.queries.LinkLikesAndLiked(ctx, db.LinkLikesAndLikedParams{
-			Column1: linkID,
-			Column2: user.ID,
+		linkRow, err := s.queries.LinkBySlug(ctx, db.LinkBySlugParams{
+			Column1: user.ID,
+			Slug:    slug,
 		})
 		if err != nil {
-			oplog.Error("error getting likes and liked", err)
+			oplog.Error("error getting link", err)
 			s.Redirect(w, r, "/")
 			return
 		}
 
 		oplog.Info("like deleted", "slug", slug)
-		link.LikeButton(slug, likesAndLiked.Liked).Render(ctx, w)
-		link.Likes(slug, likesAndLiked.Likes).Render(ctx, w)
+		link.Component(&link.Props{User: user, LinkRow: link.LinkRow(linkRow)}).Render(ctx, w)
+	}
+}
+
+func (s *Server) Comment() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+		content := r.FormValue("content")
+
+		linkID, err := s.queries.LinkIDBySlug(ctx, slug)
+		if err != nil {
+			oplog.Error("error getting link id", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		fmt.Println("content", content)
+
+		if content == "" {
+			props := &linkpage.CommentTextboxProps{LinkSlug: slug, Error: "Please enter a comment"}
+			linkpage.CommentTextbox(props).Render(ctx, w)
+			return
+		}
+
+		commentID, err := s.queries.CreateComment(ctx, db.CreateCommentParams{
+			UserID:  user.ID,
+			LinkID:  linkID,
+			Content: content,
+		})
+		if err != nil {
+			oplog.Error("error creating comment", err)
+			props := &linkpage.CommentTextboxProps{LinkSlug: slug, CommentText: content, Error: "Sorry, something went wrong"}
+			linkpage.CommentTextbox(props).Render(ctx, w)
+			return
+		}
+
+		commentRow, err := s.queries.Comment(ctx, db.CommentParams{
+			ID:     commentID,
+			UserID: user.ID,
+		})
+		if err != nil {
+			oplog.Error("error getting comment", err)
+			props := &linkpage.CommentTextboxProps{LinkSlug: slug, CommentText: content, Error: "Sorry, something went wrong"}
+			linkpage.CommentTextbox(props).Render(ctx, w)
+			return
+		}
+
+		oplog.Info("comment created", "slug", slug)
+		linkpage.CommentTextbox(&linkpage.CommentTextboxProps{LinkSlug: slug, CommentText: ""}).Render(ctx, w)
+		commentcomp.Component(&commentcomp.Props{User: user, CommentRow: commentRow}).Render(ctx, w)
 	}
 }

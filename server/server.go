@@ -63,6 +63,11 @@ func (s *Server) Router() http.Handler {
 			r.Use(s.RequireUser)
 			r.Get("/", s.Unlike())
 		})
+
+		r.Route("/comment", func(r chi.Router) {
+			r.Use(s.RequireUser)
+			r.Post("/", s.Comment())
+		})
 	})
 
 	// Create link
