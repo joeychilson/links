@@ -53,6 +53,6 @@ CREATE INDEX idx_comment_votes_user_id ON comment_votes(user_id);
 -- migrate:down
 DROP TABLE comment_votes;
 DROP TABLE comments;
-DROP TABLE link_votes;
+DROP TABLE link_likes;
 DROP TABLE links;
 

@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/a-h/templ v0.2.501
 	github.com/amacneil/dbmate/v2 v2.10.0
+	github.com/brianvoe/gofakeit/v6 v6.26.3
 	github.com/go-chi/chi/v5 v5.0.11
 	github.com/go-chi/httplog/v2 v2.0.8
 	github.com/google/uuid v1.5.0

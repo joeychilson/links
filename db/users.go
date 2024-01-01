@@ -119,3 +119,25 @@ func (q *Queries) UsernameExists(ctx context.Context, username string) (bool, er
 	err := row.Scan(&exists)
 	return exists, err
 }
+
+type UserRow struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) UserList(ctx context.Context) ([]UserRow, error) {
+	query := "SELECT id FROM users"
+	rows, err := q.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []UserRow{}
+	for rows.Next() {
+		var i UserRow
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	return items, nil
+}

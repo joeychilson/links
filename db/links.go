@@ -166,3 +166,29 @@ func (q *Queries) LinkLikesAndLiked(ctx context.Context, arg LinkLikesAndLikedPa
 	err := row.Scan(&i.Likes, &i.Liked)
 	return i, err
 }
+
+type Link struct {
+	ID uuid.UUID
+}
+
+func (q *Queries) LinkList(ctx context.Context) ([]Link, error) {
+	query := "SELECT id FROM links"
+	rows, err := q.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := []Link{}
+	for rows.Next() {
+		var i Link
+		if err := rows.Scan(&i.ID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

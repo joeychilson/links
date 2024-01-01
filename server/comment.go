@@ -206,7 +206,7 @@ func (s *Server) Upvote() http.HandlerFunc {
 			return
 		}
 
-		err = s.queries.Vote(ctx, db.VoteParams{
+		err = s.queries.CreateVote(ctx, db.CreateVoteParams{
 			UserID:    user.ID,
 			CommentID: commentUUID,
 			Vote:      1,
@@ -247,7 +247,7 @@ func (s *Server) Downvote() http.HandlerFunc {
 			return
 		}
 
-		err = s.queries.Vote(ctx, db.VoteParams{
+		err = s.queries.CreateVote(ctx, db.CreateVoteParams{
 			UserID:    user.ID,
 			CommentID: commentUUID,
 			Vote:      -1,

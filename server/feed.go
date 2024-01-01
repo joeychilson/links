@@ -17,7 +17,7 @@ func (s *Server) PopularLinks() http.HandlerFunc {
 		linkRows, err := s.queries.PopularLinks(ctx, db.PopularLinksParams{
 			UserID: user.ID,
 			Offset: 0,
-			Limit:  100,
+			Limit:  100000,
 		})
 		if err != nil {
 			oplog.Error("failed to get popular link feed", "error", err)
@@ -46,7 +46,7 @@ func (s *Server) LatestLinks() http.HandlerFunc {
 		linkRows, err := s.queries.LatestLinks(ctx, db.LatestLinksParams{
 			UserID: user.ID,
 			Offset: 0,
-			Limit:  100,
+			Limit:  100000,
 		})
 		if err != nil {
 			oplog.Error("failed to get popular link feed", "error", err)
@@ -75,7 +75,7 @@ func (s *Server) ControversialLinks() http.HandlerFunc {
 		linkRows, err := s.queries.ControversialLinks(ctx, db.ControversialLinksParams{
 			UserID: user.ID,
 			Offset: 0,
-			Limit:  100,
+			Limit:  100000,
 		})
 		if err != nil {
 			oplog.Error("failed to get popular link feed", "error", err)

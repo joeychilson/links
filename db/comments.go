@@ -398,13 +398,13 @@ func (q *Queries) CreateReply(ctx context.Context, arg CreateReplyParams) error 
 	return err
 }
 
-type VoteParams struct {
+type CreateVoteParams struct {
 	UserID    uuid.UUID
 	CommentID uuid.UUID
 	Vote      int32
 }
 
-func (q *Queries) Vote(ctx context.Context, arg VoteParams) error {
+func (q *Queries) CreateVote(ctx context.Context, arg CreateVoteParams) error {
 	query := `
 		WITH existing_vote AS (
 			SELECT vote FROM comment_votes WHERE user_id = $1 AND comment_id = $2 FOR UPDATE
@@ -418,4 +418,30 @@ func (q *Queries) Vote(ctx context.Context, arg VoteParams) error {
 	`
 	_, err := q.db.Exec(ctx, query, arg.UserID, arg.CommentID, arg.Vote)
 	return err
+}
+
+type Comment struct {
+	ID     uuid.UUID
+	LinkID uuid.UUID
+}
+
+func (q *Queries) CommentList(ctx context.Context) ([]Comment, error) {
+	query := "SELECT id, link_id FROM comments"
+	rows, err := q.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Comment
+	for rows.Next() {
+		var i Comment
+		if err := rows.Scan(&i.ID, &i.LinkID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
