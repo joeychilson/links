@@ -5,7 +5,7 @@ import (
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/layouts/app"
 	"github.com/joeychilson/links/pkg/session"
-	"github.com/joeychilson/links/components/pagination"
+	"fmt"
 )
 
 type LinkFeedProps struct {
@@ -14,25 +14,42 @@ type LinkFeedProps struct {
 	Description string
 	FeedType    FeedType
 	LinkRows    []db.LinkRow
-	Pagination  pagination.Props
+	HasNextPage bool
 }
 
 templ LinkFeed(props LinkFeedProps) {
 	@app.Layout(app.Props{Title: props.Title, Description: props.Description, User: props.User}) {
 		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
 			@LinkFeedNav(LinkFeedNavProps{Feed: props.FeedType})
-			<div id="feed">
-				for _, row := range props.LinkRows {
-					@link.Component(link.Props{User: props.User, LinkRow: row})
-				}
+			@Feed(FeedProps{User: props.User, LinkRows: props.LinkRows, FeedType: props.FeedType, NextPage: 2, HasNextPage: props.HasNextPage})
+			<div class="loading-indicator">
+				<div class="flex justify-center mt-4 mb-4">
+					<div class="animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent text-blue-600 rounded-full dark:text-blue-500" role="status" aria-label="loading">
+						<span class="sr-only">Loading...</span>
+					</div>
+				</div>
 			</div>
-			@pagination.Component(pagination.Props{
-				CurrentPage: props.Pagination.CurrentPage, 
-				TotalPages: props.Pagination.TotalPages, 
-				Pages: props.Pagination.Pages,
-			})
 		</div>
 	}
+}
+
+type FeedProps struct {
+	User        session.User
+	LinkRows    []db.LinkRow
+	FeedType    FeedType
+	NextPage    int
+	HasNextPage bool
+}
+
+templ Feed(props FeedProps) {
+	<div id="feed">
+		for _, row := range props.LinkRows {
+			@link.Component(link.Props{User: props.User, LinkRow: row})
+		}
+		if props.HasNextPage {
+			<span hx-get={ fmt.Sprintf("/feed/%s?page=%v", props.FeedType, props.NextPage) } hx-trigger="revealed" hx-swap="afterend" hx-indicator=".loading-indicator"></span>
+		}
+	</div>
 }
 
 type FeedType string
@@ -48,14 +65,26 @@ type LinkFeedNavProps struct {
 }
 
 templ LinkFeedNav(props LinkFeedNavProps) {
-	<nav id="feed-nav" class="flex mt-4 space-x-2">
-		<a href="/" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Popular, props.Feed) }>
+	<nav id="feed-nav" class="flex mt-4 space-x-2" hx-swap-oob="true">
+		<a
+ 			hx-get="/feed/popular"
+ 			hx-target="#feed"
+ 			class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Popular, props.Feed) }
+		>
 			Popular
 		</a>
-		<a href="/controversial" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Controversial, props.Feed) }>
+		<a
+ 			hx-get="/feed/controversial"
+ 			hx-target="#feed"
+ 			class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Controversial, props.Feed) }
+		>
 			Controversial
 		</a>
-		<a href="/latest" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Latest, props.Feed) }>
+		<a
+ 			hx-get="/feed/latest"
+ 			hx-target="#feed"
+ 			class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Latest, props.Feed) }
+		>
 			Latest
 		</a>
 	</nav>
