@@ -28,7 +28,7 @@ func (s *Server) LinkPage() http.HandlerFunc {
 			return
 		}
 
-		commentRows, err := s.queries.CommentFeed(ctx, db.CommentFeedParams{
+		commentRows, err := s.queries.PopularComments(ctx, db.PopularCommentsParams{
 			Slug:   linkRow.Slug,
 			UserID: user.ID,
 			Offset: 0,

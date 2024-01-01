@@ -67,14 +67,14 @@ func (q *Queries) Comment(ctx context.Context, arg CommentParams) (CommentRow, e
 	return i, err
 }
 
-type CommentFeedParams struct {
+type PopularCommentsParams struct {
 	Slug   string
 	UserID uuid.UUID
 	Limit  int32
 	Offset int32
 }
 
-func (q *Queries) CommentFeed(ctx context.Context, arg CommentFeedParams) ([]CommentRow, error) {
+func (q *Queries) PopularComments(ctx context.Context, arg PopularCommentsParams) ([]CommentRow, error) {
 	query := `
 		WITH RECURSIVE comment_tree AS (
 			SELECT 
@@ -124,7 +124,197 @@ func (q *Queries) CommentFeed(ctx context.Context, arg CommentFeedParams) ([]Com
 				links l ON c.link_id = l.id
 		)
 		SELECT id, link_slug, parent_id, content, created_at, updated_at, username, replies, score, user_vote FROM comment_tree
-		ORDER BY score DESC, created_at DESC
+		ORDER BY score DESC, replies DESC, created_at DESC
+		LIMIT $3 OFFSET $4
+	`
+	rows, err := q.db.Query(ctx, query,
+		arg.Slug,
+		arg.UserID,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CommentRow
+	for rows.Next() {
+		var i CommentRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.LinkSlug,
+			&i.ParentID,
+			&i.Content,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Username,
+			&i.Replies,
+			&i.Score,
+			&i.UserVote,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return buildCommentTree(items, uuid.Nil), nil
+}
+
+type ControversialCommentsParams struct {
+	Slug   string
+	UserID uuid.UUID
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ControversialComments(ctx context.Context, arg ControversialCommentsParams) ([]CommentRow, error) {
+	query := `
+		WITH RECURSIVE comment_tree AS (
+			SELECT 
+				c.id,
+				l.slug AS link_slug,
+				c.parent_id,
+				c.content,
+				c.created_at,
+				c.updated_at,
+				u.username,
+				(SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
+				(SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
+				COALESCE(cv.vote, 0) AS user_vote
+			FROM 
+				comments c
+			JOIN 
+				users u ON c.user_id = u.id
+			LEFT JOIN 
+				comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
+			LEFT JOIN 
+				links l ON c.link_id = l.id
+			WHERE 
+				l.slug = $1 AND c.parent_id IS NULL
+		
+			UNION ALL
+		
+			SELECT 
+				c.id,
+				l.slug AS link_slug,
+				c.parent_id,
+				c.content,
+				c.created_at,
+				c.updated_at,
+				u.username,
+				(SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
+				(SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
+				COALESCE(cv.vote, 0) AS user_vote
+			FROM 
+				comments c
+			JOIN 
+				comment_tree ct ON c.parent_id = ct.id
+			JOIN 
+				users u ON c.user_id = u.id
+			LEFT JOIN 
+				comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
+			LEFT JOIN 
+				links l ON c.link_id = l.id
+		)
+		SELECT id, link_slug, parent_id, content, created_at, updated_at, username, replies, score, user_vote FROM comment_tree
+		ORDER BY replies DESC, score DESC, created_at DESC
+		LIMIT $3 OFFSET $4
+	`
+	rows, err := q.db.Query(ctx, query,
+		arg.Slug,
+		arg.UserID,
+		arg.Limit,
+		arg.Offset,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CommentRow
+	for rows.Next() {
+		var i CommentRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.LinkSlug,
+			&i.ParentID,
+			&i.Content,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Username,
+			&i.Replies,
+			&i.Score,
+			&i.UserVote,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return buildCommentTree(items, uuid.Nil), nil
+}
+
+type LatestCommentsParams struct {
+	Slug   string
+	UserID uuid.UUID
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) LatestComments(ctx context.Context, arg LatestCommentsParams) ([]CommentRow, error) {
+	query := `
+		WITH RECURSIVE comment_tree AS (
+			SELECT 
+				c.id,
+				l.slug AS link_slug,
+				c.parent_id,
+				c.content,
+				c.created_at,
+				c.updated_at,
+				u.username,
+				(SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
+				(SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
+				COALESCE(cv.vote, 0) AS user_vote
+			FROM 
+				comments c
+			JOIN 
+				users u ON c.user_id = u.id
+			LEFT JOIN 
+				comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
+			LEFT JOIN 
+				links l ON c.link_id = l.id
+			WHERE 
+				l.slug = $1 AND c.parent_id IS NULL
+		
+			UNION ALL
+		
+			SELECT 
+				c.id,
+				l.slug AS link_slug,
+				c.parent_id,
+				c.content,
+				c.created_at,
+				c.updated_at,
+				u.username,
+				(SELECT COUNT(*) FROM comments WHERE parent_id = c.id) AS replies,
+				(SELECT COALESCE(SUM(vote), 0) FROM comment_votes WHERE comment_id = c.id) AS score,
+				COALESCE(cv.vote, 0) AS user_vote
+			FROM 
+				comments c
+			JOIN 
+				comment_tree ct ON c.parent_id = ct.id
+			JOIN 
+				users u ON c.user_id = u.id
+			LEFT JOIN 
+				comment_votes cv ON c.id = cv.comment_id AND cv.user_id = $2
+			LEFT JOIN 
+				links l ON c.link_id = l.id
+		)
+		SELECT id, link_slug, parent_id, content, created_at, updated_at, username, replies, score, user_vote FROM comment_tree
+		ORDER BY created_at DESC, score DESC, replies DESC
 		LIMIT $3 OFFSET $4
 	`
 	rows, err := q.db.Query(ctx, query,

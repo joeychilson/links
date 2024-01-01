@@ -1,5 +1,31 @@
 package feed
 
+import (
+	"github.com/joeychilson/links/components/link"
+	"github.com/joeychilson/links/db"
+	"github.com/joeychilson/links/layouts/app"
+	"github.com/joeychilson/links/pkg/session"
+)
+
+type LinkFeedProps struct {
+	User     session.User
+	FeedType FeedType
+	LinkRows []db.LinkRow
+}
+
+templ LinkFeed(props LinkFeedProps) {
+	@app.Layout(app.Props{Title: "Controversial Feed", Description: "The most liked links", User: props.User}) {
+		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
+			@LinkFeedNav(LinkFeedNavProps{Feed: Controversial})
+			<div id="feed">
+				for _, row := range props.LinkRows {
+					@link.Component(link.Props{User: props.User, LinkRow: row})
+				}
+			</div>
+		</div>
+	}
+}
+
 type FeedType string
 
 const (
@@ -8,11 +34,11 @@ const (
 	Controversial FeedType = "controversial"
 )
 
-type NavProps struct {
+type LinkFeedNavProps struct {
 	Feed FeedType
 }
 
-templ Nav(props NavProps) {
+templ LinkFeedNav(props LinkFeedNavProps) {
 	<nav id="feed-nav" class="flex mt-4 space-x-2">
 		<a href="/" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Popular, props.Feed) }>
 			Popular

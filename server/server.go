@@ -48,9 +48,9 @@ func (s *Server) Router() http.Handler {
 	r.Handle("/static/*", http.StripPrefix("/static/", static.Handler()))
 
 	// Feeds
-	r.Get("/", s.PopularFeed())
-	r.Get("/latest", s.LatestFeed())
-	r.Get("/controversial", s.ControversialFeed())
+	r.Get("/", s.PopularLinks())
+	r.Get("/latest", s.LatestLinks())
+	r.Get("/controversial", s.ControversialLinks())
 
 	// Link
 	r.Route("/{slug}", func(r chi.Router) {
@@ -73,6 +73,11 @@ func (s *Server) Router() http.Handler {
 				r.Get("/upvote", s.Upvote())
 				r.Get("/downvote", s.Downvote())
 			})
+		})
+		r.Route("/feed", func(r chi.Router) {
+			r.Get("/popular", s.PopularComments())
+			r.Get("/controversial", s.ControversialComments())
+			r.Get("/latest", s.LatestComments())
 		})
 	})
 

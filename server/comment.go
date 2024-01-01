@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/joeychilson/links/components/comment"
+	"github.com/joeychilson/links/components/feed"
 	"github.com/joeychilson/links/components/reply"
 	"github.com/joeychilson/links/db"
 )
@@ -48,6 +49,90 @@ func (s *Server) Comment() http.HandlerFunc {
 
 		oplog.Info("comment created", "slug", slug)
 		s.RefreshPage(w, r)
+	}
+}
+
+func (s *Server) PopularComments() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+
+		commentRows, err := s.queries.PopularComments(ctx, db.PopularCommentsParams{
+			Slug:   slug,
+			UserID: user.ID,
+			Limit:  30,
+			Offset: 0,
+		})
+		if err != nil {
+			oplog.Error("error getting comments", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		feed.CommentFeedNav(feed.CommentFeedNavProps{LinkSlug: slug, Feed: feed.Popular}).Render(ctx, w)
+		feedProps := feed.CommentFeedProps{
+			User:        user,
+			CommentRows: commentRows,
+		}
+		feed.CommentFeed(feedProps).Render(ctx, w)
+	}
+}
+
+func (s *Server) ControversialComments() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+
+		commentRows, err := s.queries.ControversialComments(ctx, db.ControversialCommentsParams{
+			Slug:   slug,
+			UserID: user.ID,
+			Limit:  30,
+			Offset: 0,
+		})
+		if err != nil {
+			oplog.Error("error getting comments", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		feed.CommentFeedNav(feed.CommentFeedNavProps{LinkSlug: slug, Feed: feed.Controversial}).Render(ctx, w)
+		feedProps := feed.CommentFeedProps{
+			User:        user,
+			CommentRows: commentRows,
+		}
+		feed.CommentFeed(feedProps).Render(ctx, w)
+	}
+}
+
+func (s *Server) LatestComments() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+
+		commentRows, err := s.queries.LatestComments(ctx, db.LatestCommentsParams{
+			Slug:   slug,
+			UserID: user.ID,
+			Limit:  30,
+			Offset: 0,
+		})
+		if err != nil {
+			oplog.Error("error getting comments", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		feed.CommentFeedNav(feed.CommentFeedNavProps{LinkSlug: slug, Feed: feed.Latest}).Render(ctx, w)
+		feedProps := feed.CommentFeedProps{
+			User:        user,
+			CommentRows: commentRows,
+		}
+		feed.CommentFeed(feedProps).Render(ctx, w)
 	}
 }
 

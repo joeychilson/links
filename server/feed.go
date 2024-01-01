@@ -4,72 +4,72 @@ import (
 	"net/http"
 
 	"github.com/go-chi/httplog/v2"
+	"github.com/joeychilson/links/components/feed"
 	"github.com/joeychilson/links/db"
-	"github.com/joeychilson/links/pages/feed"
 )
 
-func (s *Server) PopularFeed() http.HandlerFunc {
+func (s *Server) PopularLinks() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
 
-		linkRows, err := s.queries.PopularFeed(ctx, db.PopularFeedParams{
+		linkRows, err := s.queries.PopularLinks(ctx, db.PopularLinksParams{
 			UserID: user.ID,
 			Offset: 0,
 			Limit:  100,
 		})
 		if err != nil {
 			oplog.Error("failed to get popular link feed", "error", err)
-			feed.PopularFeed(feed.PopularFeedProps{User: user}).Render(ctx, w)
+			feed.LinkFeed(feed.LinkFeedProps{User: user}).Render(ctx, w)
 			return
 		}
 
-		oplog.Info("got popular link feed", "count", len(linkRows))
-		feed.PopularFeed(feed.PopularFeedProps{User: user, LinkRows: linkRows}).Render(ctx, w)
+		oplog.Info("popular link feed", "count", len(linkRows))
+		feed.LinkFeed(feed.LinkFeedProps{User: user, FeedType: feed.Popular, LinkRows: linkRows}).Render(ctx, w)
 	}
 }
 
-func (s *Server) LatestFeed() http.HandlerFunc {
+func (s *Server) LatestLinks() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
 
-		linkRows, err := s.queries.LatestFeed(ctx, db.LatestFeedParams{
+		linkRows, err := s.queries.LatestLinks(ctx, db.LatestLinksParams{
 			UserID: user.ID,
 			Offset: 0,
 			Limit:  100,
 		})
 		if err != nil {
-			oplog.Error("failed to get latest link feed", "error", err)
-			feed.LatestFeed(feed.LatestFeedProps{User: user}).Render(ctx, w)
+			oplog.Error("failed to get popular link feed", "error", err)
+			feed.LinkFeed(feed.LinkFeedProps{User: user}).Render(ctx, w)
 			return
 		}
 
-		oplog.Info("got latest link feed", "count", len(linkRows))
-		feed.LatestFeed(feed.LatestFeedProps{User: user, LinkRows: linkRows}).Render(ctx, w)
+		oplog.Info("latest link feed", "count", len(linkRows))
+		feed.LinkFeed(feed.LinkFeedProps{User: user, FeedType: feed.Latest, LinkRows: linkRows}).Render(ctx, w)
 	}
 }
 
-func (s *Server) ControversialFeed() http.HandlerFunc {
+func (s *Server) ControversialLinks() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
 
-		linkRows, err := s.queries.ControversialFeed(ctx, db.ControversialFeedParams{
+		linkRows, err := s.queries.ControversialLinks(ctx, db.ControversialLinksParams{
 			UserID: user.ID,
 			Offset: 0,
 			Limit:  100,
 		})
 		if err != nil {
-			oplog.Error("failed to get controversial link feed", "error", err)
-			feed.ControversialFeed(feed.ControversialFeedProps{User: user}).Render(ctx, w)
+			oplog.Error("failed to get popular link feed", "error", err)
+			feed.LinkFeed(feed.LinkFeedProps{User: user}).Render(ctx, w)
 			return
 		}
 
-		oplog.Info("got latest link feed", "count", len(linkRows))
-		feed.ControversialFeed(feed.ControversialFeedProps{User: user, LinkRows: linkRows}).Render(ctx, w)
+		oplog.Info("controversial link feed", "count", len(linkRows))
+		feed.LinkFeed(feed.LinkFeedProps{User: user, FeedType: feed.Controversial, LinkRows: linkRows}).Render(ctx, w)
 	}
 }
