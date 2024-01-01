@@ -114,6 +114,11 @@ func (s *Server) Router() http.Handler {
 		r.Get("/", s.SettingsPage())
 	})
 
+	// User
+	r.Route("/user", func(r chi.Router) {
+		r.Get("/{username}", s.UserPage())
+	})
+
 	// Not Found
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		user := s.UserFromContext(r.Context())

@@ -99,7 +99,7 @@ func CommentFeed(props CommentFeedProps) templ.Component {
 
 func indent(isReply bool) string {
 	if isReply {
-		return "ml-2"
+		return "ml-4"
 	}
 	return ""
 }

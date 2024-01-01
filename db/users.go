@@ -141,3 +141,41 @@ func (q *Queries) UserList(ctx context.Context) ([]UserRow, error) {
 	}
 	return items, nil
 }
+
+type UserProfile struct {
+	ID       uuid.UUID
+	Avatar   string
+	Username string
+	Likes    int64
+	Links    int64
+	Comments int64
+}
+
+func (q *Queries) UserProfile(ctx context.Context, username string) (UserProfile, error) {
+	query := `
+		SELECT
+			u.id,
+			u.avatar,
+			u.username,
+			COUNT(DISTINCT l.id) AS likes,
+			COUNT(DISTINCT lk.id) AS links,
+			COUNT(DISTINCT c.id) AS comments
+		FROM users u
+		LEFT JOIN link_likes l ON l.user_id = u.id
+		LEFT JOIN links lk ON lk.user_id = u.id
+		LEFT JOIN comments c ON c.user_id = u.id
+		WHERE u.username = $1
+		GROUP BY u.id
+	`
+	row := q.db.QueryRow(ctx, query, username)
+	var i UserProfile
+	err := row.Scan(
+		&i.ID,
+		&i.Avatar,
+		&i.Username,
+		&i.Likes,
+		&i.Links,
+		&i.Comments,
+	)
+	return i, err
+}
