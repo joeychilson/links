@@ -12,6 +12,7 @@ import "bytes"
 
 import (
 	"github.com/joeychilson/links/components/link"
+	"github.com/joeychilson/links/components/pagination"
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/layouts/app"
 	"github.com/joeychilson/links/pkg/session"
@@ -23,6 +24,7 @@ type LinkFeedProps struct {
 	Description string
 	FeedType    FeedType
 	LinkRows    []db.LinkRow
+	Pagination  pagination.Props
 }
 
 func LinkFeed(props LinkFeedProps) templ.Component {
@@ -62,7 +64,19 @@ func LinkFeed(props LinkFeedProps) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = pagination.Component(pagination.Props{
+				CurrentPage: props.Pagination.CurrentPage,
+				TotalPages:  props.Pagination.TotalPages,
+				Pages:       props.Pagination.Pages,
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

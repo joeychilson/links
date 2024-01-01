@@ -5,6 +5,7 @@ import (
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/layouts/app"
 	"github.com/joeychilson/links/pkg/session"
+	"github.com/joeychilson/links/components/pagination"
 )
 
 type LinkFeedProps struct {
@@ -13,6 +14,7 @@ type LinkFeedProps struct {
 	Description string
 	FeedType    FeedType
 	LinkRows    []db.LinkRow
+	Pagination  pagination.Props
 }
 
 templ LinkFeed(props LinkFeedProps) {
@@ -24,6 +26,11 @@ templ LinkFeed(props LinkFeedProps) {
 					@link.Component(link.Props{User: props.User, LinkRow: row})
 				}
 			</div>
+			@pagination.Component(pagination.Props{
+				CurrentPage: props.Pagination.CurrentPage, 
+				TotalPages: props.Pagination.TotalPages, 
+				Pages: props.Pagination.Pages,
+			})
 		</div>
 	}
 }

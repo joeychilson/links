@@ -167,6 +167,14 @@ func (q *Queries) LinkLikesAndLiked(ctx context.Context, arg LinkLikesAndLikedPa
 	return i, err
 }
 
+func (q *Queries) CountLinks(ctx context.Context) (int64, error) {
+	query := "SELECT COUNT(*) FROM links"
+	row := q.db.QueryRow(ctx, query)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 type Link struct {
 	ID uuid.UUID
 }
