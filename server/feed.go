@@ -26,7 +26,14 @@ func (s *Server) PopularLinks() http.HandlerFunc {
 		}
 
 		oplog.Info("popular link feed", "count", len(linkRows))
-		feed.LinkFeed(feed.LinkFeedProps{User: user, FeedType: feed.Popular, LinkRows: linkRows}).Render(ctx, w)
+		props := feed.LinkFeedProps{
+			User:        user,
+			Title:       "Popular Feed",
+			Description: "Links that have been recently upvoted.",
+			FeedType:    feed.Popular,
+			LinkRows:    linkRows,
+		}
+		feed.LinkFeed(props).Render(ctx, w)
 	}
 }
 
@@ -48,7 +55,14 @@ func (s *Server) LatestLinks() http.HandlerFunc {
 		}
 
 		oplog.Info("latest link feed", "count", len(linkRows))
-		feed.LinkFeed(feed.LinkFeedProps{User: user, FeedType: feed.Latest, LinkRows: linkRows}).Render(ctx, w)
+		props := feed.LinkFeedProps{
+			User:        user,
+			Title:       "Latest Feed",
+			Description: "Links that have been recently submitted.",
+			FeedType:    feed.Latest,
+			LinkRows:    linkRows,
+		}
+		feed.LinkFeed(props).Render(ctx, w)
 	}
 }
 
@@ -70,6 +84,13 @@ func (s *Server) ControversialLinks() http.HandlerFunc {
 		}
 
 		oplog.Info("controversial link feed", "count", len(linkRows))
-		feed.LinkFeed(feed.LinkFeedProps{User: user, FeedType: feed.Controversial, LinkRows: linkRows}).Render(ctx, w)
+		props := feed.LinkFeedProps{
+			User:        user,
+			Title:       "Controversial Feed",
+			Description: "Links that have a lot of comments with a lot of disagreement.",
+			FeedType:    feed.Controversial,
+			LinkRows:    linkRows,
+		}
+		feed.LinkFeed(props).Render(ctx, w)
 	}
 }

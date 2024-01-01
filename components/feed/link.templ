@@ -8,15 +8,17 @@ import (
 )
 
 type LinkFeedProps struct {
-	User     session.User
-	FeedType FeedType
-	LinkRows []db.LinkRow
+	User        session.User
+	Title       string
+	Description string
+	FeedType    FeedType
+	LinkRows    []db.LinkRow
 }
 
 templ LinkFeed(props LinkFeedProps) {
-	@app.Layout(app.Props{Title: "Controversial Feed", Description: "The most liked links", User: props.User}) {
+	@app.Layout(app.Props{Title: props.Title, Description: props.Description, User: props.User}) {
 		<div class="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
-			@LinkFeedNav(LinkFeedNavProps{Feed: Controversial})
+			@LinkFeedNav(LinkFeedNavProps{Feed: props.FeedType})
 			<div id="feed">
 				for _, row := range props.LinkRows {
 					@link.Component(link.Props{User: props.User, LinkRow: row})
