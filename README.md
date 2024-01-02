@@ -1,6 +1,8 @@
 # links
 
-A simple link sharing app written in Go using templ, htmx, and tailwind.
+A simple link sharing app to demonstrate the use of Go, HTMX, and Templ together.
+
+This is not a complete application. It is meant to be an example of how to use the three technologies together.
 
 ## Pictures
 
