@@ -5,30 +5,24 @@ import (
 	"strconv"
 
 	"github.com/go-chi/httplog/v2"
-	"github.com/joeychilson/links/components/feed"
+
+	"github.com/joeychilson/links/components/linkfeed"
 	"github.com/joeychilson/links/db"
+	"github.com/joeychilson/links/pages/feed"
 )
 
-const (
-	limit          = 25
-	maxPagesToShow = 5
-)
+const limit = 25
 
-func (s *Server) Feed() http.HandlerFunc {
+func (s *Server) FeedPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		oplog := httplog.LogEntry(ctx)
 		user := s.UserFromContext(ctx)
 
-		page, err := strconv.Atoi(r.URL.Query().Get("page"))
-		if err != nil || page < 1 {
-			page = 1
-		}
-
 		linkRows, err := s.queries.PopularLinks(ctx, db.PopularLinksParams{
 			UserID: user.ID,
-			Offset: int32((page - 1) * limit),
-			Limit:  int32(limit),
+			Offset: 0,
+			Limit:  limit,
 		})
 		if err != nil {
 			oplog.Error("failed to get popular link feed", "error", err)
@@ -37,15 +31,13 @@ func (s *Server) Feed() http.HandlerFunc {
 		}
 
 		oplog.Info("popular link feed", "count", len(linkRows))
-		props := feed.LinkFeedProps{
+		props := feed.Props{
 			User:        user,
-			Title:       "Popular Feed",
-			Description: "Links that have been recently upvoted.",
-			FeedType:    feed.Popular,
+			FeedType:    linkfeed.Popular,
 			LinkRows:    linkRows,
 			HasNextPage: len(linkRows) == limit,
 		}
-		feed.LinkFeed(props).Render(ctx, w)
+		feed.Page(props).Render(ctx, w)
 	}
 }
 
@@ -72,15 +64,15 @@ func (s *Server) PopularLinks() http.HandlerFunc {
 		}
 
 		oplog.Info("popular link feed", "count", len(linkRows))
-		props := feed.FeedProps{
+		linkfeed.Nav(linkfeed.NavProps{Feed: linkfeed.Popular}).Render(ctx, w)
+		props := linkfeed.FeedProps{
 			User:        user,
 			LinkRows:    linkRows,
-			FeedType:    feed.Popular,
+			FeedType:    linkfeed.Popular,
 			NextPage:    page + 1,
 			HasNextPage: len(linkRows) == limit,
 		}
-		feed.LinkFeedNav(feed.LinkFeedNavProps{Feed: feed.Popular}).Render(ctx, w)
-		feed.Feed(props).Render(ctx, w)
+		linkfeed.Feed(props).Render(ctx, w)
 	}
 }
 
@@ -107,15 +99,15 @@ func (s *Server) LatestLinks() http.HandlerFunc {
 		}
 
 		oplog.Info("latest link feed", "count", len(linkRows))
-		props := feed.FeedProps{
+		linkfeed.Nav(linkfeed.NavProps{Feed: linkfeed.Latest}).Render(ctx, w)
+		props := linkfeed.FeedProps{
 			User:        user,
 			LinkRows:    linkRows,
-			FeedType:    feed.Latest,
+			FeedType:    linkfeed.Latest,
 			NextPage:    page + 1,
 			HasNextPage: len(linkRows) == limit,
 		}
-		feed.LinkFeedNav(feed.LinkFeedNavProps{Feed: feed.Latest}).Render(ctx, w)
-		feed.Feed(props).Render(ctx, w)
+		linkfeed.Feed(props).Render(ctx, w)
 	}
 }
 
@@ -142,14 +134,14 @@ func (s *Server) ControversialLinks() http.HandlerFunc {
 		}
 
 		oplog.Info("controversial link feed", "count", len(linkRows))
-		props := feed.FeedProps{
+		linkfeed.Nav(linkfeed.NavProps{Feed: linkfeed.Controversial}).Render(ctx, w)
+		props := linkfeed.FeedProps{
 			User:        user,
 			LinkRows:    linkRows,
-			FeedType:    feed.Controversial,
+			FeedType:    linkfeed.Controversial,
 			NextPage:    page + 1,
 			HasNextPage: len(linkRows) == limit,
 		}
-		feed.LinkFeedNav(feed.LinkFeedNavProps{Feed: feed.Controversial}).Render(ctx, w)
-		feed.Feed(props).Render(ctx, w)
+		linkfeed.Feed(props).Render(ctx, w)
 	}
 }

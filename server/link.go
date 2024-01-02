@@ -1,11 +1,14 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v2"
 
+	"github.com/joeychilson/links/components/commentfeed"
 	"github.com/joeychilson/links/components/link"
 	"github.com/joeychilson/links/db"
 	linkpage "github.com/joeychilson/links/pages/link"
@@ -32,7 +35,7 @@ func (s *Server) LinkPage() http.HandlerFunc {
 			Slug:   linkRow.Slug,
 			UserID: user.ID,
 			Offset: 0,
-			Limit:  100,
+			Limit:  limit,
 		})
 		if err != nil {
 			oplog.Error("error getting comment feed", err)
@@ -40,7 +43,143 @@ func (s *Server) LinkPage() http.HandlerFunc {
 			return
 		}
 
-		linkpage.Page(linkpage.Props{User: user, LinkRow: linkRow, CommentRows: commentRows}).Render(ctx, w)
+		props := linkpage.Props{
+			User:        user,
+			LinkRow:     linkRow,
+			FeedType:    commentfeed.Popular,
+			CommentRows: commentRows,
+			HasNextPage: linkRow.Comments > limit,
+		}
+		linkpage.Page(props).Render(ctx, w)
+	}
+}
+
+func (s *Server) PopularComments() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+
+		page, err := strconv.Atoi(r.URL.Query().Get("page"))
+		if err != nil || page < 1 {
+			page = 1
+		}
+
+		commentRows, err := s.queries.PopularComments(ctx, db.PopularCommentsParams{
+			Slug:   slug,
+			UserID: user.ID,
+			Offset: int32((page - 1) * limit),
+			Limit:  int32(limit),
+		})
+		if err != nil {
+			oplog.Error("error getting comments", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		totalComments := int64(0)
+		for _, comment := range commentRows {
+			totalComments++
+			totalComments += comment.Replies
+		}
+
+		commentfeed.Nav(commentfeed.NavProps{LinkSlug: slug, Feed: commentfeed.Popular}).Render(ctx, w)
+		feedProps := commentfeed.FeedProps{
+			User:        user,
+			LinkSlug:    slug,
+			FeedType:    commentfeed.Popular,
+			CommentRows: commentRows,
+			NextPage:    page + 1,
+			HasNextPage: totalComments > limit,
+		}
+		commentfeed.Feed(feedProps).Render(ctx, w)
+	}
+}
+
+func (s *Server) ControversialComments() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+
+		page, err := strconv.Atoi(r.URL.Query().Get("page"))
+		if err != nil || page < 1 {
+			page = 1
+		}
+
+		commentRows, err := s.queries.ControversialComments(ctx, db.ControversialCommentsParams{
+			Slug:   slug,
+			UserID: user.ID,
+			Offset: int32((page - 1) * limit),
+			Limit:  int32(limit),
+		})
+		if err != nil {
+			oplog.Error("error getting comments", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		var totalComments int64
+		for _, comment := range commentRows {
+			totalComments++
+			totalComments += comment.Replies
+		}
+
+		commentfeed.Nav(commentfeed.NavProps{LinkSlug: slug, Feed: commentfeed.Controversial}).Render(ctx, w)
+		feedProps := commentfeed.FeedProps{
+			User:        user,
+			LinkSlug:    slug,
+			FeedType:    commentfeed.Controversial,
+			CommentRows: commentRows,
+			NextPage:    page + 1,
+			HasNextPage: totalComments > limit,
+		}
+		commentfeed.Feed(feedProps).Render(ctx, w)
+	}
+}
+
+func (s *Server) LatestComments() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		oplog := httplog.LogEntry(ctx)
+		user := s.UserFromContext(ctx)
+		slug := chi.URLParam(r, "slug")
+
+		page, err := strconv.Atoi(r.URL.Query().Get("page"))
+		if err != nil || page < 1 {
+			page = 1
+		}
+
+		commentRows, err := s.queries.LatestComments(ctx, db.LatestCommentsParams{
+			Slug:   slug,
+			UserID: user.ID,
+			Offset: int32((page - 1) * limit),
+			Limit:  int32(limit),
+		})
+		if err != nil {
+			oplog.Error("error getting comments", err)
+			s.Redirect(w, r, fmt.Sprintf("/%s", slug))
+			return
+		}
+
+		var totalComments int64
+		for _, comment := range commentRows {
+			totalComments++
+			totalComments += comment.Replies
+		}
+
+		commentfeed.Nav(commentfeed.NavProps{LinkSlug: slug, Feed: commentfeed.Latest}).Render(ctx, w)
+		feedProps := commentfeed.FeedProps{
+			User:        user,
+			LinkSlug:    slug,
+			FeedType:    commentfeed.Latest,
+			CommentRows: commentRows,
+			NextPage:    page + 1,
+			HasNextPage: totalComments > limit,
+		}
+		commentfeed.Feed(feedProps).Render(ctx, w)
 	}
 }
 

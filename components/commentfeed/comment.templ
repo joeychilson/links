@@ -1,4 +1,4 @@
-package feed
+package commentfeed
 
 import (
 	"fmt"
@@ -8,22 +8,29 @@ import (
 	"github.com/joeychilson/links/pkg/session"
 )
 
-type CommentFeedProps struct {
+type FeedProps struct {
 	User        session.User
+	LinkSlug    string
+	FeedType    FeedType
 	CommentRows []db.CommentRow
 	IsReply     bool
+	NextPage    int
+	HasNextPage bool
 }
 
-templ CommentFeed(props CommentFeedProps) {
+templ Feed(props FeedProps) {
 	<div id="feed">
 		for _, row := range props.CommentRows {
 			<div class={ indent(props.IsReply) }>
 				@comment.Component(comment.Props{User: props.User, CommentRow: row})
 				<div id={ fmt.Sprintf("reply-%s", row.ID) }></div>
 				if len(row.Children) > 0 {
-					@CommentFeed(CommentFeedProps{User: props.User, CommentRows: row.Children, IsReply: true})
+					@Feed(FeedProps{User: props.User, LinkSlug: props.LinkSlug,  FeedType: props.FeedType, CommentRows: row.Children, IsReply: true})
 				}
 			</div>
+		}
+		if props.HasNextPage {
+			<span hx-get={ fmt.Sprintf("/%s/%s?page=%v", props.LinkSlug, props.FeedType, props.NextPage) } hx-trigger="revealed" hx-swap="afterend" hx-indicator=".loading-indicator"></span>
 		}
 	</div>
 }
@@ -35,33 +42,48 @@ func indent(isReply bool) string {
 	return ""
 }
 
-type CommentFeedNavProps struct {
+type FeedType string
+
+const (
+	Popular       FeedType = "popular"
+	Latest        FeedType = "latest"
+	Controversial FeedType = "controversial"
+)
+
+type NavProps struct {
 	LinkSlug string
 	Feed     FeedType
 }
 
-templ CommentFeedNav(props CommentFeedNavProps) {
+templ Nav(props NavProps) {
 	<nav id="feed-nav" class="flex mt-4 space-x-2" hx-swap-oob="true">
 		<a
- 			hx-get={ fmt.Sprintf("/%s/feed/popular", props.LinkSlug) }
+ 			hx-get={ fmt.Sprintf("/%s/popular", props.LinkSlug) }
  			hx-target="#feed"
  			class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Popular, props.Feed) }
 		>
 			Popular
 		</a>
 		<a
- 			hx-get={ fmt.Sprintf("/%s/feed/controversial", props.LinkSlug) }
+ 			hx-get={ fmt.Sprintf("/%s/controversial", props.LinkSlug) }
  			hx-target="#feed"
  			class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Controversial, props.Feed) }
 		>
 			Controversial
 		</a>
 		<a
- 			hx-get={ fmt.Sprintf("/%s/feed/latest", props.LinkSlug) }
+ 			hx-get={ fmt.Sprintf("/%s/latest", props.LinkSlug) }
  			hx-target="#feed"
  			class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Latest, props.Feed) }
 		>
 			Latest
 		</a>
 	</nav>
+}
+
+func activeClass(feedType FeedType, currentFeed FeedType) string {
+	if feedType == currentFeed {
+		return "bg-blue-600 text-white"
+	}
+	return "bg-transparent text-gray-500 hover:text-blue-600 dark:hover:text-gray-400"
 }
