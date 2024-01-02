@@ -1,9 +1,8 @@
 package linkfeed
 
 import (
-	"fmt"
-
 	"github.com/joeychilson/links/components/link"
+	"github.com/joeychilson/links/components/pagination"
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/pkg/session"
 )
@@ -17,11 +16,10 @@ const (
 )
 
 type FeedProps struct {
-	User        session.User
-	LinkRows    []db.LinkRow
-	FeedType    FeedType
-	NextPage    int
-	HasNextPage bool
+	User       session.User
+	LinkRows   []db.LinkRow
+	FeedType   FeedType
+	Pagination pagination.Props
 }
 
 templ Feed(props FeedProps) {
@@ -29,10 +27,12 @@ templ Feed(props FeedProps) {
 		for _, row := range props.LinkRows {
 			@link.Component(link.Props{User: props.User, LinkRow: row})
 		}
-		if props.HasNextPage {
-			<span hx-get={ fmt.Sprintf("/feed/%s?page=%v", props.FeedType, props.NextPage) } hx-trigger="revealed" hx-swap="afterend" hx-indicator=".loading-indicator"></span>
-		}
 	</div>
+	@pagination.Component(pagination.Props{
+		CurrentPage: props.Pagination.CurrentPage, 
+		TotalPages: props.Pagination.TotalPages, 
+		Pages: props.Pagination.Pages,
+	})
 }
 
 type NavProps struct {
@@ -40,26 +40,14 @@ type NavProps struct {
 }
 
 templ Nav(props NavProps) {
-	<nav id="feed-nav" class="flex mt-4 space-x-2" hx-swap-oob="true">
-		<a
- 			hx-get="/feed/popular"
- 			hx-target="#feed"
- 			class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Popular, props.Feed) }
-		>
+	<nav id="feed-nav" class="flex mt-4 space-x-2">
+		<a href="/" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Popular, props.Feed) }>
 			Popular
 		</a>
-		<a
- 			hx-get="/feed/controversial"
- 			hx-target="#feed"
- 			class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Controversial, props.Feed) }
-		>
+		<a href="/controversial" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Controversial, props.Feed) }>
 			Controversial
 		</a>
-		<a
- 			hx-get="/feed/latest"
- 			hx-target="#feed"
- 			class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Latest, props.Feed) }
-		>
+		<a href="/latest" class={ "py-2 px-3 inline-flex items-center gap-2 text-sm font-medium text-center rounded-lg dark:focus:ring-1 dark:focus:ring-gray-600 dark:focus:outline-none", activeClass(Latest, props.Feed) }>
 			Latest
 		</a>
 	</nav>

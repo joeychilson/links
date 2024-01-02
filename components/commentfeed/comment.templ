@@ -10,12 +10,9 @@ import (
 
 type FeedProps struct {
 	User        session.User
-	LinkSlug    string
 	FeedType    FeedType
 	CommentRows []db.CommentRow
 	IsReply     bool
-	NextPage    int
-	HasNextPage bool
 }
 
 templ Feed(props FeedProps) {
@@ -25,12 +22,9 @@ templ Feed(props FeedProps) {
 				@comment.Component(comment.Props{User: props.User, CommentRow: row})
 				<div id={ fmt.Sprintf("reply-%s", row.ID) }></div>
 				if len(row.Children) > 0 {
-					@Feed(FeedProps{User: props.User, LinkSlug: props.LinkSlug,  FeedType: props.FeedType, CommentRows: row.Children, IsReply: true})
+					@Feed(FeedProps{User: props.User, FeedType: props.FeedType, CommentRows: row.Children, IsReply: true})
 				}
 			</div>
-		}
-		if props.HasNextPage {
-			<span hx-get={ fmt.Sprintf("/%s/%s?page=%v", props.LinkSlug, props.FeedType, props.NextPage) } hx-trigger="revealed" hx-swap="afterend" hx-indicator=".loading-indicator"></span>
 		}
 	</div>
 }

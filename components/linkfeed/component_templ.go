@@ -11,9 +11,8 @@ import "io"
 import "bytes"
 
 import (
-	"fmt"
-
 	"github.com/joeychilson/links/components/link"
+	"github.com/joeychilson/links/components/pagination"
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/pkg/session"
 )
@@ -27,11 +26,10 @@ const (
 )
 
 type FeedProps struct {
-	User        session.User
-	LinkRows    []db.LinkRow
-	FeedType    FeedType
-	NextPage    int
-	HasNextPage bool
+	User       session.User
+	LinkRows   []db.LinkRow
+	FeedType   FeedType
+	Pagination pagination.Props
 }
 
 func Feed(props FeedProps) templ.Component {
@@ -57,21 +55,15 @@ func Feed(props FeedProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		if props.HasNextPage {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span hx-get=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/feed/%s?page=%v", props.FeedType, props.NextPage)))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-trigger=\"revealed\" hx-swap=\"afterend\" hx-indicator=\".loading-indicator\"></span>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = pagination.Component(pagination.Props{
+			CurrentPage: props.Pagination.CurrentPage,
+			TotalPages:  props.Pagination.TotalPages,
+			Pages:       props.Pagination.Pages,
+		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -99,7 +91,7 @@ func Nav(props NavProps) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nav id=\"feed-nav\" class=\"flex mt-4 space-x-2\" hx-swap-oob=\"true\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nav id=\"feed-nav\" class=\"flex mt-4 space-x-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -108,7 +100,7 @@ func Nav(props NavProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a hx-get=\"/feed/popular\" hx-target=\"#feed\" class=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -134,7 +126,7 @@ func Nav(props NavProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a hx-get=\"/feed/controversial\" hx-target=\"#feed\" class=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/controversial\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -160,7 +152,7 @@ func Nav(props NavProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a hx-get=\"/feed/latest\" hx-target=\"#feed\" class=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"/latest\" class=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

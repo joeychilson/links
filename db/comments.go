@@ -70,8 +70,6 @@ func (q *Queries) Comment(ctx context.Context, arg CommentParams) (CommentRow, e
 type PopularCommentsParams struct {
 	Slug   string
 	UserID uuid.UUID
-	Limit  int32
-	Offset int32
 }
 
 func (q *Queries) PopularComments(ctx context.Context, arg PopularCommentsParams) ([]CommentRow, error) {
@@ -125,14 +123,8 @@ func (q *Queries) PopularComments(ctx context.Context, arg PopularCommentsParams
 		)
 		SELECT id, link_slug, parent_id, content, created_at, updated_at, username, replies, score, user_vote FROM comment_tree
 		ORDER BY score DESC, replies DESC, created_at DESC
-		LIMIT $3 OFFSET $4
 	`
-	rows, err := q.db.Query(ctx, query,
-		arg.Slug,
-		arg.UserID,
-		arg.Limit,
-		arg.Offset,
-	)
+	rows, err := q.db.Query(ctx, query, arg.Slug, arg.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -165,8 +157,6 @@ func (q *Queries) PopularComments(ctx context.Context, arg PopularCommentsParams
 type ControversialCommentsParams struct {
 	Slug   string
 	UserID uuid.UUID
-	Limit  int32
-	Offset int32
 }
 
 func (q *Queries) ControversialComments(ctx context.Context, arg ControversialCommentsParams) ([]CommentRow, error) {
@@ -220,14 +210,8 @@ func (q *Queries) ControversialComments(ctx context.Context, arg ControversialCo
 		)
 		SELECT id, link_slug, parent_id, content, created_at, updated_at, username, replies, score, user_vote FROM comment_tree
 		ORDER BY replies DESC, score DESC, created_at DESC
-		LIMIT $3 OFFSET $4
 	`
-	rows, err := q.db.Query(ctx, query,
-		arg.Slug,
-		arg.UserID,
-		arg.Limit,
-		arg.Offset,
-	)
+	rows, err := q.db.Query(ctx, query, arg.Slug, arg.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -260,8 +244,6 @@ func (q *Queries) ControversialComments(ctx context.Context, arg ControversialCo
 type LatestCommentsParams struct {
 	Slug   string
 	UserID uuid.UUID
-	Limit  int32
-	Offset int32
 }
 
 func (q *Queries) LatestComments(ctx context.Context, arg LatestCommentsParams) ([]CommentRow, error) {
@@ -315,14 +297,8 @@ func (q *Queries) LatestComments(ctx context.Context, arg LatestCommentsParams) 
 		)
 		SELECT id, link_slug, parent_id, content, created_at, updated_at, username, replies, score, user_vote FROM comment_tree
 		ORDER BY created_at DESC, score DESC, replies DESC
-		LIMIT $3 OFFSET $4
 	`
-	rows, err := q.db.Query(ctx, query,
-		arg.Slug,
-		arg.UserID,
-		arg.Limit,
-		arg.Offset,
-	)
+	rows, err := q.db.Query(ctx, query, arg.Slug, arg.UserID)
 	if err != nil {
 		return nil, err
 	}

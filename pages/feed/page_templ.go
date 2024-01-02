@@ -12,6 +12,7 @@ import "bytes"
 
 import (
 	"github.com/joeychilson/links/components/linkfeed"
+	"github.com/joeychilson/links/components/pagination"
 	"github.com/joeychilson/links/db"
 	"github.com/joeychilson/links/layouts/app"
 	"github.com/joeychilson/links/pkg/session"
@@ -19,9 +20,11 @@ import (
 
 type Props struct {
 	User        session.User
+	Title       string
+	Description string
 	FeedType    linkfeed.FeedType
 	LinkRows    []db.LinkRow
-	HasNextPage bool
+	Pagination  pagination.Props
 }
 
 func Page(props Props) templ.Component {
@@ -51,20 +54,11 @@ func Page(props Props) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = linkfeed.Feed(linkfeed.FeedProps{User: props.User, LinkRows: props.LinkRows, FeedType: props.FeedType, NextPage: 2, HasNextPage: props.HasNextPage}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = linkfeed.Feed(linkfeed.FeedProps{User: props.User, LinkRows: props.LinkRows, FeedType: props.FeedType, Pagination: props.Pagination}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"loading-indicator\"><div class=\"flex justify-center mt-4 mb-4\"><div class=\"animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent text-blue-600 rounded-full dark:text-blue-500\" role=\"status\" aria-label=\"loading\"><span class=\"sr-only\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Var3 := `Loading...`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div></div></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -73,7 +67,7 @@ func Page(props Props) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = app.Layout(app.Props{Title: "Feed", Description: "Links feed", User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = app.Layout(app.Props{Title: props.Title, Description: props.Description, User: props.User}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

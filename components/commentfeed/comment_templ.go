@@ -20,12 +20,9 @@ import (
 
 type FeedProps struct {
 	User        session.User
-	LinkSlug    string
 	FeedType    FeedType
 	CommentRows []db.CommentRow
 	IsReply     bool
-	NextPage    int
-	HasNextPage bool
 }
 
 func Feed(props FeedProps) templ.Component {
@@ -80,26 +77,12 @@ func Feed(props FeedProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if len(row.Children) > 0 {
-				templ_7745c5c3_Err = Feed(FeedProps{User: props.User, LinkSlug: props.LinkSlug, FeedType: props.FeedType, CommentRows: row.Children, IsReply: true}).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = Feed(FeedProps{User: props.User, FeedType: props.FeedType, CommentRows: row.Children, IsReply: true}).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if props.HasNextPage {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span hx-get=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/%s/%s?page=%v", props.LinkSlug, props.FeedType, props.NextPage)))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-trigger=\"revealed\" hx-swap=\"afterend\" hx-indicator=\".loading-indicator\"></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
